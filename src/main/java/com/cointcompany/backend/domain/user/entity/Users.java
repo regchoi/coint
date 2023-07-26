@@ -39,11 +39,17 @@ public class Users {
 
     private String phone;
 
-    private LocalDateTime regDate;
+//    private LocalDateTime regDate;
+//
+//    private LocalDateTime lastLoginDate;
+//
+//    private LocalDateTime modDate;
 
-    private LocalDateTime lastLoginDate;
+    private String regDate;
 
-    private LocalDateTime modDate;
+    private String lastLoginDate;
+
+    private String modDate;
 
     private boolean delyn = Boolean.FALSE;
 

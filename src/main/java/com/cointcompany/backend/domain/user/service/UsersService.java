@@ -35,7 +35,7 @@ public class UsersService {
         dbUser.setIsAdmin(user.getIsAdmin());
         dbUser.setEmail(user.getEmail());
         dbUser.setPhone(user.getPhone());
-        dbUser.setModDate(LocalDateTime.now());
+//        dbUser.setModDate(LocalDateTime.now());
 
         return dbUser;
     }

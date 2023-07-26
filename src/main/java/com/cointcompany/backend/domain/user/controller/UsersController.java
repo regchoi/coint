@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/table")
+@CrossOrigin
 public class UsersController {
 
     private final UsersService usersService;
@@ -29,6 +30,7 @@ public class UsersController {
     public ResponseEntity<String> postUsers (Users users) {
         usersService.saveUsers(users);
 
+        log.info("데이터 받기");
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
@@ -37,6 +39,7 @@ public class UsersController {
     public ResponseEntity<String> putUsers (
             @RequestBody ModifyUserReq[] usersDto) {
 
+        log.info("");
         List<GetUsersRes> getUsersRes;
 
         for (ModifyUserReq modifyUserReq : usersDto) {
