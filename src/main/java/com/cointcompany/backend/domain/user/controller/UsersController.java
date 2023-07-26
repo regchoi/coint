@@ -21,17 +21,19 @@ public class UsersController {
 
     private final UsersService usersService;
 
-    @GetMapping
+//    @GetMapping
     public ResponseEntity<String> getUsers () {
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
     @PostMapping
-    public ResponseEntity<String> postUsers (Users users) {
+    public ResponseEntity<Users> postUsers (@RequestBody Users users) {
+
+        log.info(users.toString());
         usersService.saveUsers(users);
 
         log.info("데이터 받기");
-        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     // TODO: 나중에 response 코드 리팩토링
