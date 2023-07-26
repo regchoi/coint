@@ -53,10 +53,12 @@ export default function SampleTable() {
             if (existingRow) {
                 return updatedRows.map(row => row.id_num === updatedRow.id_num ? updatedRow : row);
             } else {
-                return [...updatedRows, updatedRow];
+                return [...updatedRows, {...updatedRow, id_num: addId}];
             }
         });
-    }
+        setAddId(addId + 1);  // addId 값을 증가시킵니다.
+    };
+
 
     // 삭제 확인 Modal 열기
     const handleOpenDeleteModal = () => {
@@ -191,7 +193,7 @@ export default function SampleTable() {
                                 if (updated.some(updatedRow => updatedRow.id_num === row.id_num)) {
                                     return (
                                         <EditableRow
-                                            key={row.id}
+                                            key={row.id_num}
                                             row={row}
                                             labelId={labelId}
                                             onRowChange={handleUpdateRowChange}
@@ -217,7 +219,7 @@ export default function SampleTable() {
 
                                 return (
                                     <EditableRow
-                                        key={row.id}
+                                        key={row.id_num}
                                         row={row}
                                         labelId={labelId}
                                         onRowChange={handleAddRowChange}

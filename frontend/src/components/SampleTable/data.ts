@@ -62,10 +62,10 @@ interface HeadCell {
 
 const headCells: readonly HeadCell[] = [
     {
-        id: 'userName',
+        id: 'state',
         numeric: false,
-        disablePadding: false,  // 라이브러리 제공 기능 - 일반적으로 false로 정의해두면 됨.
-        label: '이름',
+        disablePadding: true,
+        label: '상태',
     },
     {
         id: 'seq',
@@ -74,16 +74,16 @@ const headCells: readonly HeadCell[] = [
         label: 'No.',
     },
     {
-        id: 'state',
-        numeric: false,
-        disablePadding: true,
-        label: '상태',
-    },
-    {
         id: 'id',
         numeric: false,
         disablePadding: false,
         label: '아이디',
+    },
+    {
+        id: 'userName',
+        numeric: false,
+        disablePadding: false,  // 라이브러리 제공 기능 - 일반적으로 false로 정의해두면 됨.
+        label: '이름',
     },
     {
         id: 'userPosition',

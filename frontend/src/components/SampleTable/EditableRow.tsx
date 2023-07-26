@@ -24,7 +24,7 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange}) =>
         <TableRow
             hover
             role="checkbox"
-            tabIndex={-1}
+            tabIndex={row.id_num}
             key={row.id_num}
         >
             <TableCell padding="checkbox">
