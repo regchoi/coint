@@ -1,6 +1,6 @@
-package com.cointcompany.backend.user.repository;
+package com.cointcompany.backend.domain.user.repository;
 
-import com.cointcompany.backend.user.entity.Users;
+import com.cointcompany.backend.domain.user.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UsersRepository extends JpaRepository<Users, Long> {
