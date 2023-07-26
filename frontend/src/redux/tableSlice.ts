@@ -14,23 +14,26 @@ export const addTableData = createAsyncThunk('table/addData',
     async ({apiUrl, data}: {apiUrl: string, data: Data[]}) => {
     // TODO: id_num을 서버에서 생성하도록 수정
     const response = await axios.post(apiUrl, data);
-    return response.data;
+
+    if(response.data !== 'SUCCESS') {
+        throw new Error('Failed to add data');
+    }
+
+    const getData = await axios.get(apiUrl);
+    return getData.data;
 });
 
 // 서버에 테이블 데이터를 업데이트하는 비동기 액션
 export const updateTableData = createAsyncThunk('table/updateData',
     async ({apiUrl, data}: {apiUrl: string, data: Data[]}) => {
-    try {
-        await axios.put(`${apiUrl}`, data);
+        const response = await axios.put(apiUrl, data);
 
-        // 모든 업데이트가 완료된 후에 서버로부터 업데이트된 전체 데이터를 가져옵니다.
-        const response = await axios.get(apiUrl);
-        return response.data;
-    } catch (error) {
-        // TODO: 에러 처리
-        console.error('Error while updating data:', error);
-        throw error;
-    }
+        if(response.data !== 'SUCCESS') {
+            throw new Error('Failed to add data');
+        }
+
+        const getData = await axios.get(apiUrl);
+        return getData.data;
 });
 
 // 서버에 테이블 데이터를 삭제하는 비동기 액션
@@ -38,17 +41,14 @@ export const deleteTableData = createAsyncThunk(
     'table/deleteData',
     async ({ apiUrl, ids }: { apiUrl: string; ids: number[] }) => {
         // TODO: Batch API를 활용하여 서버에서 일괄적으로 데이터를 받아 처리하는 방법으로 수정
-        try {
-                await axios.delete(`${apiUrl}`, {data: ids});
+        const response = await axios.post(apiUrl, ids);
 
-            // 삭제 처리가 완료된 후에 서버로부터 업데이트된 전체 데이터를 가져옵니다.
-            const response = await axios.get(apiUrl);
-            return response.data;
-        } catch (error) {
-            // TODO: 에러 처리
-            console.error('Error while deleting data:', error);
-            throw error;
+        if(response.data !== 'SUCCESS') {
+            throw new Error('Failed to add data');
         }
+
+        const getData = await axios.get(apiUrl);
+        return getData.data;
     }
 );
 
