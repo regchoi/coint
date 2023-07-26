@@ -35,3 +35,29 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+### front-end ###
+
+# dependencies
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
+manufacturing-backend/node_modules
+
+# testing
+frontend/coverage
+
+# production
+frontend/build
+
+# misc
+frontend/.DS_Store
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
