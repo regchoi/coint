@@ -4,12 +4,14 @@ import com.cointcompany.backend.domain.user.dto.UsersDto.ModifyUserReq;
 import com.cointcompany.backend.domain.user.dto.UsersDto.GetUsersRes;
 import com.cointcompany.backend.domain.user.entity.Users;
 import com.cointcompany.backend.domain.user.service.UsersService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -21,38 +23,42 @@ public class UsersController {
 
     private final UsersService usersService;
 
-//    @GetMapping
-    public ResponseEntity<String> getUsers () {
+    @GetMapping
+    public ResponseEntity<List<Users>> getUsers () {
 
-        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        List<Users> usersList = usersService.findAllUsers();
+
+
+        return new ResponseEntity<>(usersList, HttpStatus.OK);
     }
     @PostMapping
-    public ResponseEntity<Users> postUsers (@RequestBody Users users) {
+    public ResponseEntity<String> postUsers (@RequestBody List<Users> listUsers) {
 
-        log.info(users.toString());
-        usersService.saveUsers(users);
+        for (Users user : listUsers) {
+            usersService.saveUsers(user);
 
-        log.info("데이터 받기");
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        }
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
-    // TODO: 나중에 response 코드 리팩토링
     @PutMapping
     public ResponseEntity<String> putUsers (
-            @RequestBody ModifyUserReq[] usersDto) {
+            @RequestBody List<Users> listUsers) {
 
-        log.info("");
-        List<GetUsersRes> getUsersRes;
+        List<Users> usersList = new ArrayList<>();
+        for (Users user : listUsers) {
+            usersService.modifyUsers(user);
 
-        for (ModifyUserReq modifyUserReq : usersDto) {
-            usersService.updateUsers(modifyUserReq);
         }
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
     @DeleteMapping
-    public ResponseEntity<String> deleteUsers (Long userId) {
-        usersService.deleteUsers(userId);
+    public ResponseEntity<String> deleteUsers (
+            @RequestBody List<Long> userId) {
+        for (Long aLong : userId) {
+            usersService.removeUsers(aLong);
+        }
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 }

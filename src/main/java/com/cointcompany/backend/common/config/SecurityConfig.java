@@ -19,7 +19,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
         httpSecurity
+<<<<<<< Updated upstream
                 .csrf(csrf -> csrf.disable());
+=======
+
+                .csrf(a -> a.disable()); // POST가 정상적으로 수행되려면 csrf().disable()해야 돼
+////                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                .formLogin().disable()
+//                .httpBasic().disable()
+//                .apply(new MyCustomDsl())
+//                .and()
+//                .headers().addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
+//                .and()
+//                .authorizeHttpRequests((reqest) -> request
+//
+//                        .requestMatchers("/join/**").permitAll()
+//                        .anyRequest().permitAll()
+//                );
+>>>>>>> Stashed changes
         return httpSecurity.build();
     }
 
