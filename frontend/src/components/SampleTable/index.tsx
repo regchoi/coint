@@ -21,6 +21,7 @@ import {Button, Modal, Typography} from "@mui/material";
 export default function SampleTable() {
     const dispatch = useAppDispatch();
     const [added, setAdded] = useState([] as Data[]);
+    const [addId, setAddId] = useState(2147483647);
     const [updated, setUpdated] = useState([] as Data[]);
     // 삭제 확인 Modal 상태 관리
     const [isDeleteModalOpen, setDeleteModalOpen] = React.useState(false);
@@ -41,8 +42,9 @@ export default function SampleTable() {
 
     // added data를 추가하는 함수
     const handleAdd = () => {
-        const newData: Data = createData(2147483647, '', 0, '', '', '', '', false, '', '', '', '');
+        const newData: Data = createData(addId, '', 0, '', '', '', '', false, '', '', '', '');
         setAdded([...added, newData]);
+        setAddId(addId + 1);
     }
     // added data의 각 항목을 변경하는 함수
     const handleAddRowChange = (updatedRow: Data) => {
