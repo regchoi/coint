@@ -37,7 +37,7 @@ public class UsersController {
         String check = usersService.checkUsers(listUsers);
         if ( check != "SUCCESS")
 
-            return new ResponseEntity<>(check , HttpStatus.OK);
+            return new ResponseEntity<>(check , HttpStatus.BAD_REQUEST);
 
         for (Users saveUserReq : listUsers) {
             usersService.saveUsers(saveUserReq);

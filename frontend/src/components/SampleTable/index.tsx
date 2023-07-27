@@ -18,7 +18,6 @@ import {AppDispatch, useAppDispatch, useAppSelector} from "../../redux/store";
 import EditableRow from "./EditableRow";
 import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import AlertVariousStates from "../common/AlertVariousState";
 import ErrorModal from "../common/ErrorModal";
 
 export default function SampleTable() {

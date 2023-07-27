@@ -2,6 +2,7 @@ package com.cointcompany.backend.common.config.security;
 
 import com.cointcompany.backend.domain.user.repository.AuthRepository;
 import com.cointcompany.backend.domain.user.repository.UsersRepository;
+import com.cointcompany.backend.domain.user.service.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ public class SecurityConfig {
 
     private final CorsConfig corsConfig;
     private final AuthRepository authRepository;
+    private final AuthUtil authUtil;
     @Bean
 
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -29,26 +31,21 @@ public class SecurityConfig {
         log.info("{}", "security filter chain");
         httpSecurity
                 .csrf(a -> a.disable())  // POST가 정상적으로 수행되기 위해 필요
+                .sessionManagement(
+                        httpSecuritySessionManagementConfigurer ->
+                                httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Session 사용 안함
+                .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth").permitAll()
-                        .requestMatchers("/api/table/**").permitAll()
-                        .anyRequest().authenticated()) // /api/auth 경로는 인증 없이 허용
-                .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Session 사용 안함
-                .apply(new MyCustomDsl());
+//                        .requestMatchers("/api/table/**").permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(new JwtAuthenticationFilter(authUtil),
+                        UsernamePasswordAuthenticationFilter.class); // /api/auth 경로는 인증 없이 허용
                  // 모든 요청에 대해 jwtRequestFilter 적용
 //                .anyRequest().authenticated();  // 그 외의 모든 요청은 인증 필요
 
         return httpSecurity.build();
     }
 
-    public class MyCustomDsl extends AbstractHttpConfigurer<MyCustomDsl, HttpSecurity> {
-        @Override
-        public void configure(HttpSecurity http) throws Exception {
-            AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-            http
-                    .addFilter(corsConfig.corsFilter())
-                    .addFilter(new JwtAuthenticationFilter(authenticationManager))
-                    .addFilter(new JwtAuthorizationFilter(authRepository, authenticationManager));
-        }
-    }
+
 }
