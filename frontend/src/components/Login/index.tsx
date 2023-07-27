@@ -17,6 +17,7 @@ import {useEffect, useState} from "react";
 import {loggedIn} from "../../redux/authSlice";
 import {useAppDispatch, useAppSelector} from "../../redux/store";
 import ErrorModal from "../common/ErrorModal";
+import {useNavigate} from "react-router-dom";
 
 function Copyright(props: any) {
     return (
@@ -35,9 +36,10 @@ function Copyright(props: any) {
 const defaultTheme = createTheme();
 
 export default function LogIn() {
+    const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [credentials, setCredentials] = useState({id: '', password: ''});
-    const error = useAppSelector(state => state.auth.error);
+    const {isAuthenticated, error} = useAppSelector(state => state.auth);
     // 에러 확인 Modal 상태 관리
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
 
@@ -48,6 +50,13 @@ export default function LogIn() {
         }
     }, [error]);
 
+    useEffect(() => {
+        if (isAuthenticated) {
+            // TODO 로그인 성공 시 이동할 페이지
+            navigate('/sampletable');
+        }
+    }, [isAuthenticated, navigate]);
+
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCredentials({
             ...credentials,
@@ -57,9 +66,13 @@ export default function LogIn() {
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        dispatch(loggedIn(credentials));
+        dispatch(loggedIn(credentials)).then(() => {
+            if(isAuthenticated) {
+                // TODO 로그인 성공 시 이동할 페이지
+                navigate('/sampletable');
+            }
+        });
     };
-
 
     return (
         <ThemeProvider theme={defaultTheme}>

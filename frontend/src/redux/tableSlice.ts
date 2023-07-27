@@ -63,7 +63,7 @@ export const tableSlice = createSlice({
             })
             .addCase(fetchTableData.rejected, (state, action: any) => {
                 state.loading = 'failed';
-                state.error = action.payload.message;
+                state.error = action.error;
             })
             // 서버에 테이블 데이터를 추가하는 비동기 액션
             .addCase(addTableData.pending, (state) => {
@@ -75,7 +75,7 @@ export const tableSlice = createSlice({
             })
             .addCase(addTableData.rejected, (state, action: any) => {
                 state.loading = 'failed';
-                state.error = action.payload.message;
+                state.error = action.error;
             })
             // 서버에 테이블 데이터를 업데이트하는 비동기 액션
             .addCase(updateTableData.pending, (state) => {
@@ -87,7 +87,7 @@ export const tableSlice = createSlice({
             })
             .addCase(updateTableData.rejected, (state, action: any) => {
                 state.loading = 'failed';
-                state.error = action.payload.message;
+                state.error = action.error;
             })
             // 서버에 테이블 데이터를 삭제하는 비동기 액션
             .addCase(deleteTableData.pending, (state) => {
@@ -99,7 +99,7 @@ export const tableSlice = createSlice({
             })
             .addCase(deleteTableData.rejected, (state, action: any) => {
                 state.loading = 'failed';
-                state.error = action.payload.message;
+                state.error = action.error;
             })
     }
 });
