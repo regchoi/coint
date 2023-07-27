@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 public class UsersDto {
 
+    @NoArgsConstructor
     @Data
     public static class GetUsersRes {
         private Long id_num;
@@ -60,6 +61,12 @@ public class UsersDto {
 
     @Data
     public static class ModifyUserReq extends Users {
+//        @JsonIgnore
+//        private Long id_num;
+    }
+    @Data
+    @NoArgsConstructor
+    public static class SaveUserReq extends Users {
         @JsonIgnore
         private Long id_num;
     }

@@ -3,12 +3,14 @@ package com.cointcompany.backend.domain.user.service;
 import com.cointcompany.backend.domain.user.dto.UsersDto;
 import com.cointcompany.backend.domain.user.entity.Users;
 import com.cointcompany.backend.domain.user.repository.UsersRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -17,45 +19,45 @@ import java.util.List;
 public class UsersService {
 
     private final UsersRepository usersRepository;
+    private final ModelMapper mapper;
 
-    public Users saveUsers(Users users) {
-        return usersRepository.save(users);
+//    @Transactional
+//    public void saveUsers(UsersDto.SaveUserReq users) {
+//        Users user = users;
+//        user.setRegDate(LocalDateTime.now());
+//        usersRepository.save(user);
+//    }
+    @Transactional
+    public void saveUsers(Users users) {
+        log.info("save");
+        users.setRegDate(LocalDateTime.now());
+        usersRepository.save(users);
     }
 
-    public List<Users> findAllUsers() {
-        return usersRepository.findAll();
-    }
+    @Transactional(readOnly = true)
+    public List<UsersDto.GetUsersRes> findAllUsersToGetUsersRes() {
 
-    public void deleteUsers(Long userId) {
-        usersRepository.deleteById(userId);
-    }
+        List<Users> usersList = usersRepository.findAll();
+        List<UsersDto.GetUsersRes> usersResList = new ArrayList<>();
+        for (Users users : usersList) {
+            usersResList.add(mapper.map(users, UsersDto.GetUsersRes.class));
+        }
 
-    public Users updateUsers(UsersDto.ModifyUserReq user) {
-        Users dbUser = usersRepository.findById(user.getId_num()).orElseThrow();
-        dbUser.setState(user.getState());
-        dbUser.setSeq(user.getSeq());
-        dbUser.setId(user.getId());
-        dbUser.setUserName(user.getUserName());
-        dbUser.setUserPosition(user.getUserPosition());
-        dbUser.setUserDepartment(user.getUserDepartment());
-        dbUser.setIsAdmin(user.getIsAdmin());
-        dbUser.setEmail(user.getEmail());
-        dbUser.setPhone(user.getPhone());
-//        dbUser.setModDate(LocalDateTime.now());
-
-        return dbUser;
+        return usersResList;
     }
 
     @Transactional
     public void removeUsers(Long userId) {
-        usersRepository.findById(userId).orElseThrow().setDelyn(Boolean.TRUE);
-
+        Users user = usersRepository.findById(userId).orElseThrow();
+        user.setDelyn(Boolean.TRUE);
+        user.setModDate(LocalDateTime.now());
     }
 
     @Transactional
-    public void modifyUsers(Users users) {
+    public void modifyUsers(UsersDto.ModifyUserReq users) {
         Users user = usersRepository.getById(users.getId_num());
-        user.setState(user.getState());
+
+        user.setState(users.getState());
         user.setSeq(users.getSeq());
         user.setId(users.getId());
         user.setUserName(users.getUserName());
@@ -64,5 +66,6 @@ public class UsersService {
         user.setIsAdmin(users.getIsAdmin());
         user.setEmail(users.getEmail());
         user.setPhone(users.getPhone());
+        user.setModDate(LocalDateTime.now());
     }
 }
