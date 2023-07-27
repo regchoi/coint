@@ -30,28 +30,24 @@ public class UsersController {
 
         return new ResponseEntity<>(usersList, HttpStatus.OK);
     }
-//    @PostMapping
-//    public ResponseEntity<String> postUsers (@RequestBody List<UsersDto.SaveUserReq> listUsers) {
-//
-//        for (UsersDto.SaveUserReq saveUserReq : listUsers) {
-//            usersService.saveUsers(saveUserReq);
-//
-//        }
-//        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-//    }
+
     @PostMapping
     public ResponseEntity<String> postUsers (@RequestBody List<Users> listUsers) {
 
+        String check = usersService.checkUsers(listUsers);
+        if ( check != "SUCCESS")
+
+            return new ResponseEntity<>(check , HttpStatus.OK);
+
         for (Users saveUserReq : listUsers) {
             usersService.saveUsers(saveUserReq);
-
         }
+
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
     @PutMapping
-    public ResponseEntity<String> putUsers (
-            @RequestBody List<UsersDto.ModifyUserReq> listUsers) {
+    public ResponseEntity<String> putUsers (@RequestBody List<UsersDto.ModifyUserReq> listUsers) {
 
         List<UsersDto.ModifyUserReq> usersList = new ArrayList<>();
         for (UsersDto.ModifyUserReq modifyUserReq : listUsers) {
@@ -62,11 +58,12 @@ public class UsersController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
     @PostMapping("/delete")
-    public ResponseEntity<String> deleteUsers (
-            @RequestBody List<Long> userId) {
+    public ResponseEntity<String> deleteUsers (@RequestBody List<Long> userId) {
+
         for (Long aLong : userId) {
             usersService.removeUsers(aLong);
         }
+
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 }

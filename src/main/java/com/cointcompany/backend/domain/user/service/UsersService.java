@@ -21,17 +21,25 @@ public class UsersService {
     private final UsersRepository usersRepository;
     private final ModelMapper mapper;
 
-//    @Transactional
-//    public void saveUsers(UsersDto.SaveUserReq users) {
-//        Users user = users;
-//        user.setRegDate(LocalDateTime.now());
-//        usersRepository.save(user);
-//    }
+    public String checkUsers(List<Users> users) {
+        for (Users user : users) {
+            if (usersRepository.findById(user.getId()) != null)
+                return "이미 있는 아이디입니다";
+        }
+        return "SUCCESS";
+    }
+
     @Transactional
-    public void saveUsers(Users users) {
+    public String saveUsers(Users users) {
         log.info("save");
-        users.setRegDate(LocalDateTime.now());
-        usersRepository.save(users);
+        if (usersRepository.findById(users.getId()) != null) {
+            return "이미 있는 아이디입니다";
+        } else {
+            users.setRegDate(LocalDateTime.now());
+            usersRepository.save(users);
+            return "SUCCESS";
+        }
+
     }
 
     @Transactional(readOnly = true)

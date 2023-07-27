@@ -21,7 +21,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final CorsConfig corsConfig;
-    //    private final JwtRequestFilter jwtRequestFilter;
     private final AuthRepository authRepository;
     @Bean
 
@@ -32,6 +31,7 @@ public class SecurityConfig {
                 .csrf(a -> a.disable())  // POST가 정상적으로 수행되기 위해 필요
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth").permitAll()
+                        .requestMatchers("/api/table/**").permitAll()
                         .anyRequest().authenticated()) // /api/auth 경로는 인증 없이 허용
                 .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Session 사용 안함
                 .apply(new MyCustomDsl());
