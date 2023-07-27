@@ -53,7 +53,7 @@ public class UsersController {
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
-    @DeleteMapping
+    @PostMapping("/delete")
     public ResponseEntity<String> deleteUsers (
             @RequestBody List<Long> userId) {
         for (Long aLong : userId) {

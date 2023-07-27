@@ -41,7 +41,7 @@ export const deleteTableData = createAsyncThunk(
     'table/deleteData',
     async ({ apiUrl, ids }: { apiUrl: string; ids: number[] }) => {
         // TODO: Batch API를 활용하여 서버에서 일괄적으로 데이터를 받아 처리하는 방법으로 수정
-        const response = await axios.post(apiUrl, ids);
+        const response = await axios.post(`${apiUrl}/delete`, ids);
 
         if(response.data !== 'SUCCESS') {
             throw new Error('Failed to add data');
@@ -49,6 +49,17 @@ export const deleteTableData = createAsyncThunk(
 
         const getData = await axios.get(apiUrl);
         return getData.data;
+        try {
+                await axios.delete(`${apiUrl}`, {data: ids});
+
+            // 삭제 처리가 완료된 후에 서버로부터 업데이트된 전체 데이터를 가져옵니다.
+            const response = await axios.get(apiUrl);
+            return response.data;
+        } catch (error) {
+            // TODO: 에러 처리
+            console.error('Error while deleting data:', error);
+            throw error;
+        }
     }
 );
 

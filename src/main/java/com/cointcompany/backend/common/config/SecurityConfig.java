@@ -1,5 +1,6 @@
 package com.cointcompany.backend.common.config;
 
+import com.cointcompany.backend.common.filter.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 
 @Configuration
@@ -15,31 +17,18 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 public class SecurityConfig {
 
     private final CorsConfig corsConfig;
+    private final JwtRequestFilter jwtRequestFilter;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
         httpSecurity
-<<<<<<< Updated upstream
-                .csrf(csrf -> csrf.disable());
-=======
+                .csrf(a -> a.disable())  // POST가 정상적으로 수행되려면 csrf().disable()해야 돼
+                .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Session 사용 안함
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)  // 모든 요청에 대해 jwtRequestFilter 적용
+                .authorizeRequests()
+                .requestMatchers("/api/auth").permitAll()  // /api/auth 경로는 인증 없이 허용
+                .anyRequest().authenticated();  // 그 외의 모든 요청은 인증 필요
 
-                .csrf(a -> a.disable()); // POST가 정상적으로 수행되려면 csrf().disable()해야 돼
-////                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .formLogin().disable()
-//                .httpBasic().disable()
-//                .apply(new MyCustomDsl())
-//                .and()
-//                .headers().addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
-//                .and()
-//                .authorizeHttpRequests((reqest) -> request
-//
-//                        .requestMatchers("/join/**").permitAll()
-//                        .anyRequest().permitAll()
-//                );
->>>>>>> Stashed changes
         return httpSecurity.build();
     }
-
-
-
 }
