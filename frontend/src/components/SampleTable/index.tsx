@@ -16,7 +16,10 @@ import {useEffect, useState} from "react";
 import {addTableData, deleteTableData, fetchTableData, updateTableData} from "../../redux/tableSlice";
 import {AppDispatch, useAppDispatch, useAppSelector} from "../../redux/store";
 import EditableRow from "./EditableRow";
-import {Button, Modal, Typography} from "@mui/material";
+import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import AlertVariousStates from "../common/AlertVariousState";
+import ErrorModal from "../common/ErrorModal";
 
 export default function SampleTable() {
     const dispatch = useAppDispatch();
@@ -24,13 +27,23 @@ export default function SampleTable() {
     const [addId, setAddId] = useState(2147483647);
     const [updated, setUpdated] = useState([] as Data[]);
     // 삭제 확인 Modal 상태 관리
-    const [isDeleteModalOpen, setDeleteModalOpen] = React.useState(false);
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+    // 에러 확인 Modal 상태 관리
+    const [isErrorModalOpen, setErrorModalOpen] = useState(false);
+
     const { data, loading, error } = useAppSelector(state => state.table);
 
     // table data를 가져오는 hook
     useEffect(() => {
         dispatch(fetchTableData(API_LINK));
     }, [dispatch]);
+
+    // 요청 실패 시 에러 처리
+    useEffect(() => {
+        if (error) {
+            setErrorModalOpen(true);
+        }
+    }, [error]);
 
     // selected 해제를 위한 함수
     const dummyEvent = {
@@ -135,6 +148,11 @@ export default function SampleTable() {
         }
     }
 
+    // Error Modal 닫기
+    const handleCloseErrorModal = () => {
+        setErrorModalOpen(false);
+    }
+
 
     // table 관련 hook들을 관리하는 커스텀 hook
     const {
@@ -161,6 +179,7 @@ export default function SampleTable() {
 
     return (
         <Box sx={{width: '100%'}}>
+            {loading === 'loading' && <LinearProgress/>}
             <Paper sx={{width: '100%', mb: 2}}>
                 <EnhancedTableToolbar
                     numSelected={selected.length}
@@ -286,6 +305,18 @@ export default function SampleTable() {
                     </Box>
                 </Box>
             </Modal>
+
+            {/*
+            에러 발생 Modal
+            ErrorModal은 Error처리 시 Modal을 띄워줄 수 있는 재사용 가능한 컴포넌트입니다.
+             */}
+            <ErrorModal
+                open={isErrorModalOpen}
+                onClose={() => setErrorModalOpen(false)}
+                title="요청 실패"
+                description={error?.message || ""}
+            />
+
         </Box>
     );
 }

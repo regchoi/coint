@@ -8,6 +8,7 @@ import {Outlet} from "react-router-dom";
 import {Container} from "@mui/material";
 import {useDispatch} from "react-redux";
 import {logout} from "../../redux/authSlice";
+import {useAppDispatch} from "../../redux/store";
 
 interface Props {
     window?: () => Window;
@@ -15,7 +16,7 @@ interface Props {
 
 export default function ResponsiveDrawer(props: Props) {
     const {window} = props;
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const [mobileOpen, setMobileOpen] = React.useState(false);
 
     const handleDrawerToggle = () => {

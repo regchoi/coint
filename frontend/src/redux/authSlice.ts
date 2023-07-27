@@ -1,50 +1,51 @@
 // src/redux/authSlice.ts
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice, PayloadAction, SerializedError} from '@reduxjs/toolkit';
+import {Data} from "../components/SampleTable/data";
+import axios from "./axiosConfig";
+
+// 로그인 액션
+export const loggedIn = createAsyncThunk('auth/login', async ({id, password}: { id: string; password: string }) => {
+    const response = await axios.post('/api/auth', {id: id, password: password});
+    localStorage.setItem('token', response.data.token);
+    return response.data;
+})
+
+// 로그아웃 액션
+export const logout = createAsyncThunk('auth/logout', async () => {
+    localStorage.removeItem('token');
+    return null;
+})
 
 interface AuthState {
     token: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
+    error: SerializedError | null;
 }
 
 const initialState: AuthState = {
     token: null,
     isAuthenticated: false,
     isLoading: true, // isLoading 추가
+    error: null,
 };
 
 const authSlice = createSlice({
     name: 'auth',
     initialState,
-    reducers: {
-        // login action - id, password를 받아서 서버에 로그인 요청을 보낸다.
-        login(state, action: PayloadAction<{ id: string; password: string }>) {
-            const {id, password} = action.payload;
-            if (id === 'admin' && password === 'admin') {
-                // 로그인 성공 시 token을 받아온다고 가정하고 token을 저장
-                state.token = 'test_token';
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(loggedIn.fulfilled, (state, action) => {
+                state.token = action.payload.token;
                 state.isAuthenticated = true;
-
-                // 로그인 성공 시 localStorage에 token을 저장
-                localStorage.setItem('token', state.token);
-
-                // redirect to index
-                window.location.href = '/';
-            }
-        },
-        logout(state) {
-            state.token = null;
-            state.isAuthenticated = false;
-        },
-        setAuth(state, action: PayloadAction<boolean>) {
-            state.isAuthenticated = action.payload;
-        },
-        setLoading(state, action: PayloadAction<boolean>) {
-            state.isLoading = action.payload;
-        },
-    },
+            })
+            .addCase(loggedIn.rejected, (state, action: any) => {
+                state.token = null;
+                state.isAuthenticated = false;
+                state.error = action.error.message;
+            });
+    }
 });
-
-export const {login, logout, setAuth, setLoading} = authSlice.actions;
 
 export default authSlice.reducer;

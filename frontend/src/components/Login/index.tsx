@@ -13,8 +13,10 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {useDispatch} from "react-redux";
-import {useState} from "react";
-import {login} from "../../redux/authSlice";
+import {useEffect, useState} from "react";
+import {loggedIn} from "../../redux/authSlice";
+import {useAppDispatch, useAppSelector} from "../../redux/store";
+import ErrorModal from "../common/ErrorModal";
 
 function Copyright(props: any) {
     return (
@@ -33,8 +35,18 @@ function Copyright(props: any) {
 const defaultTheme = createTheme();
 
 export default function LogIn() {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const [credentials, setCredentials] = useState({id: '', password: ''});
+    const error = useAppSelector(state => state.auth.error);
+    // 에러 확인 Modal 상태 관리
+    const [isErrorModalOpen, setErrorModalOpen] = useState(false);
+
+    // 요청 실패 시 에러 처리
+    useEffect(() => {
+        if (error) {
+            setErrorModalOpen(true);
+        }
+    }, [error]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCredentials({
@@ -45,11 +57,19 @@ export default function LogIn() {
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        dispatch(login(credentials));
+        dispatch(loggedIn(credentials));
     };
+
 
     return (
         <ThemeProvider theme={defaultTheme}>
+            {/* 에러 발생 Modal */}
+            <ErrorModal
+                open={isErrorModalOpen}
+                onClose={() => setErrorModalOpen(false)}
+                title="로그인 실패"
+                description={error?.message || ""}
+            />
             <Container component="main" maxWidth="xs">
                 <CssBaseline/>
                 <Box
