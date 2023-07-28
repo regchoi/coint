@@ -32,7 +32,7 @@ export default function ResponsiveDrawer(props: Props) {
             <CssBaseline/>
             <Appbar handleLogout={handleLogout}/> {/* AppBar 컴포넌트 사용 */}
             <Sidebar window={window} mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} open={false}/>
-            <Container sx={{mt: 10}}>
+            <Container sx={{mt: 10, marginLeft: '240px'}}>
                 <Outlet/>
             </Container>
         </Box>

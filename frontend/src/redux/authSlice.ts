@@ -1,10 +1,15 @@
 // src/redux/authSlice.ts
 import {createAsyncThunk, createSlice, PayloadAction, SerializedError} from '@reduxjs/toolkit';
-import axios from "./axiosConfig";
+import axios from "axios";
+
+const authAxios = axios.create({
+    baseURL: process.env.REACT_APP_API_URL, // 서버 주소 - .env 파일에 정의
+    timeout: 5000,
+});
 
 // 로그인 액션
 export const loggedIn = createAsyncThunk('auth/login', async ({id, password}: { id: string; password: string }) => {
-    const response = await axios.post('/api/auth', {id: id, password: password});
+    const response = await authAxios.post('/api/auth', {userId: id, password: password});
     localStorage.setItem('token', response.data);
     return response.data;
 })

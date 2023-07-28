@@ -1,3 +1,4 @@
+
 package com.cointcompany.backend.common.config.security;
 
 import com.cointcompany.backend.domain.user.service.AuthUtil;

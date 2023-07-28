@@ -44,6 +44,12 @@ export default function SampleTable() {
         }
     }, [error]);
 
+    // Error Modal 닫기
+    const handleCloseErrorModal = () => {
+        setErrorModalOpen(false);
+    }
+
+
     // selected 해제를 위한 함수
     const dummyEvent = {
         target: {
@@ -146,12 +152,6 @@ export default function SampleTable() {
             console.error('Error while saving data:', error);
         }
     }
-
-    // Error Modal 닫기
-    const handleCloseErrorModal = () => {
-        setErrorModalOpen(false);
-    }
-
 
     // table 관련 hook들을 관리하는 커스텀 hook
     const {

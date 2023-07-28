@@ -25,6 +25,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ open, onClose, title, descripti
                 bgcolor: 'background.paper',
                 boxShadow: 24,
                 p: 4,
+                width: 400,     // Modal의 너비를 400px로 설정
             }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ErrorOutlineIcon color="error" fontSize="large" />

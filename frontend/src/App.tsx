@@ -1,14 +1,10 @@
 import React, {useEffect} from 'react';
 import {BrowserRouter, Routes, Route, Navigate, Outlet} from 'react-router-dom';
-import {useDispatch, useSelector} from 'react-redux';
 import Login from './components/Login';
 import ResponsiveDrawer from './components/ResponsiveDrawer';
-// import Dashboard from './components/Dashboard';
-import {RootState} from './redux/store';
-import {CircularProgress} from "@mui/material";
 import Dashboard from "./components/Dashboard";
 import SampleTable from "./components/SampleTable";
-import ErrorModal from "./components/common/ErrorModal";  // Assuming that the RootState is the type of the whole redux state
+import SampleChart from "./components/SampleChart";
 
 const ProtectedRoute: React.FC = () => {
 
@@ -39,6 +35,7 @@ const App: React.FC = () => {
                         <Route path="/" element={<div></div>}/>
                         <Route path="/dashboard" element={<Dashboard/>}/>
                         <Route path="/sampletable" element={<SampleTable/>}/>
+                        <Route path="/stackedbarchart" element={<SampleChart/>}/>
                     </Route>
                     {/* other protected routes go here */}
                 </Route>

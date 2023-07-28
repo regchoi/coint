@@ -19,7 +19,6 @@ interface Data {
     phone: string;
     regDate: string;
     lastLoginDate: string;
-
 }
 
 // 빈 데이터 생성을 위한 함수
