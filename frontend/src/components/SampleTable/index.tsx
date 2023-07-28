@@ -17,7 +17,6 @@ import {addTableData, deleteTableData, fetchTableData, updateTableData} from "..
 import {AppDispatch, useAppDispatch, useAppSelector} from "../../redux/store";
 import EditableRow from "./EditableRow";
 import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ErrorModal from "../common/ErrorModal";
 
 export default function SampleTable() {
@@ -38,6 +37,7 @@ export default function SampleTable() {
     }, [dispatch]);
 
     // 요청 실패 시 에러 처리
+    // error가 undefined일 수 있음
     useEffect(() => {
         if (error) {
             setErrorModalOpen(true);

@@ -1,12 +1,11 @@
 // src/redux/authSlice.ts
 import {createAsyncThunk, createSlice, PayloadAction, SerializedError} from '@reduxjs/toolkit';
-import {Data} from "../components/SampleTable/data";
 import axios from "./axiosConfig";
 
 // 로그인 액션
 export const loggedIn = createAsyncThunk('auth/login', async ({id, password}: { id: string; password: string }) => {
     const response = await axios.post('/api/auth', {id: id, password: password});
-    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('token', response.data);
     return response.data;
 })
 
@@ -39,11 +38,14 @@ const authSlice = createSlice({
             .addCase(loggedIn.fulfilled, (state, action) => {
                 state.token = action.payload.token;
                 state.isAuthenticated = true;
+                state.isLoading = false;
+                state.error = null;
             })
             .addCase(loggedIn.rejected, (state, action: any) => {
                 state.token = null;
                 state.isAuthenticated = false;
                 state.error = action.error.message;
+                state.isLoading = false;
             });
     }
 });

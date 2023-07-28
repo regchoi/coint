@@ -7,16 +7,24 @@ import ResponsiveDrawer from './components/ResponsiveDrawer';
 import {RootState} from './redux/store';
 import {CircularProgress} from "@mui/material";
 import Dashboard from "./components/Dashboard";
-import SampleTable from "./components/SampleTable";  // Assuming that the RootState is the type of the whole redux state
+import SampleTable from "./components/SampleTable";
+import ErrorModal from "./components/common/ErrorModal";  // Assuming that the RootState is the type of the whole redux state
 
 const ProtectedRoute: React.FC = () => {
-    const dispatch = useDispatch();
-    const {isAuthenticated, isLoading} = useSelector((state: RootState) => state.auth); // isLoading 추가
 
-    // 사용자 인증을 처리하고 있는 동안 Loading 표시
-    // 사용자 인증이 완료되면 인증된 사용자에게만 Outlet을 표시
-    // 인증되지 않은 사용자는 로그인 페이지로 리디렉션
-    return isLoading ? <CircularProgress/> : (isAuthenticated ? (<Outlet/>) : <Navigate to="/login" replace/>);
+    const token = localStorage.getItem('token');
+
+    if(token){
+        const jwt = JSON.parse(atob(token.split('.')[1]));
+
+        // 만료시간이 현재 시간보다 이전인 경우
+        if (jwt.exp < Date.now() / 1000) {
+            // 토큰 만료
+            // TODO Alert를 띄우고 로그인 페이지로 이동
+            return <Navigate to="/login" replace/>;
+        }
+    }
+    return <Outlet/>;
 };
 
 
