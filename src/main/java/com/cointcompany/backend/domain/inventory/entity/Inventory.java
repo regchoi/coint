@@ -24,6 +24,7 @@ public class Inventory {
     private Long gitemno;
     private String gitemno_name;
     private String unit;
+    private Long stockqty;
     @Column(insertable = false, updatable = false)
     private LocalDateTime ipgodate;
     private String inspectcodenameafter;

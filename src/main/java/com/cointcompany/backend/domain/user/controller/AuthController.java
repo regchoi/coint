@@ -6,6 +6,8 @@ import com.cointcompany.backend.domain.user.service.AuthUtil;
 import com.cointcompany.backend.domain.user.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,12 +24,16 @@ public class AuthController {
     private final AuthUtil authUtil;
 
     @PostMapping
-    public String login(@RequestBody Auth auth) {
+    public ResponseEntity<String> login(@RequestBody Auth auth) {
         Auth authInDB = authService.findByUserId(auth.getUserId());
+        String result = null;
         if (authInDB == null || !authInDB.getPassword().equals(authService.findByPassword(auth.getPassword()).getPassword())) {
-            return "FAIL";
+            result = "FAIL";
+            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
         }
-        return authUtil.generateToken(auth.getUserId());    // 인증 성공시 토큰 생성
+        result = authUtil.generateToken(auth.getUserId());    // 인증 성공시 토큰 생성
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 //    @PostMapping
 //    public String login(@RequestBody Auth auth) {
@@ -35,9 +41,9 @@ public class AuthController {
 //        return "SUCCESS";    // 인증 성공시 토큰 생성
 //    }
     @GetMapping
-    public String login(Authentication authentication) {
+    public ResponseEntity<String> login(Authentication authentication) {
 
-        return "SUCCESS";    // 인증 성공시 토큰 생성
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);    // 인증 성공시 토큰 생성
     }
 
 }
