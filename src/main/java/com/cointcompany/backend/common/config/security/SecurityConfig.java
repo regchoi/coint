@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth").permitAll()
+                        .requestMatchers("/api/chart").permitAll()
 //                        .requestMatchers("/api/table/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(authUtil),
