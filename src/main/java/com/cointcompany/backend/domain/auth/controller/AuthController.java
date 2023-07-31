@@ -1,8 +1,8 @@
-package com.cointcompany.backend.domain.user.controller;
+package com.cointcompany.backend.domain.auth.controller;
 
-import com.cointcompany.backend.domain.user.entity.Auth;
-import com.cointcompany.backend.domain.user.service.AuthService;
-import com.cointcompany.backend.domain.user.service.AuthUtil;
+import com.cointcompany.backend.domain.auth.entity.Auth;
+import com.cointcompany.backend.domain.auth.service.AuthService;
+import com.cointcompany.backend.domain.auth.service.AuthUtil;
 import com.cointcompany.backend.domain.user.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
-@CrossOrigin
 public class AuthController {
 
     private final AuthService authService;

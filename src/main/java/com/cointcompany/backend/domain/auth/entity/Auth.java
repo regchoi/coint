@@ -1,4 +1,4 @@
-package com.cointcompany.backend.domain.user.entity;
+package com.cointcompany.backend.domain.auth.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
