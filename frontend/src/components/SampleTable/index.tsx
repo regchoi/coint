@@ -147,6 +147,9 @@ export default function SampleTable() {
             }
             // 서버 응답을 받은 후에 updated 상태 초기화
             setUpdated([]);
+
+            // table 데이터 가져오기
+            dispatch(fetchTableData(API_LINK));
         } catch (error) {
             // 에러 처리
             console.error('Error while saving data:', error);

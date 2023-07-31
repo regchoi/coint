@@ -4,25 +4,9 @@ import Login from './components/Login';
 import ResponsiveDrawer from './components/ResponsiveDrawer';
 import Dashboard from "./components/Dashboard";
 import SampleTable from "./components/SampleTable";
-import SampleChart from "./components/SampleChart";
-
-const ProtectedRoute: React.FC = () => {
-
-    const token = localStorage.getItem('token');
-
-    if(token){
-        const jwt = JSON.parse(atob(token.split('.')[1]));
-
-        // 만료시간이 현재 시간보다 이전인 경우
-        if (jwt.exp < Date.now() / 1000) {
-            // 토큰 만료
-            // TODO Alert를 띄우고 로그인 페이지로 이동
-            return <Navigate to="/login" replace/>;
-        }
-    }
-    return <Outlet/>;
-};
-
+import SampleChart from "./components/SampleChart/StackedBarSample";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import PieChart from "./components/SampleChart/PieSample";
 
 const App: React.FC = () => {
 
@@ -36,6 +20,7 @@ const App: React.FC = () => {
                         <Route path="/dashboard" element={<Dashboard/>}/>
                         <Route path="/sampletable" element={<SampleTable/>}/>
                         <Route path="/stackedbarchart" element={<SampleChart/>}/>
+                        <Route path="/piechart" element={<PieChart/>}/>
                     </Route>
                     {/* other protected routes go here */}
                 </Route>

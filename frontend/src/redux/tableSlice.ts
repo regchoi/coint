@@ -71,7 +71,6 @@ export const tableSlice = createSlice({
             })
             .addCase(addTableData.fulfilled, (state, action: PayloadAction<Data[]>) => {
                 state.loading = 'succeeded';
-                state.data = state.data.concat(action.payload);
             })
             .addCase(addTableData.rejected, (state, action: any) => {
                 state.loading = 'failed';
@@ -83,7 +82,6 @@ export const tableSlice = createSlice({
             })
             .addCase(updateTableData.fulfilled, (state, action: PayloadAction<Data[]>) => {
                 state.loading = 'succeeded';
-                state.data = action.payload;
             })
             .addCase(updateTableData.rejected, (state, action: any) => {
                 state.loading = 'failed';
@@ -95,7 +93,6 @@ export const tableSlice = createSlice({
             })
             .addCase(deleteTableData.fulfilled, (state, action: PayloadAction<Data[]>) => {
                 state.loading = 'succeeded';
-                state.data = action.payload;
             })
             .addCase(deleteTableData.rejected, (state, action: any) => {
                 state.loading = 'failed';
