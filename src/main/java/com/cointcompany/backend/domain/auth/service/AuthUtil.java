@@ -1,4 +1,4 @@
-package com.cointcompany.backend.domain.user.service;
+package com.cointcompany.backend.domain.auth.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -44,9 +44,13 @@ public class AuthUtil {
     }
 
 
-    // Request의 Header에서 token 값을 가져옵니다. "Authorization" : "TOKEN값'
+    // Request의 Header에서 token 값을 가져옵니다. "Authorization" : "Bearer " + "TOKEN값'
     public String resolveToken(HttpServletRequest request) {
-        return request.getHeader("Authorization");
+        final String authHeader = request.getHeader("authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
     }
 
     public Boolean validateToken(String token) {

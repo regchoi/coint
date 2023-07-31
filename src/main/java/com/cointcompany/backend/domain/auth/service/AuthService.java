@@ -1,7 +1,7 @@
-package com.cointcompany.backend.domain.user.service;
+package com.cointcompany.backend.domain.auth.service;
 
-import com.cointcompany.backend.domain.user.entity.Auth;
-import com.cointcompany.backend.domain.user.repository.AuthRepository;
+import com.cointcompany.backend.domain.auth.entity.Auth;
+import com.cointcompany.backend.domain.auth.repository.AuthRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

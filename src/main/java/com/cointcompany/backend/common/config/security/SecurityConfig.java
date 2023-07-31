@@ -1,8 +1,8 @@
 package com.cointcompany.backend.common.config.security;
 
-import com.cointcompany.backend.domain.user.repository.AuthRepository;
-import com.cointcompany.backend.domain.user.repository.UsersRepository;
-import com.cointcompany.backend.domain.user.service.AuthUtil;
+import com.cointcompany.backend.domain.auth.repository.AuthRepository;
+import com.cointcompany.backend.domain.auth.service.AuthUtil;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsUtils;
 
 @Configuration
 @EnableWebSecurity
@@ -21,12 +21,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Slf4j
 public class SecurityConfig {
 
-    private final CorsConfig corsConfig;
+//    private final CorsConfig corsConfig;
     private final AuthRepository authRepository;
     private final AuthUtil authUtil;
     @Bean
-
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain filterChain (HttpSecurity httpSecurity) throws Exception {
         AuthenticationManager authenticationManager = httpSecurity.getSharedObject(AuthenticationManager.class);
         log.info("{}", "security filter chain");
         httpSecurity
@@ -36,6 +35,8 @@ public class SecurityConfig {
                                 httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Session 사용 안함
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(authorize -> authorize
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
+                        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers("/api/auth").permitAll()
                         .requestMatchers("/api/chart").permitAll()
 //                        .requestMatchers("/api/table/**").permitAll()
