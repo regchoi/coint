@@ -22,7 +22,8 @@ interface CustomPieChartProps<T> {
     midAngle?: number;
     innerRadius?: number;
     percent?: number;
-    tooltipFormat?: (value: any, name: string, entry: any) => string;  // Add this line
+    tooltipFormat?: (value: any, name: string, entry: any) => string;
+    showTooltip?: boolean;
 }
 
 /**
@@ -33,15 +34,29 @@ interface CustomPieChartProps<T> {
  * @param dataKey Pie Chart에 표현할 data의 key
  * @param outerRadius Pie Chart의 바깥 반지름
  * @param label Pie Chart에 label을 표시할지 여부
- * @param cx Pie Chart의 중심 x좌표 (50%가 중심)
- * @param cy Pie Chart의 중심 y좌표 (50%가 중심)
- * @param midAngle Pie Chart의 중심 각도
- * @param innerRadius Pie Chart의 안쪽 반지름
- * @param percent Pie Chart의 비율
+ * @param cx Pie Chart의 중심 x좌표 (50%가 중심) default: '50%'
+ * @param cy Pie Chart의 중심 y좌표 (50%가 중심) default: '50%'
+ * @param midAngle Pie Chart의 중심 각도 (default: 0)
+ * @param innerRadius Pie Chart의 안쪽 반지름 (default: 0)
+ * @param percent Pie Chart의 비율 (default: 0)
+ * @param tooltipFormat Pie Chart의 Tooltip에 표시될 단위를 변경하고 싶을 때 사용
+ * @param showTooltip Pie Chart의 Tooltip을 표시할지 여부 (default: true)
  * @constructor
  */
-const PieChartWithCustomizedLabel = <T,>({ data, colors, dataKey, outerRadius, label, cx, cy, midAngle, innerRadius, percent, tooltipFormat }: CustomPieChartProps<T>) => {
-
+const PieChartWithCustomizedLabel = <T,>({
+    data,
+    colors,
+    dataKey,
+    outerRadius,
+    label,
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    percent,
+    tooltipFormat,
+    showTooltip = true
+}: CustomPieChartProps<T>) => {
     const RADIAN = Math.PI / 180;
 
     // cx, cy, midAngle, innerRadius, outerRadius, percent와 같이 renderCustomizedLabel 함수에서 사용할 수 있는 props를 미리 지정
@@ -91,7 +106,7 @@ const PieChartWithCustomizedLabel = <T,>({ data, colors, dataKey, outerRadius, l
                         <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                     ))}
                 </Pie>
-                <Tooltip formatter={customTooltipFormatter} />
+                {showTooltip && <Tooltip formatter={customTooltipFormatter} /> }
             </PieChart>
         </ResponsiveContainer>
     );

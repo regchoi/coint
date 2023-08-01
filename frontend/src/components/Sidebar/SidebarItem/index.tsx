@@ -8,13 +8,15 @@ import * as React from 'react';
 
 interface SidebarItemProps {
     title: string;
-    items: string[];
     icon: JSX.Element;
+    items: string[];
+    itemLink: string[];
+    itemIcons?: JSX.Element[];
     open: boolean;
     onClick: () => void;
 }
 
-const SidebarItem = ({title, items, icon, open, onClick}: SidebarItemProps) => {
+const SidebarItem = ({title, icon, open, items, itemLink, itemIcons, onClick}: SidebarItemProps) => {
     return (
         <React.Fragment>
             <ListItem button onClick={onClick}>
@@ -24,10 +26,10 @@ const SidebarItem = ({title, items, icon, open, onClick}: SidebarItemProps) => {
             </ListItem>
             <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
-                    {items.map((item) => (
-                        <ListItem button component={Link} to={`/${title.toLowerCase()}/${item}`}>
+                    {items.map((item, idx) => (
+                        <ListItem button component={Link} to={`/${itemLink[idx]}`}>
                             <ListItemIcon>
-                                <InboxIcon/>
+                                {itemIcons ? itemIcons[idx] : <InboxIcon/>}
                             </ListItemIcon>
                             <ListItemText primary={item}/>
                         </ListItem>

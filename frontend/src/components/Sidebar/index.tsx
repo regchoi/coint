@@ -3,9 +3,10 @@ import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from "@mui/material/Typography";
+import {BubbleChart, PieChart, SignalCellularAlt, Streetview} from "@mui/icons-material";
 import sidebarLogo from '../../assets/coint.png';
 
-import {AccountCircle, Factory, Construction} from "@mui/icons-material";
+import {AccountCircle, Factory, Construction, BarChart} from "@mui/icons-material";
 import SidebarItem from "./SidebarItem";
 
 const drawerWidth = 240;
@@ -20,8 +21,10 @@ interface SidebarProps {
 // List의 배열을 관리하기 위한 interface
 interface SidebarItemState {
     title: string;
-    items: string[];
     icon: JSX.Element;
+    items: string[];
+    itemLink: string[];
+    itemIcons?: JSX.Element[];
     open: boolean;
 }
 
@@ -32,9 +35,10 @@ const Sidebar = (props: SidebarProps) => {
     // 현재 useState를 통해 SidebarItem들을 관리
     // Redux 혹은 Context API에 전역상태로 정보를 관리하여 Auth 정보에 따라 다른 SidebarItem을 보여주게 변경 가능
     const initialSidebarItems: SidebarItemState[] = [
-        {title: "사용자관리", items: ["Menu1", "Menu2", "Menu3", "Menu4",], icon: <AccountCircle/>, open: false},
-        {title: "공정관리", items: ["Proccess1", "Proccess2"], icon: <Factory/>, open: false},
-        {title: "설비관리", items: ["Equipment1", "Equipment2"], icon: <Construction/>, open: false},
+        {title: "차트샘플", icon: <BarChart />, items: ["StackedBar Chart", "Pie Chart", "Scatter Chart", "Three Chart"], itemLink: ["stackedbarchart", "piechart", "threedimscatterchart", "threemapchart"], itemIcons: [<SignalCellularAlt />, <PieChart/>, <BubbleChart/>, <Streetview/>], open: false},
+        {title: "사용자관리", items: ["Menu1", "Menu2", "Menu3", "Menu4",], itemLink: ["menu1", "menu2", "menu3", "menu4"], icon: <AccountCircle/>, open: false},
+        {title: "공정관리", items: ["Process1", "Process2"], itemLink: ["process1", "process2"], icon: <Factory/>, open: false},
+        {title: "설비관리", items: ["Equipment1", "Equipment2"],itemLink: ["equipment1", "equipment2"], icon: <Construction/>, open: false},
         // 필요한 만큼 추가
     ];
 
@@ -66,8 +70,10 @@ const Sidebar = (props: SidebarProps) => {
                         <SidebarItem
                             key={index}     // Warning: Each child in a list should have a unique "key" prop. -> 추후 uuid 혹은 데이터베이스 id로 변경
                             title={item.title}
-                            items={item.items}
                             icon={item.icon}
+                            items={item.items}
+                            itemLink={item.itemLink}
+                            itemIcons={item.itemIcons}
                             open={item.open}
                             onClick={() => handleItemClick(item.title)}
                         />

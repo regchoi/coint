@@ -15,6 +15,7 @@ interface StackedBarChartProps<T> {
     tooltipFormat?: (value: number, name: string, entry: any) => React.ReactNode;
     barSize?: number; // 바 차트의 두께를 설정하는 prop 추가
     showLegend?: boolean; // 범례를 표시할지 여부를 설정하는 prop 추가
+    showTooltip?: boolean; // 툴팁을 표시할지 여부를 설정하는 prop 추가
 }
 
 /**
@@ -32,6 +33,7 @@ interface StackedBarChartProps<T> {
  * @param tooltipFormat 툴팁의 포맷팅 함수 (default: value => value)
  * @param barSize 바 차트의 두께 (default: 40)
  * @param showLegend 범례 표시 여부 (default: true)
+ * @param showTooltip 툴팁 표시 여부 (default: true)
  * @constructor
  */
 const StackedBarChart = <T,>({
@@ -47,6 +49,7 @@ const StackedBarChart = <T,>({
                                  tooltipFormat,
                                  barSize = 40, // 기본 바 차트 두께 설정
                                  showLegend = true, // 기본 범례 표시
+                                 showTooltip = true, // 기본 툴팁 표시 여부
                              }: StackedBarChartProps<T>) => {
 
     // Tooltip의 커스텀 포매터 함수
@@ -64,7 +67,7 @@ const StackedBarChart = <T,>({
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey={dataKey} tick={{ fontSize: XAxisFontSize }} />
                 <YAxis tick={{ fontSize: YAxisFontSize }} />
-                <Tooltip formatter={customTooltipFormatter} />
+                {showTooltip && <Tooltip formatter={customTooltipFormatter} /> }
                 {showLegend && <Legend wrapperStyle={{ fontSize: '14px' }} /> }
                 {dataKeys.map((key, index) => (
                     <Bar key={index} dataKey={key} stackId="a" fill={colors[index % colors.length]} barSize={barSize} />
