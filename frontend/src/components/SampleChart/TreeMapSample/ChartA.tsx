@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import TreeMapChart from '../../common/Charts/ThreeMapChart';
+import TreeMapChart from '../../common/Charts/TreeMapChart';
 import {Grid, Typography} from "@mui/material";
 import {TooltipProps} from "recharts";
 

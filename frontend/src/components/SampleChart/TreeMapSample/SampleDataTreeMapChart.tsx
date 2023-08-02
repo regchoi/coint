@@ -1,5 +1,5 @@
 import React from 'react';
-import TreeMapChart from '../../common/Charts/ThreeMapChart';
+import TreeMapChart from '../../common/Charts/TreeMapChart';
 import {Grid} from "@mui/material";
 
 const sampleData = [
