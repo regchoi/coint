@@ -36,7 +36,7 @@ const StyledAppBar = styled(MuiAppBar, {
 
 export default function AppBar({ open, handleDrawer, drawerWidth }: AppBarProps) {
     return (
-        <StyledAppBar position="fixed" open={open} drawerWidth={drawerWidth}>
+        <StyledAppBar position="fixed" open={open} drawerWidth={drawerWidth} sx={{backgroundColor: '#fff', color: '#000'}}>
             <Toolbar>
                 <IconButton
                     color="inherit"

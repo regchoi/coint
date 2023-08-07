@@ -9,9 +9,12 @@ const authAxios = axios.create({
 
 // 로그인 액션
 export const loggedIn = createAsyncThunk('auth/login', async ({id, password}: { id: string; password: string }) => {
+    // response의 header에 있는 Authorization 값이 token
+    // Authorization의 Bearer: token 형식으로 전달됨
     const response = await authAxios.post('/api/auth', {userId: id, password: password});
-    localStorage.setItem('token', response.data);
-    return response.data;
+    const token = response.headers.authorization.split(' ')[1];
+    localStorage.setItem('token', token);
+    return {token};
 })
 
 // 로그아웃 액션

@@ -11,27 +11,29 @@ interface SidebarItemProps {
     icon: JSX.Element;
     items: string[];
     itemLink: string[];
-    itemIcons?: JSX.Element[];
     open: boolean;
     onClick: () => void;
 }
 
-const SidebarItem = ({title, icon, open, items, itemLink, itemIcons, onClick}: SidebarItemProps) => {
+const SidebarItem = ({title, icon, open, items, itemLink, onClick}: SidebarItemProps) => {
     return (
         <React.Fragment>
-            <ListItem button onClick={onClick}>
-                <ListItemIcon>{icon}</ListItemIcon>
-                <ListItemText primary={title}/>
+            <ListItem button onClick={onClick}  sx={{ color: '#c8c8c8'}}>
+                <ListItemIcon style={{minWidth: '40px', textAlign: "center"}} >{icon}</ListItemIcon>
+                <ListItemText primary={title} sx={{ color: open ? '#fff' : '#c8c8c8'  }} />
                 {open ? <ExpandLess/> : <ExpandMore/>}
             </ListItem>
             <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                     {items.map((item, idx) => (
                         <ListItem button component={Link} to={`/${itemLink[idx]}`}>
-                            <ListItemIcon>
-                                {itemIcons ? itemIcons[idx] : <InboxIcon/>}
-                            </ListItemIcon>
-                            <ListItemText primary={item}/>
+                            <ListItemIcon style={{minWidth: '40px'}}>&nbsp;</ListItemIcon>
+                            <ListItemText primary={item}  sx={{
+                                color: '#c8c8c8',
+                                '& .MuiTypography-root': {
+                                    fontSize: '14px'
+                                },
+                            }}/>
                         </ListItem>
                     ))}
                 </List>

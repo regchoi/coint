@@ -6,7 +6,7 @@ import AppBar from './AppBar';
 import SideDrawer from './Drawer';
 import MainContent from './Main';
 
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 export default function Layout() {
     const theme = useTheme();

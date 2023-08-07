@@ -36,7 +36,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function MainContent({ open, drawerWidth }: MainProps) {
     return (
-        <Main open={open} drawerWidth={drawerWidth}>
+        <Main open={open} drawerWidth={drawerWidth} sx={{marginTop: '64px'}}>
             <Outlet />
         </Main>
     );

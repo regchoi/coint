@@ -10,7 +10,7 @@ import {
     AccountCircle,
     BarChart,
     BubbleChart, Construction,
-    Factory,
+    Factory, GridView,
     PieChart,
     SignalCellularAlt,
     Streetview
@@ -27,7 +27,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
     alignItems: 'center',
     padding: theme.spacing(0, 1),
     ...theme.mixins.toolbar,
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
 }));
 
 // List의 배열을 관리하기 위한 interface
@@ -43,14 +43,15 @@ interface SidebarItemState {
 export default function SideDrawer({ open, drawerWidth }: DrawerProps) {
     const theme = useTheme();
 
+    // TODO: DB에서 Sidebar Item 정보를 가져오는 것으로 변경
     // 현재 useState를 통해 SidebarItem들을 관리
     // Auth 정보에 따라 다른 SidebarItem을 보여주게 변경 가능
     const initialSidebarItems: SidebarItemState[] = [
-        {title: "차트샘플", icon: <BarChart />, items: ["StackedBar Chart", "Pie Chart", "Scatter Chart", "Three Chart"], itemLink: ["stackedbarchart", "piechart", "threedimscatterchart", "threemapchart"], itemIcons: [<SignalCellularAlt />, <PieChart/>, <BubbleChart/>, <Streetview/>], open: false},
-        {title: "사용자관리", items: ["Menu1", "Menu2", "Menu3", "Menu4",], itemLink: ["menu1", "menu2", "menu3", "menu4"], icon: <AccountCircle/>, open: false},
-        {title: "공정관리", items: ["Process1", "Process2"], itemLink: ["process1", "process2"], icon: <Factory/>, open: false},
-        {title: "설비관리", items: ["Equipment1", "Equipment2"],itemLink: ["equipment1", "equipment2"], icon: <Construction/>, open: false},
-        // 필요한 만큼 추가
+        {title: "차트샘플", icon: <BarChart sx={{ color: '#c8c8c8' }} />, items: ["StackedBar Chart", "Pie Chart", "Scatter Chart", "Tree Chart"], itemLink: ["stackedbarchart", "piechart", "threedimscatterchart", "treemapchart"], open: false},
+        {title: "컴포넌트관리", icon: <GridView sx={{ color: '#c8c8c8' }} />, items: ["Kanban", "Gantt", "Document Editor", "Calendar", "Task List"], itemLink: ["kanban", "ganttchart", "documenteditor", "calendar", "tasklist"], open: false},
+        {title: "사용자관리", items: ["Menu1", "Menu2", "Menu3", "Menu4",], itemLink: ["menu1", "menu2", "menu3", "menu4"], icon: <AccountCircle sx={{ color: '#c8c8c8' }}/>, open: false},
+        // {title: "공정관리", items: ["Process1", "Process2"], itemLink: ["process1", "process2"], icon: <Factory sx={{ color: '#c8c8c8' }}/>, open: false},
+        // {title: "설비관리", items: ["Equipment1", "Equipment2"],itemLink: ["equipment1", "equipment2"], icon: <Construction sx={{ color: '#c8c8c8' }}/>, open: false},
     ];
 
     // handleClick을 통해 각 List의 open 상태관리
@@ -70,6 +71,8 @@ export default function SideDrawer({ open, drawerWidth }: DrawerProps) {
                 '& .MuiDrawer-paper': {
                     width: drawerWidth,
                     boxSizing: 'border-box',
+                    height: '100%',
+                    backgroundColor: 'rgb(40, 49, 66)',
                 },
             }}
             variant="persistent"
@@ -77,9 +80,9 @@ export default function SideDrawer({ open, drawerWidth }: DrawerProps) {
             open={open}
         >
             <DrawerHeader>
-                <Toolbar>
-                    <img src={sidebarLogo} alt="Logo" style={{marginRight: '10px', width: '40px'}}/>
-                    <Typography variant="h6" noWrap component="div">
+                <Toolbar style={{width: '100%', padding: '0 10px'}}>
+                    <img src={sidebarLogo} alt="Logo" style={{borderRadius: '100%', width: '40px', height: '40px', background: 'paddingBox rgb(2, 54, 113)', marginRight: '30px'}}/>
+                    <Typography variant="h6" noWrap component="div" sx={{fontSize: '16px', fontWeight: 'bold', color: '#fff', fontFamily: 'Noto Sans KR', height: '100%'}}>
                         Coint Company <br/>
                         MES System
                     </Typography>
@@ -94,7 +97,6 @@ export default function SideDrawer({ open, drawerWidth }: DrawerProps) {
                         icon={item.icon}
                         items={item.items}
                         itemLink={item.itemLink}
-                        itemIcons={item.itemIcons}
                         open={item.open}
                         onClick={() => handleItemClick(item.title)}
                     />
