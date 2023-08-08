@@ -7,6 +7,7 @@ import Toolbar from "@mui/material/Toolbar";
 import sidebarLogo from "../../assets/coint.png";
 import Typography from "@mui/material/Typography";
 import {
+    Settings,
     AccountCircle,
     BarChart,
     BubbleChart, Construction,
@@ -47,11 +48,12 @@ export default function SideDrawer({ open, drawerWidth }: DrawerProps) {
     // 현재 useState를 통해 SidebarItem들을 관리
     // Auth 정보에 따라 다른 SidebarItem을 보여주게 변경 가능
     const initialSidebarItems: SidebarItemState[] = [
-        {title: "차트샘플", icon: <BarChart sx={{ color: '#c8c8c8' }} />, items: ["StackedBar Chart", "Pie Chart", "Scatter Chart", "Tree Chart"], itemLink: ["stackedbarchart", "piechart", "threedimscatterchart", "treemapchart"], open: false},
-        {title: "컴포넌트관리", icon: <GridView sx={{ color: '#c8c8c8' }} />, items: ["Kanban", "Gantt", "Document Editor", "Calendar", "Task List"], itemLink: ["kanban", "ganttchart", "documenteditor", "calendar", "tasklist"], open: false},
-        {title: "사용자관리", items: ["Menu1", "Menu2", "Menu3", "Menu4",], itemLink: ["menu1", "menu2", "menu3", "menu4"], icon: <AccountCircle sx={{ color: '#c8c8c8' }}/>, open: false},
-        // {title: "공정관리", items: ["Process1", "Process2"], itemLink: ["process1", "process2"], icon: <Factory sx={{ color: '#c8c8c8' }}/>, open: false},
-        // {title: "설비관리", items: ["Equipment1", "Equipment2"],itemLink: ["equipment1", "equipment2"], icon: <Construction sx={{ color: '#c8c8c8' }}/>, open: false},
+        {title: "시스템관리", icon: <Settings sx={{ color: '#c8c8c8' }} />, items: ["사용자 관리", "사용자 그룹 관리", "부서 관리"], itemLink: ["/system/user", "/system/usergroup", "/system/department"], open: false},
+
+        // Example
+        // {title: "차트샘플", icon: <BarChart sx={{ color: '#c8c8c8' }} />, items: ["StackedBar Chart", "Pie Chart", "Scatter Chart", "Tree Chart"], itemLink: ["stackedbarchart", "piechart", "threedimscatterchart", "treemapchart"], open: false},
+        // {title: "컴포넌트관리", icon: <GridView sx={{ color: '#c8c8c8' }} />, items: ["Kanban", "Gantt", "Document Editor", "Calendar", "Task List"], itemLink: ["kanban", "ganttchart", "documenteditor", "calendar", "tasklist"], open: false},
+        // {title: "사용자관리", items: ["Menu1", "Menu2", "Menu3", "Menu4",], itemLink: ["menu1", "menu2", "menu3", "menu4"], icon: <AccountCircle sx={{ color: '#c8c8c8' }}/>, open: false},
     ];
 
     // handleClick을 통해 각 List의 open 상태관리
