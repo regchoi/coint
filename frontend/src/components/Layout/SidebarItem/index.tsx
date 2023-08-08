@@ -26,7 +26,7 @@ const SidebarItem = ({title, icon, open, items, itemLink, onClick}: SidebarItemP
             <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                     {items.map((item, idx) => (
-                        <ListItem button component={Link} to={`/${itemLink[idx]}`}>
+                        <ListItem button component={Link} to={`${itemLink[idx]}`}>
                             <ListItemIcon style={{minWidth: '40px'}}>&nbsp;</ListItemIcon>
                             <ListItemText primary={item}  sx={{
                                 color: '#c8c8c8',

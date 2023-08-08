@@ -26,17 +26,9 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<Ma
     }),
 }));
 
-const DrawerHeader = styled('div')(({ theme }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    padding: theme.spacing(0, 1),
-    ...theme.mixins.toolbar,
-    justifyContent: 'flex-end',
-}));
-
 export default function MainContent({ open, drawerWidth }: MainProps) {
     return (
-        <Main open={open} drawerWidth={drawerWidth} sx={{marginTop: '64px'}}>
+        <Main open={open} drawerWidth={drawerWidth} sx={{marginTop: '64px', backgroundColor: '#f5f7fa !important'}}>
             <Outlet />
         </Main>
     );

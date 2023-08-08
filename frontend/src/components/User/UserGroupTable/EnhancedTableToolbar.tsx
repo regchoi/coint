@@ -7,7 +7,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import EditIcon from '@mui/icons-material/Edit';
-import {createData} from "./data";  // 빈 배열을 생성하기위한 함수
 
 interface EnhancedTableToolbarProps {
     numSelected: number;
@@ -38,13 +37,6 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         },
     };
 
-
-    // props로 dispatch를 받아서 처리할 수 있음
-    // 추후 dispatch를 전달받아 동일한 형식 내에서의 다른 처리를 할 수 있음
-    function handleDelete() {
-        console.log("delete")
-    }
-
     return (
         <Toolbar
             sx={{
@@ -67,13 +59,12 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 </Typography>
             ) : (
                 <Typography
-                    sx={{flex: '1 1 100%'}}
+                    sx={{flex: '1 1 100%', fontWeight: 'bold', fontSize: '13px', color: 'black', marginLeft: '10px'}}
                     variant="h6"
                     id="tableTitle"
                     component="div"
                 >
-                    {/*// tableName을 DB에서 가져올 수 있음*/}
-                    {tableName}
+                    <span style={{fontWeight: 'normal', color: 'rgb(164, 169, 182)'}} >시스템관리 &gt; </span>{tableName}
                 </Typography>
             )}
             <Stack direction="row" spacing={1}>

@@ -50,7 +50,7 @@ export default function AppBar({ open, handleDrawer, drawerWidth }: AppBarProps)
                     }
                 </IconButton>
                 <Typography variant="h6" noWrap component="div">
-                    Persistent drawer
+                    Coint Company
                 </Typography>
             </Toolbar>
         </StyledAppBar>
