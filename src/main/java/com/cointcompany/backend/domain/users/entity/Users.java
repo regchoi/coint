@@ -4,10 +4,7 @@ import com.cointcompany.backend.common.config.security.jwt.dto.AuthDto;
 import com.cointcompany.backend.domain.common.BaseEntity;
 import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -16,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Where(clause = "del = false")
 @SQLDelete(sql = "UPDATE Users SET del = true WHERE id = ?")
