@@ -10,6 +10,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebMvc
 public class WebMvcSecurity implements WebMvcConfigurer {
 
+    // CORS를 관리하기 위한 환경 설정입니다.
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")

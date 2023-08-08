@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -17,5 +18,9 @@ public class InventoryService {
 
     public List<Inventory> getAllInventory() {
         return inventoryRepository.findAll();
+    }
+
+    public List<Inventory> getAllByIpgodateBetween(LocalDateTime start, LocalDateTime end) {
+        return inventoryRepository.findAllByIpgodateBetween(start, end);
     }
 }
