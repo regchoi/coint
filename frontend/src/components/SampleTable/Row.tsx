@@ -24,7 +24,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
         selected={isItemSelected}
         sx={{cursor: 'pointer'}}
     >
-        <TableCell padding="checkbox">
+        <TableCell padding="checkbox" sx={{border: "1px solid black"}}>
             <Checkbox
                 color="primary"
                 checked={isItemSelected}

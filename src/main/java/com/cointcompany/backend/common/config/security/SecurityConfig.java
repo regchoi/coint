@@ -1,7 +1,9 @@
 //package com.cointcompany.backend.common.config.security;
 //
-//import com.cointcompany.backend.domain.auth.repository.AuthRepository;
-//
+//import com.cointcompany.backend.domain.jwt.security.JwtAccessDeniedHandler;
+//import com.cointcompany.backend.domain.jwt.security.JwtAuthenticationEntryPoint;
+//import com.cointcompany.backend.domain.jwt.security.JwtAuthenticationFilter;
+//import com.cointcompany.backend.domain.jwt.security.JwtTokenProvider;
 //import jakarta.servlet.DispatcherType;
 //import lombok.RequiredArgsConstructor;
 //import lombok.extern.slf4j.Slf4j;

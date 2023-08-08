@@ -253,7 +253,7 @@ export default function SampleTable() {
                                         height: (dense ? 33 : 53) * emptyRows,
                                     }}
                                 >
-                                    <TableCell colSpan={6}/>
+                                    <TableCell colSpan={6}  sx={{border: "1px solid rgba(0, 0, 0, 0.12)"}} />
                                 </TableRow>
                             )}
                         </TableBody>

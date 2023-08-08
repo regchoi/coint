@@ -27,7 +27,7 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange}) =>
             tabIndex={row.id_num}
             key={row.id_num}
         >
-            <TableCell padding="checkbox">
+            <TableCell padding="checkbox"  sx={{border: "1px solid rgba(0, 0, 0, 0.12)"}}>
                 <Checkbox
                     color="primary"
                     inputProps={{
@@ -46,14 +46,21 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange}) =>
                         <CheckCircleIcon color="success"/> : null}</TableCell>;
                 }
                 return (
-                    <TableCell align="center" key={key}>
+                    <TableCell align="center" key={key} sx={{
+                        border: "1px solid rgba(0, 0, 0, 0.12)",
+                        padding: "5px",
+                        fontSize: "12px",
+                        height: "45px"
+                    }}>
                         <TextField
                             value={editedRow[key]}
                             onChange={(event) => handleRowChange(event, key)}
                             sx={{
                                 '& .MuiInputBase-input': {
                                     padding: 0,
-                                    fontSize: '0.8rem'
+                                    fontSize: '12px',
+                                    height: '25px',
+                                    paddingLeft: '10px',
                                 }
                             }}
                         />

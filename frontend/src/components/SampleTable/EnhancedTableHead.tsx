@@ -32,7 +32,15 @@ export default function EnhancedTableHead(props: EnhancedTableProps) {
             <TableRow>
 
 
-                <TableCell padding="checkbox">
+                <TableCell padding="checkbox"
+                           sx={{
+                               width: '30px', height: '30px',
+                               border: "1px solid rgba(0, 0, 0, 0.12)",
+                               padding: "0px 10px",
+                               fontWeight: "bold",
+                               fontSize: "12px",
+                               backgroundColor: "hsl(210, 7%, 89%)"
+                           }}>
                     <Checkbox
                         color="primary"
                         indeterminate={numSelected > 0 && numSelected < rowCount}
@@ -41,6 +49,7 @@ export default function EnhancedTableHead(props: EnhancedTableProps) {
                         inputProps={{
                             'aria-label': 'select all desserts',
                         }}
+                        sx={{ width: '30px', height: '30px' }}
                     />
                 </TableCell>
 
@@ -49,14 +58,23 @@ export default function EnhancedTableHead(props: EnhancedTableProps) {
                 {headCells.map((headCell) => (
                     <TableCell
                         key={headCell.id}
-                        align={headCell.numeric ? 'right' : 'center'}
-                        padding={headCell.disablePadding ? 'none' : 'normal'}
+                        align={'center'}
                         sortDirection={orderBy === headCell.id ? order : false}
+                        sx={{
+                            border: "1px solid rgba(0, 0, 0, 0.12)",
+                            padding: "0px 10px",
+                            fontWeight: "bold",
+                            fontSize: "12px",
+                            backgroundColor: "hsl(210, 7%, 89%)"
+                    }}
                     >
                         <TableSortLabel
                             active={orderBy === headCell.id}
                             direction={orderBy === headCell.id ? order : 'asc'}
                             onClick={createSortHandler(headCell.id)}
+                            sx={{
+                                paddingLeft: '18px'
+                            }}
                         >
                             {headCell.label}
                             {orderBy === headCell.id ? (

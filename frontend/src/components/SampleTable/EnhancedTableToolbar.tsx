@@ -3,14 +3,11 @@ import {alpha} from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import {Button, Stack} from "@mui/material";
-import {AddCircle} from "@mui/icons-material";
+import SaveIcon from '@mui/icons-material/Save';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import {createData} from "./data";  // 빈 배열을 생성하기위한 함수
-
-import {useDispatch} from 'react-redux';
-import {AppDispatch} from "../../redux/store";
 
 interface EnhancedTableToolbarProps {
     numSelected: number;
@@ -62,8 +59,18 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 </Typography>
             )}
             <Stack direction="row" spacing={1}>
-                <Button variant="outlined" endIcon={<AddCircle/>} onClick={onAdd} color={"secondary"}
-                        size={"small"} style={{minWidth: '70px'}}>
+                <Button variant="contained"
+                        startIcon={<SaveIcon style={{ color: 'rgb(81, 128, 253)', marginRight: '2px', fontSize: '15px' }} />}
+                        style={{
+                            color: 'black',
+                            marginLeft: '10px',
+                            fontSize: '12px',
+                            height: '30px',
+                            backgroundColor: 'white',
+                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)', // Custom elevation
+                            textTransform: 'none' // Removes the default uppercase transform
+                        }}
+                        onClick={onAdd}>
                     추가
                 </Button>
                 <Button variant="outlined" endIcon={<EditIcon/>} onClick={onUpdate} color={"warning"}
