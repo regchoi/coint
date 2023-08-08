@@ -1,12 +1,12 @@
-
   ## database
 spring:
     datasource:
         driver-class-name: org.postgresql.Driver
-        url: jdbc:postgresql://localhost:50000/postgres
+        url: jdbc:postgresql://localhost:5432/postgres
         username: postgres
-        password: zhdlsxm4602!
-    ## jpa
+        password: root
+
+  ## jpa
     jpa:
         show-sql: true
         hibernate:
@@ -21,12 +21,12 @@ spring:
 
 jwt:
     secretKey: "VGhpcyBpcyBhIGRlbW8gcHJvamVjdCBmb3IgaW1wbGVtZW50aW5nIGp3dC4=VGhpcyBpcyBhIGRlbW8gcHJvamVjdCBmb3IgaW1wbGVtZW50aW5nIGp3dC4="  # 임의의 문자열을 BASE64로 인코딩한 값
-    #    refreshKey: {jwt refresh Key}
+#    refreshKey: {jwt refresh Key}
     refresh-token-validity-in-seconds: 1209600 # 14일
     access-token-validity-in-seconds: 43200 # 12시간
 
 
-    ## logging
+  ## logging
 logging:
     level:
         org:
