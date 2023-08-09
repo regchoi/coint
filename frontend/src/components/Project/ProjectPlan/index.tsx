@@ -18,12 +18,15 @@ import {AppDispatch, useAppDispatch, useAppSelector} from "../../../redux/store"
 import EditableRow from "./EditableRow";
 import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
 import ErrorModal from "../../common/ErrorModal";
+import UpdateModal from "./UpdateModal";
 
 export default function ProjectPlan() {
     const dispatch = useAppDispatch();
     const [added, setAdded] = useState([] as Data[]);
     const [addId, setAddId] = useState(2147483647);
     const [updated, setUpdated] = useState([] as Data[]);
+    // 생성 Modal 상태 관리
+    const [isCreateModalOpen, setCreateModalOpen] = useState(false);
     // 삭제 확인 Modal 상태 관리
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     // 에러 확인 Modal 상태 관리
@@ -59,9 +62,7 @@ export default function ProjectPlan() {
 
     // added data를 추가하는 함수
     const handleAdd = () => {
-        const newData: Data = createData(addId, '', '', '', '', '', '', '', '', '');
-        setAdded([...added, newData]);
-        setAddId(addId + 1);
+        setCreateModalOpen(!isCreateModalOpen);
     }
     // added data의 각 항목을 변경하는 함수
     const handleAddRowChange = (updatedRow: Data) => {
@@ -275,6 +276,13 @@ export default function ProjectPlan() {
             {/*    control={<Switch checked={dense} onChange={handleChangeDense}/>}*/}
             {/*    label="Dense padding"*/}
             {/*/>*/}
+
+            {/*프로젝트 생성 모달*/}
+            <UpdateModal
+                open={isCreateModalOpen}
+                onClose={() => setCreateModalOpen(false)}
+                onSave={(data: Data) => {}}
+            />
 
             {/* 삭제 확인 Modal */}
             <Modal

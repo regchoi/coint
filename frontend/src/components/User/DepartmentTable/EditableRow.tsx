@@ -59,33 +59,114 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                     );
                 }
 
-                if (key === 'regDate' && onState === 'added') {
-                    const today = new Date();
-                    return (
-                        <TableCell align="center" key={key} sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "5px",
-                            fontSize: "12px",
-                            height: "45px"
-                        }}>
-                            {today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0')}
-                        </TableCell>
-                    );
-                }
 
-                if (key === 'regUserid' && onState === 'added') {
-                    return (
-                        <TableCell align="center" key={key} sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "5px",
-                            fontSize: "12px",
-                            height: "45px"
-                        }}>
-                            {getName()}
-                        </TableCell>
-                    );
-                }
+                if(onState === 'added') {
+                    if (key === 'regDate') {
+                        const today = new Date();
+                        return (
+                            <TableCell align="center" key={key} sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "5px",
+                                fontSize: "12px",
+                                height: "45px"
+                            }}>
+                                {today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0')}
+                            </TableCell>
+                        );
+                    }
 
+                    if (key === 'regUserid') {
+                        return (
+                            <TableCell align="center" key={key} sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "5px",
+                                fontSize: "12px",
+                                height: "45px"
+                            }}>
+                                {getName()}
+                            </TableCell>
+                        );
+                    }
+
+                    if (key === 'modUserid') {
+                        return (
+                            <TableCell align="center" key={key} sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "5px",
+                                fontSize: "12px",
+                                height: "45px"
+                            }}>
+                            </TableCell>
+                        );
+                    }
+
+                    if (key === 'modDate') {
+                        return (
+                            <TableCell align="center" key={key} sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "5px",
+                                fontSize: "12px",
+                                height: "45px"
+                            }}>
+                            </TableCell>
+                        );
+                    }
+                } else if(onState === 'updated') {
+                    if (key === 'regDate') {
+                        const today = new Date();
+                        return (
+                            <TableCell align="center" key={key} sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "5px",
+                                fontSize: "12px",
+                                height: "45px"
+                            }}>
+                                {editedRow[key].toString().substring(0, 10)}
+                            </TableCell>
+                        );
+                    }
+
+                    if (key === 'regUserid') {
+                        return (
+                            <TableCell align="center" key={key} sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "5px",
+                                fontSize: "12px",
+                                height: "45px"
+                            }}>
+                                {editedRow[key]}
+                            </TableCell>
+                        );
+                    }
+
+                    if (key === 'modUserid') {
+                        const today = new Date();
+                        return (
+                            <TableCell align="center" key={key} sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "5px",
+                                fontSize: "12px",
+                                height: "45px"
+                            }}>
+                                {today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0')}
+                            </TableCell>
+                        );
+                    }
+
+                    if (key === 'modDate') {
+                        return (
+                            <TableCell align="center" key={key} sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "5px",
+                                fontSize: "12px",
+                                height: "45px"
+                            }}>
+                                {getName()}
+                            </TableCell>
+                        );
+                    }
+
+                }
                 return (
                     <TableCell align="center" key={key} sx={{
                         border: "1px solid rgba(0, 0, 0, 0.12)",

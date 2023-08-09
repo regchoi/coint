@@ -64,7 +64,7 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                     id="tableTitle"
                     component="div"
                 >
-                    <span style={{fontWeight: 'normal', color: 'rgb(164, 169, 182)'}} >시스템관리 &gt; </span>{tableName}
+                    <span style={{fontWeight: 'normal', color: 'rgb(164, 169, 182)'}} >프로젝트관리 &gt; </span>{tableName}
                 </Typography>
             )}
             <Stack direction="row" spacing={1}>
