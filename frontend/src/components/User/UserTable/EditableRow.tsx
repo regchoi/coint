@@ -28,13 +28,20 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
             tabIndex={row.idNum}
             key={row.idNum}
         >
-            <TableCell padding="checkbox"  sx={{border: "1px solid rgba(0, 0, 0, 0.12)"}}>
+            <TableCell padding="checkbox" sx={{
+                width: '30px', height: '30px',
+                border: "1px solid rgba(0, 0, 0, 0.12)",
+                padding: "0px 10px",
+                fontSize: "12px",
+                textAlign: "center"
+            }}>
                 <Checkbox
                     color="primary"
                     inputProps={{
                         'aria-labelledby': labelId,
                     }}
                     disabled={true} // 추가중인 행은 체크박스를 비활성화함
+                    sx={{ width: '36px', height: '36px' }}
                 />
             </TableCell>
 
@@ -74,7 +81,7 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                             fontSize: "12px",
                             height: "45px"
                         }}>
-                            {getUserId()}
+                            {getName()}
                         </TableCell>
                     );
                 }

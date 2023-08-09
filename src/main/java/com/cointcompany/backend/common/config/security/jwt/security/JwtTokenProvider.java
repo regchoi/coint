@@ -71,8 +71,8 @@ public class JwtTokenProvider implements InitializingBean {
         Users users = usersRepository.findByLoginId(loginId).orElseThrow();
 
         String idNum = users.getIdNum().toString();
-//        String name = users.getName();
-        String name = "작성자";
+        String name = users.getName();
+//        String name = "작성자";
 
         String accessToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")

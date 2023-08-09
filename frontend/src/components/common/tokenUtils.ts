@@ -1,6 +1,13 @@
 function getTokenInfo() {
     const token = localStorage.getItem('token');
-    return token ? JSON.parse(atob(token.split('.')[1])) : null;
+    return token ? JSON.parse(b64DecodeUnicode(token.split('.')[1])) : null;
+
+}
+
+function b64DecodeUnicode(str: string) {
+    return decodeURIComponent(atob(str).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
 }
 
 function getUserId() {
@@ -10,6 +17,7 @@ function getUserId() {
 
 function getName() {
     const tokenInfo = getTokenInfo();
+    console.log(tokenInfo);
     return tokenInfo ? tokenInfo.name : null;
 }
 

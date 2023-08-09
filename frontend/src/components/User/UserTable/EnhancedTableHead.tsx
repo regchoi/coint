@@ -39,7 +39,8 @@ export default function EnhancedTableHead(props: EnhancedTableProps) {
                                padding: "0px 10px",
                                fontWeight: "bold",
                                fontSize: "12px",
-                               backgroundColor: "hsl(210, 7%, 89%)"
+                               backgroundColor: "hsl(210, 7%, 89%)",
+                               textAlign: "center"
                            }}>
                     <Checkbox
                         color="primary"
