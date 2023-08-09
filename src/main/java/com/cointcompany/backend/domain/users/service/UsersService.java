@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,13 +40,20 @@ public class UsersService {
 
     }
 
+    /**
+     * users 테이블에 reg_userid가 비어있으면 안됨!
+     *
+     */
     @Transactional(readOnly = true)
     public List<UsersDto.GetUsersRes> findAllUsersToGetUsersRes() {
-
+        List<UsersDto.GetUsersRes> usersDtoList = new ArrayList<>();
         List<Users> usersList = usersRepository.findAll();
-        List<UsersDto.GetUsersRes> usersDtoList = usersList.stream()
-                .map(users -> mapper.map(users, UsersDto.GetUsersRes.class))
-                .collect(Collectors.toList());
+
+        for (Users users : usersList) {
+            UsersDto.GetUsersRes usersRes = new UsersDto.GetUsersRes(users);
+            usersRes.setRegUserName(usersRepository.findById(users.getRegUserid()).orElseThrow().getName());
+            usersDtoList.add(usersRes);
+        }
 
         return usersDtoList;
     }

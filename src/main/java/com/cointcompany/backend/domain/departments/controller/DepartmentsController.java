@@ -1,5 +1,6 @@
 package com.cointcompany.backend.domain.departments.controller;
 
+import com.cointcompany.backend.common.config.security.jwt.security.UserDetailsImpl;
 import com.cointcompany.backend.domain.departments.dto.DepartmentsDto;
 import com.cointcompany.backend.domain.departments.entity.Departments;
 import com.cointcompany.backend.domain.departments.service.DepartmentsService;

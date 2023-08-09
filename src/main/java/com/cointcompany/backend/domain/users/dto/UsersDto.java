@@ -1,5 +1,6 @@
 package com.cointcompany.backend.domain.users.dto;
 
+import com.cointcompany.backend.domain.users.entity.Users;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -30,19 +31,16 @@ public class UsersDto {
 
         private String regUserName;
 
-        public GetUsersRes (
-                Long idNum, String loginId, String name, String position,
-                String phone, String email, String regDate, String regUserName
-                ) {
+        public GetUsersRes (Users users) {
 
-            this.idNum = idNum;
-            this.loginId = loginId;
-            this.name = name;
-            this.position = position;
-            this.phone = phone;
-            this.email = email;
-            this.regDate = regDate;
-            this.regUserName = regUserName;
+            this.idNum = users.getIdNum();
+            this.loginId = users.getLoginId();
+            this.name = users.getName();
+            this.position = users.getPosition();
+            this.phone = users.getPhone();
+            this.email = users.getEmail();
+            this.regDate = users.getRegDate().toString();
+            this.regUserName = null;
 
         }
     }
