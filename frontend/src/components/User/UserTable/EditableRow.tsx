@@ -1,39 +1,16 @@
 import React, { useState } from 'react';
 import { TableRow, TableCell, Checkbox, TextField } from '@mui/material';
+import {getUserId, getName } from '../../common/tokenUtils';
 import { Data } from "./data";
-
-// // JWT에서 가져온 사용자 정보
-// interface CustomJwtPayload extends jwt.JwtPayload {
-//     name?: string;
-// }
-//
-// const SECRET_KEY = Buffer.from(
-//     "VGhpcyBpcyBhIGRlbW8gcHJvamVjdCBmb3IgaW1wbGVtZW50aW5nIGp3dC4=VGhpcyBpcyBhIGRlbW8gcHJvamVjdCBmb3IgaW1wbGVtZW50aW5nIGp3dC4=",
-//     'base64'
-// ).toString();
-//
-// const getNameFromToken = (token: string) => {
-//     try {
-//         const decodedJWT = jwt.verify(token, SECRET_KEY, { algorithms: ['HS512'] }) as CustomJwtPayload;
-//         return decodedJWT?.name || null;
-//     } catch (error) {
-//         console.error('Failed to verify JWT:', error);
-//         return null;
-//     }
-// };
-//
-// // 테스트를 위한 샘플 JWT 토큰
-// const sampleToken = localStorage.getItem('token');
-// if(sampleToken) console.log(getNameFromToken(sampleToken));
-//
 
 type EditableRowProps = {
     row: Data,
     labelId: string,
     onRowChange: (updatedRow: Data) => void,
+    onState: string,
 };
 
-const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange}) => {
+const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onState}) => {
     const [editedRow, setEditedRow] = useState<Data>(row);
 
     const handleRowChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: keyof Data) => {
@@ -48,8 +25,8 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange}) =>
         <TableRow
             hover
             role="checkbox"
-            tabIndex={row.id_num}
-            key={row.id_num}
+            tabIndex={row.idNum}
+            key={row.idNum}
         >
             <TableCell padding="checkbox"  sx={{border: "1px solid rgba(0, 0, 0, 0.12)"}}>
                 <Checkbox
@@ -63,7 +40,7 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange}) =>
 
             {(Object.keys(editedRow) as Array<keyof Data>).map(key => {
                 // TODO: add user_id, 권한 동적 할당
-                if (key === 'id_num' || key === 'reg_date' || key === 'reg_userid') {
+                if (key === 'idNum') {
                     return (
                         <TableCell align="center" key={key} sx={{
                             border: "1px solid rgba(0, 0, 0, 0.12)",
@@ -71,6 +48,33 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange}) =>
                             fontSize: "12px",
                             height: "45px"
                         }}>
+                        </TableCell>
+                    );
+                }
+
+                if (key === 'regDate' && onState === 'added') {
+                    const today = new Date();
+                    return (
+                        <TableCell align="center" key={key} sx={{
+                            border: "1px solid rgba(0, 0, 0, 0.12)",
+                            padding: "5px",
+                            fontSize: "12px",
+                            height: "45px"
+                        }}>
+                            {today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0')}
+                        </TableCell>
+                    );
+                }
+
+                if (key === 'regUserid' && onState === 'added') {
+                    return (
+                        <TableCell align="center" key={key} sx={{
+                            border: "1px solid rgba(0, 0, 0, 0.12)",
+                            padding: "5px",
+                            fontSize: "12px",
+                            height: "45px"
+                        }}>
+                            {getUserId()}
                         </TableCell>
                     );
                 }
