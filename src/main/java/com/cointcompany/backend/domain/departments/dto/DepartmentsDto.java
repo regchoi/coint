@@ -1,4 +1,4 @@
-package com.cointcompany.backend.domain.usergroups.dto;
+package com.cointcompany.backend.domain.departments.dto;
 
 import lombok.*;
 
@@ -6,14 +6,14 @@ import lombok.*;
 @ToString
 @Getter
 @Setter
-public class UserGroupsDto {
+public class DepartmentsDto {
 
     @NoArgsConstructor
     @Data
-    public static class GetUserGroupsRes {
+    public static class GetDepartmentsRes {
         private Long idNum;
 
-        private String usergroupName;
+        private String departmentName;
 
         private String description;
 
@@ -25,13 +25,13 @@ public class UserGroupsDto {
 
         private String modUserId;
 
-        public GetUserGroupsRes (
-                Long idNum, String usergroupName, String description,
+        public GetDepartmentsRes (
+                Long idNum, String departmentName, String description,
                 String regDate, String regUserId, String modDate, String modUserId
                 ) {
 
             this.idNum = idNum;
-            this.usergroupName = usergroupName;
+            this.departmentName = departmentName;
             this.description = description;
             this.regDate = regDate;
             this.regUserId = regUserId;

@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user/usergroup")
-@CrossOrigin
+@CrossOrigin //ToDO cors문제 해결
 public class UserGroupsController {
 
     private final UserGroupsService userGroupsService;
