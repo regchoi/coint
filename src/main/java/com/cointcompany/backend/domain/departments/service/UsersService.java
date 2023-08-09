@@ -1,17 +1,14 @@
-package com.cointcompany.backend.domain.users.service;
+package com.cointcompany.backend.domain.departments.service;
 
-import com.cointcompany.backend.domain.users.dto.UsersDto;
+import com.cointcompany.backend.domain.departments.repository.UsersRepository;
 import com.cointcompany.backend.domain.users.entity.Users;
-import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,14 +39,15 @@ public class UsersService {
     }
 
     @Transactional(readOnly = true)
-    public List<UsersDto.GetUsersRes> findAllUsersToGetUsersRes() {
+    public List<Users> findAllUsersToGetUsersRes() {
 
         List<Users> usersList = usersRepository.findAll();
-        List<UsersDto.GetUsersRes> usersDtoList = usersList.stream()
-                .map(users -> mapper.map(users, UsersDto.GetUsersRes.class))
-                .collect(Collectors.toList());
+//        List<Users> usersResList = new ArrayList<>();
+//        for (Users users : usersList) {
+//            usersResList.add(mapper.map(users, Users.class));
+//        }
 
-        return usersDtoList;
+        return usersList;
     }
 
     @Transactional
