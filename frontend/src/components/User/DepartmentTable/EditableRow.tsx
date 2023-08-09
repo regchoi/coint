@@ -59,7 +59,7 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                     );
                 }
 
-                if (key === 'regDate') {
+                if (key === 'regDate' && onState === 'added') {
                     const today = new Date();
                     return (
                         <TableCell align="center" key={key} sx={{
@@ -73,7 +73,7 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                     );
                 }
 
-                if (key === 'regUserid') {
+                if (key === 'regUserid' && onState === 'added') {
                     return (
                         <TableCell align="center" key={key} sx={{
                             border: "1px solid rgba(0, 0, 0, 0.12)",

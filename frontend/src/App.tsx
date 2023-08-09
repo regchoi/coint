@@ -5,9 +5,12 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import NotFoundPage from "./components/common/Error/NotFoundPage";
 import Login from './components/Login';
 import Layout from "./components/Layout";
+// User
 import UserTable from "./components/User/UserTable";
 import UserGroupTable from "./components/User/UserGroupTable";
 import DepartmentTable from "./components/User/DepartmentTable";
+// Project
+import ProjectPlan from "./components/Project/ProjectPlan";
 
 
 // Example
@@ -27,9 +30,12 @@ import "./assets/css/common/chart.css";
 const ROUTES = {
     LOGIN: '/login',
     LAYOUT: '/layout',
+    // User
     USERTABLE: '/system/user',
     USERGROUPTABLE: '/system/usergroup',
     DEPARTMENTTABLE: '/system/department',
+    // Project
+    PROJECTPLAN: '/project/plan',
 
     // Example
     // SAMPLE_TABLE: '/sampletable',
@@ -62,6 +68,7 @@ const App: React.FC = () => {
                         <Route path={ROUTES.USERTABLE} element={<UserTable/>}/>
                         <Route path={ROUTES.USERGROUPTABLE} element={<UserGroupTable/>}/>
                         <Route path={ROUTES.DEPARTMENTTABLE} element={<DepartmentTable/>}/>
+                        <Route path={ROUTES.PROJECTPLAN} element={<ProjectPlan/>}/>
 
                         {/* Example*/}
                         {/*<Route path={ROUTES.SAMPLE_TABLE} element={<SampleTable/>}/>*/}

@@ -11,6 +11,7 @@ export const fetchTableData = createAsyncThunk('table/fetchData', async (apiUrl:
 // 서버에 테이블 데이터를 추가하는 비동기 액션
 export const addTableData = createAsyncThunk('table/addData',
     async ({apiUrl, data}: {apiUrl: string, data: any[]}) => {
+        console.log(data);
         const response = await axios.post(apiUrl, data);
         return response.data;
 });

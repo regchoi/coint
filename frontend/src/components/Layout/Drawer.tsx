@@ -7,6 +7,7 @@ import Toolbar from "@mui/material/Toolbar";
 import sidebarLogo from "../../assets/coint.png";
 import Typography from "@mui/material/Typography";
 import {
+    ListAlt,
     Settings,
     AccountCircle,
     BarChart,
@@ -48,6 +49,8 @@ export default function SideDrawer({ open, drawerWidth }: DrawerProps) {
     // 현재 useState를 통해 SidebarItem들을 관리
     // Auth 정보에 따라 다른 SidebarItem을 보여주게 변경 가능
     const initialSidebarItems: SidebarItemState[] = [
+
+        {title: "프로젝트관리", icon: <ListAlt sx={{ color: '#c8c8c8' }} />, items: ["프로젝트 계획"], itemLink: ["/project/plan"], open: false},
         {title: "시스템관리", icon: <Settings sx={{ color: '#c8c8c8' }} />, items: ["사용자 관리", "사용자 그룹 관리", "부서 관리"], itemLink: ["/system/user", "/system/usergroup", "/system/department"], open: false},
 
         // Example
