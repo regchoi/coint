@@ -2,6 +2,8 @@ package com.cointcompany.backend.common.config.security.jwt.security;
 
 import com.cointcompany.backend.common.config.security.jwt.service.RedisService;
 import com.cointcompany.backend.common.config.security.jwt.dto.AuthDto;
+import com.cointcompany.backend.domain.users.entity.Users;
+import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -25,8 +27,12 @@ public class JwtTokenProvider implements InitializingBean {
     private final UserDetailsServiceImpl userDetailsService;
     private final RedisService redisService;
 
+    private final UsersRepository usersRepository;
+
     private static final String AUTHORITIES_KEY = "role";
     private static final String LOGIN_KEY = "loginId";
+    private static final String USER_KEY = "idNum";
+    private static final String USER_NAME = "name";
     private static final String url = "https://localhost:8080";
 
     private final String secretKey;
@@ -38,11 +44,12 @@ public class JwtTokenProvider implements InitializingBean {
     public JwtTokenProvider(
             UserDetailsServiceImpl userDetailsService,
             RedisService redisService,
-            @Value("${jwt.secretKey}") String secretKey,
+            UsersRepository usersRepository, @Value("${jwt.secretKey}") String secretKey,
             @Value("${jwt.access-token-validity-in-seconds}") Long accessTokenValidityInMilliseconds,
             @Value("${jwt.refresh-token-validity-in-seconds}") Long refreshTokenValidityInMilliseconds) {
         this.userDetailsService = userDetailsService;
         this.redisService = redisService;
+        this.usersRepository = usersRepository;
         this.secretKey = secretKey;
         // seconds -> milliseconds
         this.accessTokenValidityInMilliseconds = accessTokenValidityInMilliseconds * 1000;
@@ -58,7 +65,14 @@ public class JwtTokenProvider implements InitializingBean {
 
     @Transactional
     public AuthDto.TokenDto createToken(String loginId, String authorities){
+
         Long now = System.currentTimeMillis();
+
+        Users users = usersRepository.findByLoginId(loginId).orElseThrow();
+
+        String idNum = users.getIdNum().toString();
+//        String name = users.getName();
+        String name = "작성자";
 
         String accessToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
@@ -67,6 +81,8 @@ public class JwtTokenProvider implements InitializingBean {
                 .setSubject("access-token")
                 .claim(url, true)
                 .claim(LOGIN_KEY, loginId)
+                .claim(USER_KEY, idNum)
+                .claim(USER_NAME, name)
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(signingKey, SignatureAlgorithm.HS512)
                 .compact();

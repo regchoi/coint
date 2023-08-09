@@ -43,12 +43,12 @@ public class UsersService {
     public List<Users> findAllUsersToGetUsersRes() {
 
         List<Users> usersList = usersRepository.findAll();
-        List<Users> usersResList = new ArrayList<>();
-        for (Users users : usersList) {
-            usersResList.add(mapper.map(users, Users.class));
-        }
+//        List<Users> usersResList = new ArrayList<>();
+//        for (Users users : usersList) {
+//            usersResList.add(mapper.map(users, Users.class));
+//        }
 
-        return usersResList;
+        return usersList;
     }
 
     @Transactional

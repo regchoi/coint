@@ -25,6 +25,7 @@ public class UsersController {
     public ResponseEntity<List<Users>> getUsers () {
 
         List<Users> usersList = usersService.findAllUsersToGetUsersRes();
+        log.info("{}", usersList.get(0).getRegDate());
 
         return new ResponseEntity<>(usersList, HttpStatus.OK);
     }
