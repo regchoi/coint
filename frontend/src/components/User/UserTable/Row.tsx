@@ -9,8 +9,6 @@ type RowProps = {
     handleClick: (event: React.MouseEvent<unknown>, id_num: number) => void,
 };
 
-// regDate 형식 202388184547719255000 해당 형식을 앞의
-
 // 가져온 데이터의 각 행을 자동적으로 구성하는 컴포넌트
 // row의 각 key를 기준으로 TableCell을 구성함
 // 각 key는 Data의 key type인 keyof Data로 정의함
@@ -30,6 +28,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
             border: "1px solid rgba(0, 0, 0, 0.12)",
             padding: "0px 10px",
             fontSize: "12px",
+            textAlign: "center"
         }}>
             <Checkbox
                 color="primary"
@@ -37,6 +36,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                 inputProps={{
                     'aria-labelledby': labelId,
                 }}
+                sx={{ width: '40px', height: '40px' }}
             />
         </TableCell>
 
@@ -55,7 +55,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     padding: "0px 10px",
                     fontSize: "12px",
-                }} align="center" key={key}>{(row[key])}</TableCell>;
+                }} align="center" key={key}>{(row[key]).toString().substring(0, 10)}</TableCell>;
             }
             return <TableCell sx={{
                 border: "1px solid rgba(0, 0, 0, 0.12)",

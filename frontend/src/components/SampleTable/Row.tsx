@@ -1,6 +1,5 @@
 import React from 'react';
 import {TableRow, TableCell, Checkbox} from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import {Data} from "./data";
 
 type RowProps = {
@@ -16,35 +15,53 @@ type RowProps = {
 const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) => (
     <TableRow
         hover
-        onClick={(event) => handleClick(event, row.id_num)}
+        onClick={(event) => handleClick(event, row.idNum)}
         role="checkbox"
         aria-checked={isItemSelected}
         tabIndex={-1}
-        key={row.id_num}
+        key={row.idNum}
         selected={isItemSelected}
         sx={{cursor: 'pointer'}}
     >
-        <TableCell padding="checkbox" sx={{border: "1px solid black"}}>
+        <TableCell padding="checkbox" sx={{
+            width: '30px', height: '30px',
+            border: "1px solid rgba(0, 0, 0, 0.12)",
+            padding: "0px 10px",
+            fontSize: "12px",
+            textAlign: "center"
+        }}>
             <Checkbox
                 color="primary"
                 checked={isItemSelected}
                 inputProps={{
                     'aria-labelledby': labelId,
                 }}
+                sx={{ width: '40px', height: '40px' }}
             />
         </TableCell>
 
         {/* row에 들어있는 Data를 처리하는 부분*/}
         {/* key값을 기준으로 TableCell을 유동적으로 구성함*/}
         {(Object.keys(row) as Array<keyof Data>).map(key => {
-            if (key === 'id_num') {
-                return null;
+            if (key === 'idNum') {
+                return <TableCell sx={{
+                    border: "1px solid rgba(0, 0, 0, 0.12)",
+                    padding: "0px 10px",
+                    fontSize: "12px",
+                }} align="center" key={key}></TableCell>;
             }
-            if (key === 'isAdmin') {
-                return <TableCell align="center" key={key}>{row[key] ?
-                    <CheckCircleIcon color="success"/> : null}</TableCell>;
+            if (key === 'regDate') {
+                return <TableCell sx={{
+                    border: "1px solid rgba(0, 0, 0, 0.12)",
+                    padding: "0px 10px",
+                    fontSize: "12px",
+                }} align="center" key={key}>{(row[key]).toString().substring(0, 10)}</TableCell>;
             }
-            return <TableCell align="center" key={key}>{row[key]}</TableCell>;
+            return <TableCell sx={{
+                border: "1px solid rgba(0, 0, 0, 0.12)",
+                padding: "0px 10px",
+                fontSize: "12px",
+            }} align="center" key={key}>{row[key]}</TableCell>;
         })}
     </TableRow>
 );

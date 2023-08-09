@@ -49,7 +49,6 @@ export default function SampleTable() {
         setErrorModalOpen(false);
     }
 
-
     // selected 해제를 위한 함수
     const dummyEvent = {
         target: {
@@ -60,18 +59,18 @@ export default function SampleTable() {
 
     // added data를 추가하는 함수
     const handleAdd = () => {
-        const newData: Data = createData(addId, '', 0, '', '', '', '', false, '', '', '', '');
+        const newData: Data = createData(addId, '', '', '', '', '', '', '', '', '');
         setAdded([...added, newData]);
         setAddId(addId + 1);
     }
     // added data의 각 항목을 변경하는 함수
     const handleAddRowChange = (updatedRow: Data) => {
         setAdded(updatedRows => {
-            const existingRow = updatedRows.find(row => row.id_num === updatedRow.id_num);
+            const existingRow = updatedRows.find(row => row.idNum === updatedRow.idNum);
             if (existingRow) {
-                return updatedRows.map(row => row.id_num === updatedRow.id_num ? updatedRow : row);
+                return updatedRows.map(row => row.idNum === updatedRow.idNum ? updatedRow : row);
             } else {
-                return [...updatedRows, {...updatedRow, id_num: addId}];
+                return [...updatedRows, {...updatedRow, idNum: addId}];
             }
         });
         setAddId(addId + 1);  // addId 값을 증가시킵니다.
@@ -90,7 +89,7 @@ export default function SampleTable() {
     const handleDelete = async () => {
         try {
             // selected 배열에 있는 id_num들을 추출합니다.
-            const selectedForDeletion = data.filter(row => selected.includes(row.id_num)).map(row => row.id_num);
+            const selectedForDeletion = data.filter(row => selected.includes(row.idNum)).map(row => row.idNum);
 
             // 서버에 삭제할 데이터 전송
             await dispatch(deleteTableData({ apiUrl: API_LINK, ids: selectedForDeletion }));
@@ -111,7 +110,7 @@ export default function SampleTable() {
 
     // selected 항목들을 updated 상태로 이동시키는 함수
     const handleUpdate = () => {
-        const selectedRows = data.filter(row => selected.includes(row.id_num));
+        const selectedRows = data.filter(row => selected.includes(row.idNum));
         setUpdated([...updated, ...selectedRows]);
         // 이동한 항목들은 selected에서 제거
         handleSelectAllClick(dummyEvent); // dummyEvent를 통해 selected 상태 초기화
@@ -120,9 +119,9 @@ export default function SampleTable() {
     // updated data의 각 항목을 변경하는 함수
     const handleUpdateRowChange = (updatedRow: Data) => {
         setUpdated(updatedRows => {
-            const existingRow = updatedRows.find(row => row.id_num === updatedRow.id_num);
+            const existingRow = updatedRows.find(row => row.idNum === updatedRow.idNum);
             if (existingRow) {
-                return updatedRows.map(row => row.id_num === updatedRow.id_num ? updatedRow : row);
+                return updatedRows.map(row => row.idNum === updatedRow.idNum ? updatedRow : row);
             } else {
                 return [...updatedRows, updatedRow];
             }
@@ -173,7 +172,7 @@ export default function SampleTable() {
         emptyRows,
         visibleRows,
     } = useTable({
-        initialOrderBy: 'id_num',
+        initialOrderBy: 'idNum',
         initialOrder: 'asc',
         initialRowsPerPage: 5,
         rowsData: data,
@@ -182,7 +181,7 @@ export default function SampleTable() {
     return (
         <Box sx={{width: '100%'}}>
             {loading === 'loading' && <LinearProgress/>}
-            <Paper sx={{width: '100%', mb: 2}}>
+            <Paper sx={{width: '100%', mb: 2, padding: '10px'}}>
                 <EnhancedTableToolbar
                     numSelected={selected.length}
                     tableName={tableName}
@@ -191,7 +190,7 @@ export default function SampleTable() {
                     onSave={handleSave}
                     onDelete={handleOpenDeleteModal}    // 삭제 버튼 클릭 시, 삭제 확인 Modal 열기
                 />
-                <TableContainer>
+                <TableContainer sx={{borderRadius: '3px'}}>
                     <Table
                         sx={{minWidth: 750}}
                         aria-labelledby="tableTitle"
@@ -207,23 +206,24 @@ export default function SampleTable() {
                         />
                         <TableBody>
                             {visibleRows.map((row, index) => {
-                                const isItemSelected = isSelected(row.id_num);
+                                const isItemSelected = isSelected(row.idNum);
                                 const labelId = `enhanced-table-checkbox-${index}`;
 
                                 // updated에 포함된 항목들은 EditableRow로 표현
-                                if (updated.some(updatedRow => updatedRow.id_num === row.id_num)) {
+                                if (updated.some(updatedRow => updatedRow.idNum === row.idNum)) {
                                     return (
                                         <EditableRow
-                                            key={row.id_num}
+                                            key={row.idNum}
                                             row={row}
                                             labelId={labelId}
                                             onRowChange={handleUpdateRowChange}
+                                            onState={'updated'}
                                         />
                                     );
                                 } else {
                                     return (
                                         <Row
-                                            key={row.id}
+                                            key={row.idNum}
                                             row={row}
                                             labelId={labelId}
                                             isItemSelected={isItemSelected}
@@ -235,15 +235,16 @@ export default function SampleTable() {
 
                             {/*추가 예정인 컬럼들 EditableRow로 변경*/}
                             {added.map((row, index) => {
-                                const isItemSelected = isSelected(row.id_num);
+                                const isItemSelected = isSelected(row.idNum);
                                 const labelId = `enhanced-table-checkbox-${index}`;
 
                                 return (
                                     <EditableRow
-                                        key={row.id_num}
+                                        key={row.idNum}
                                         row={row}
                                         labelId={labelId}
                                         onRowChange={handleAddRowChange}
+                                        onState={'added'}
                                     />
                                 );
                             })}
