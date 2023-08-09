@@ -1,6 +1,7 @@
 import { Button, Modal, Box, TextField, Typography, Table, TableBody } from "@mui/material";
 import { createData, Data } from "./data";
 import { useState } from "react";
+import UserTable from "./UserTable";
 
 interface ModalProps {
     open: boolean;
@@ -8,8 +9,8 @@ interface ModalProps {
     onSave: (data: Data) => void;
 }
 
-export default function UpdateModal({ open, onClose, onSave }: ModalProps) {
-    const [data, setData] = useState<Data>(createData(1, '', '', '', '', '', '', ''));
+export default function AddModal({ open, onClose, onSave }: ModalProps) {
+    const [data, setData] = useState<Data>(createData(1, '', '', '', '', '', '', '', ''));
     const [participants, setParticipants] = useState<string[]>([]);
     const [departments, setDepartments] = useState<string[]>([]);
 
@@ -28,28 +29,41 @@ export default function UpdateModal({ open, onClose, onSave }: ModalProps) {
                 boxShadow: 24,
                 p: 4,
                 minWidth: 300,
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                borderRadius: '10px',
             }}>
-                <Typography variant="h6">
-                    Update Data
+                <Typography variant="h6" sx={{ borderBottom: '2px solid #f0f0f0', pb: 2, mb: 2, fontSize: '18px', fontWeight: 'bold' }}>
+                    프로젝트 계획등록
                 </Typography>
 
                 <TextField
-                    label="Project Name"
-                    variant="outlined"
+                    label="프로젝트명"
                     name="projectName"
+                    variant="filled"
                     value={data.projectName}
                     onChange={handleInputChange}
-                    fullWidth
-                    sx={{ mt: 2 }}
+                    sx={{ mt: 1, width: '50%' }}
+                    InputProps={{
+                        style: { fontSize: '14px', backgroundColor: 'transparent' }
+                    }}
+                    InputLabelProps={{
+                        style: { fontSize: '14px' },
+                    }}
                 />
                 <TextField
-                    label="Project Description"
-                    variant="outlined"
+                    label="프로젝트 상세설명"
                     name="projectDescription"
-                    value={data.description}
+                    variant="filled"
+                    value={data.projectName}
                     onChange={handleInputChange}
-                    fullWidth
-                    sx={{ mt: 2 }}
+                    sx={{ mt: 1, width: '100%' }}
+                    InputProps={{
+                        style: { fontSize: '14px', backgroundColor: 'transparent' }
+                    }}
+                    InputLabelProps={{
+                        style: { fontSize: '14px' },
+                    }}
                 />
                 <TextField
                     label="Project Start Date"
@@ -59,7 +73,10 @@ export default function UpdateModal({ open, onClose, onSave }: ModalProps) {
                     value={data.startDate}
                     onChange={handleInputChange}
                     fullWidth
-                    sx={{ mt: 2 }}
+                    sx={{ mt: 3 }}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
                 />
                 <TextField
                     label="Project End Date"
@@ -69,20 +86,20 @@ export default function UpdateModal({ open, onClose, onSave }: ModalProps) {
                     value={data.endDate}
                     onChange={handleInputChange}
                     fullWidth
-                    sx={{ mt: 2 }}
+                    sx={{ mt: 3 }}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
                 />
 
                 <Typography variant="subtitle1" sx={{ mt: 3 }}>
-                    Project Participants
+                    프로젝트 참여자
                 </Typography>
-                <Table>
-                    <TableBody>
-                        {/* Later, add table rows for participants here */}
-                    </TableBody>
-                </Table>
+                <UserTable />
+
 
                 <Typography variant="subtitle1" sx={{ mt: 3 }}>
-                    Project Departments
+                    프로젝트 담당부서
                 </Typography>
                 <Table>
                     <TableBody>

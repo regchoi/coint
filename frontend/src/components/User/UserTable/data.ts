@@ -60,7 +60,7 @@ const headCells: readonly HeadCell[] = [
     {id: 'position', numeric: false, disablePadding: false, label: '직급'},
     {id: 'department', numeric: false, disablePadding: false, label: '부서'},
     {id: 'email', numeric: false, disablePadding: false, label: '이메일'},
-    {id: 'usergroup', numeric: false, disablePadding: false, label: '권한'},
+    {id: 'usergroup', numeric: false, disablePadding: false, label: '사용자 그룹'},
     {id: 'phone', numeric: false, disablePadding: false, label: '전화번호'},
     {id: 'regDate', numeric: false, disablePadding: false, label: '등록일'},
     {id: 'regUserid', numeric: false, disablePadding: false, label: '등록자'},

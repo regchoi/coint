@@ -13,20 +13,17 @@ import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import Row from "./Row";
 import useTable from "./useTable";
 import {useEffect, useState} from "react";
-import {addTableData, deleteTableData, fetchTableData, updateTableData} from "../../../redux/tableSlice";
-import {AppDispatch, useAppDispatch, useAppSelector} from "../../../redux/store";
+import {addTableData, deleteTableData, fetchTableData, updateTableData} from "../../../../redux/tableSlice";
+import {AppDispatch, useAppDispatch, useAppSelector} from "../../../../redux/store";
 import EditableRow from "./EditableRow";
 import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
-import ErrorModal from "../../common/ErrorModal";
-import AddModal from "./AddModal";
+import ErrorModal from "../../../common/ErrorModal";
 
 export default function ProjectPlan() {
     const dispatch = useAppDispatch();
     const [added, setAdded] = useState([] as Data[]);
     const [addId, setAddId] = useState(2147483647);
     const [updated, setUpdated] = useState([] as Data[]);
-    // 생성 Modal 상태 관리
-    const [isCreateModalOpen, setCreateModalOpen] = useState(false);
     // 삭제 확인 Modal 상태 관리
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     // 에러 확인 Modal 상태 관리
@@ -62,7 +59,6 @@ export default function ProjectPlan() {
 
     // added data를 추가하는 함수
     const handleAdd = () => {
-        setCreateModalOpen(!isCreateModalOpen);
     }
     // added data의 각 항목을 변경하는 함수
     const handleAddRowChange = (updatedRow: Data) => {
@@ -182,7 +178,7 @@ export default function ProjectPlan() {
     return (
         <Box sx={{width: '100%'}}>
             {loading === 'loading' && <LinearProgress/>}
-            <Paper sx={{width: '100%', mb: 2, padding: '10px'}}>
+            <Paper sx={{width: '100%', padding: '10px', border: 'none', boxShadow: 'none'}}>
                 <EnhancedTableToolbar
                     numSelected={selected.length}
                     tableName={tableName}
@@ -276,13 +272,6 @@ export default function ProjectPlan() {
             {/*    control={<Switch checked={dense} onChange={handleChangeDense}/>}*/}
             {/*    label="Dense padding"*/}
             {/*/>*/}
-
-            {/*프로젝트 생성 모달*/}
-            <AddModal
-                open={isCreateModalOpen}
-                onClose={() => setCreateModalOpen(false)}
-                onSave={(data: Data) => {}}
-            />
 
             {/* 삭제 확인 Modal */}
             <Modal

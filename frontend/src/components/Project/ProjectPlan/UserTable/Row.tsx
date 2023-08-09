@@ -1,6 +1,5 @@
 import React from 'react';
 import {TableRow, TableCell, Checkbox, IconButton} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import {Data} from "./data";
 import { useNavigate } from 'react-router-dom';
 
@@ -17,10 +16,6 @@ type RowProps = {
 const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) => {
 
     const navigate = useNavigate();
-
-    const handleRedirect = (idNum: number) => {
-        navigate(`/project/task/${idNum}`);
-    };
 
     return (
         <TableRow
@@ -59,32 +54,6 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                         padding: "0px 10px",
                         fontSize: "12px",
                     }} align="center" key={key}></TableCell>;
-                }
-                if (key === 'startDate' || key === 'endDate' || key === 'regDate') {
-                    return <TableCell sx={{
-                        border: "1px solid rgba(0, 0, 0, 0.12)",
-                        padding: "0px 10px",
-                        fontSize: "12px",
-                    }} align="center" key={key}>{row[key] ? (row[key]).toString().substring(0, 10) : ''}</TableCell>;
-                }
-
-                const handleRedirect = (idNum: number) => {
-                    navigate(`/project/task/${idNum}`);
-                }
-
-                if (key === 'detail') {
-                    return (
-                        <TableCell sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "0px 10px",
-                            fontSize: "12px",
-                            width: "120px"
-                        }} align="center" key={key}>
-                            <IconButton onClick={() => handleRedirect(row.idNum)}>  {/* 아이콘 버튼에 클릭 이벤트 연결 */}
-                                <SearchIcon/>
-                            </IconButton>
-                        </TableCell>
-                    );
                 }
                 return <TableCell sx={{
                     border: "1px solid rgba(0, 0, 0, 0.12)",
