@@ -1,5 +1,6 @@
 package com.cointcompany.backend.domain.departments.service;
 
+import com.cointcompany.backend.common.config.security.jwt.security.UserDetailsImpl;
 import com.cointcompany.backend.domain.departments.dto.DepartmentsDto;
 import com.cointcompany.backend.domain.departments.repository.DepartmentsRepository;
 import com.cointcompany.backend.domain.departments.entity.Departments;
@@ -23,7 +24,6 @@ public class DepartmentsService {
 
     @Transactional
     public String saveDepartments(Departments departments) {
-
         departmentsRepository.save(departments);
         return "SUCCESS";
     }

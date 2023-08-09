@@ -32,6 +32,10 @@ public class UserDetailsImpl implements UserDetails {
         return users.getLoginPw();
     }
 
+    public Long getUserId() {
+        return users.getIdNum();
+    }
+
 
     // == 세부 설정 == //
 
