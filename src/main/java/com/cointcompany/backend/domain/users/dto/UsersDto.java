@@ -1,73 +1,50 @@
-//package com.cointcompany.backend.domain.users.dto;
-//
-//import com.fasterxml.jackson.annotation.JsonIgnore;
-//import lombok.*;
-//
-//import java.time.LocalDateTime;
-//
-//@NoArgsConstructor(access = AccessLevel.PROTECTED)
-//@ToString
-//@Getter
-//@Setter
-//public class UsersDto {
-//
-//    @NoArgsConstructor
-//    @Data
-//    public static class GetUsersRes {
-//        private Long idNum;
-//
-//        private String state;
-//
-//        private Long seq;
-//
-//        private String id;
-//
-//        private String userName;
-//
-//        private String userPosition;
-//
-//        private String userDepartment;
-//
-//        private Boolean isAdmin;
-//
-//        private String email;
-//
-//        private String phone;
-//
-//        private String regDate;
-//
-//        private LocalDateTime lastLoginDate;
-//
-//        public GetUsersRes (
-//                Long idNum, String state, Long seq, String id, String userName,
-//                String userPosition, String userDepartment, Boolean isAdmin,
-//                String email, String phone, LocalDateTime regDate, LocalDateTime lastLoginDate
-//                ) {
-//            this.id_num = id_num;
-//            this.state = state;
-//            this.seq = seq;
-//            this.id = id;
-//            this.userName = userName;
-//            this.userPosition = userPosition;
-//            this.userDepartment = userDepartment;
-//            this.isAdmin = isAdmin;
-//            this.email = email;
-//            this.phone = phone;
-//            this.regDate = regDate;
-//            this.lastLoginDate = lastLoginDate;
-//        }
-//    }
-//
-//    @Data
-//    public static class ModifyUserReq extends Users {
-////        @JsonIgnore
-////        private Long id_num;
-//    }
-//    @Data
-//    @NoArgsConstructor
-//    public static class SaveUserReq extends Users {
-//        @JsonIgnore
-//        private Long id_num;
-//    }
-//
-//}
+package com.cointcompany.backend.domain.users.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
+@Getter
+@Setter
+public class UsersDto {
+
+    @NoArgsConstructor
+    @Data
+    public static class GetUsersRes {
+        private Long idNum;
+
+        private String loginId;
+
+        private String name;
+
+        private String position;
+
+        private String phone;
+
+        private String email;
+
+        private String regDate;
+
+        private String regUserName;
+
+        public GetUsersRes (
+                Long idNum, String loginId, String name, String position,
+                String phone, String email, String regDate, String regUserName
+                ) {
+
+            this.idNum = idNum;
+            this.loginId = loginId;
+            this.name = name;
+            this.position = position;
+            this.phone = phone;
+            this.email = email;
+            this.regDate = regDate;
+            this.regUserName = regUserName;
+
+        }
+    }
+
+}
