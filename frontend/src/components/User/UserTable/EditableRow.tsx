@@ -25,7 +25,8 @@ type EditableRowProps = {
 const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onState}) => {
     const [editedRow, setEditedRow] = useState<Data>({
         ...row,
-        getUserDepartmentResList: row.getUserDepartmentResList.length ? row.getUserDepartmentResList : [{ idNum: 0, departmentName: "" }]});
+        getUserDepartmentResList: row.getUserDepartmentResList.length ? row.getUserDepartmentResList : [{ idNum: 0, departmentName: "" }],
+        getUserUserGroupsResList: row.getUserUserGroupsResList.length ? row.getUserUserGroupsResList : [{ idNum: 0, usergroupName: "" }]});
     const [departments, setDepartments] = useState<Department[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
 
@@ -129,6 +130,59 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                                             };
 
                                             const updatedRow = {...editedRow, getUserDepartmentResList: updatedDepartments};
+                                            setEditedRow(updatedRow);
+                                            onRowChange(updatedRow);
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: '#409aff',
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                padding: 0,
+                                                fontSize: '12px',
+                                                height: '25px',
+                                                paddingLeft: '10px',
+                                                backgroundColor: '#fff',
+                                                minWidth: '50px'
+                                            }
+                                        }}
+                                    >
+                                        {
+                                            departments.map(deptOption => (
+                                                <MenuItem key={deptOption.idNum} value={deptOption.idNum}>
+                                                    {deptOption.departmentName}
+                                                </MenuItem>
+                                            ))
+                                        }
+                                    </Select>
+                                ))
+                            }
+                        </TableCell>
+                    )
+                }
+
+                if (key === 'getUserUserGroupsResList') {
+                    return (
+                        <TableCell align="center" key={1} sx={{
+                            border: "1px solid rgba(0, 0, 0, 0.12)",
+                            padding: "5px",
+                            fontSize: "12px",
+                            height: "45px"
+                        }}>
+                            {
+                                editedRow[key].map((dept: any, index: number) => (
+                                    <Select
+                                        key={index}
+                                        value={dept.idNum}
+                                        onChange={(event) => {
+                                            const selectedDeptId = event.target.value;
+                                            const updatedUserGroups = [...editedRow[key]];
+                                            updatedUserGroups[index] = {
+                                                idNum: selectedDeptId,
+                                                usergroupName: userGroups.find(d => d.idNum === selectedDeptId)?.usergroupName || ''
+                                            };
+
+                                            const updatedRow = {...editedRow, getUserUserGroupsResList: updatedUserGroups};
                                             setEditedRow(updatedRow);
                                             onRowChange(updatedRow);
                                         }}

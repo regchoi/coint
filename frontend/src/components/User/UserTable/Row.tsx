@@ -51,7 +51,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                 }} align="center" key={key}></TableCell>;
             }
             {
-                if (key === 'getUserDepartmentResList') {
+                if (key === 'getUserDepartmentResList' || key === 'getUserUserGroupsResList') {
                     return (
                         <TableCell
                             sx={{
@@ -67,13 +67,11 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                                 // row[key]가 빈배열일 수 있음
                                 // row[key]가 빈배열이 아닐 경우, map을 통해 각 요소를 출력함
                                 // row[key]가 빈배열일 경우, 빈 문자열을 출력함
-                                row[key] !== undefined ? row[key].map((item, index) => {
-                                    return (
-                                        <div key={index}>
-                                            {item.departmentName}
-                                        </div>
-                                    );
-                                }) : ''
+                                key === 'getUserUserGroupsResList' && row[key] !== undefined
+                                    ? row[key].map((item, index) => (<div key={index}>{item.usergroupName}</div>))
+                                    : key === 'getUserDepartmentResList' && row[key] !== undefined
+                                        ? row[key].map((item, index) => (<div key={index}>{item.departmentName}</div>))
+                                        : ''
                             }
                         </TableCell>
                     );
