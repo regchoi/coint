@@ -58,23 +58,20 @@ public class UsersService {
 
         // 부서가 있다면 진행
         for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
-            if (userDepartmentRepository.findByDepartments_IdNum(getUserDepartmentRes.getIdNum()).get(0).getIdNum() != null) {
                 userDepartmentRepository.save(UserDepartment.of(
                         users,
                         departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
                 ));
-            }
         }
 
         List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
 
         for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
-            if (userUsergroupRepository.findByUsergroups_IdNum(getUserUserGroupsRes.getIdNum()).get(0).getIdNum() != null) {
                 userUsergroupRepository.save(UserUsergroup.of(
                         users,
                         userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
                 ));
-            }
+
         }
 
 
@@ -142,23 +139,20 @@ public class UsersService {
 
         // 부서가 있다면 진행
         for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
-            if (userDepartmentRepository.findByDepartments_IdNum(getUserDepartmentRes.getIdNum()).get(0).getIdNum() != null) {
                 userDepartmentRepository.save(UserDepartment.of(
                         user,
                         departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
                 ));
-            }
+
         }
 
         List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
 
         for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
-            if (userUsergroupRepository.findByUsergroups_IdNum(getUserUserGroupsRes.getIdNum()).get(0).getIdNum() != null) {
                 userUsergroupRepository.save(UserUsergroup.of(
                         user,
                         userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
                 ));
-            }
         }
 
     }
