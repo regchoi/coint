@@ -44,12 +44,11 @@ public class Users extends BaseEntity {
     private List<UserDepartment> userDepartments = new ArrayList<>();
 
     public static Users of(
-            String loginId, String loginPw, String name,
+            String loginId, String name,
             String position, String phone, String email
     ) {
         return Users.builder()
                 .loginId(loginId)
-                .loginPw(loginPw)
                 .name(name)
                 .position(position)
                 .phone(phone)
@@ -60,11 +59,11 @@ public class Users extends BaseEntity {
 
     @Builder
     public Users(
-            String loginId, String loginPw, String name,
+            String loginId, String name,
             String position, String phone, String email, Boolean del
     ) {
         this.loginId = loginId;
-        this.loginPw = loginPw;
+        this.loginPw = "0000";
         this.name = name;
         this.position = position;
         this.phone = phone;

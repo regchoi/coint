@@ -27,11 +27,12 @@ public class DepartmentsService {
         departmentsRepository.save(departments);
         return "SUCCESS";
     }
-
+//Todo 사용자가 속해있는 부서만 전송
     @Transactional(readOnly = true)
     public List<DepartmentsDto.GetDepartmentsRes> findAllDepartmentsToGetDepartmentsRes() {
 
         List<Departments> departmentsList = departmentsRepository.findAll();
+
         List<DepartmentsDto.GetDepartmentsRes> departmentsResListResList = departmentsList.stream()
                 .map(departments -> mapper.map(departments, DepartmentsDto.GetDepartmentsRes.class))
                 .collect(Collectors.toList());

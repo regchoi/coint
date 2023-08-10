@@ -1,7 +1,12 @@
 package com.cointcompany.backend.domain.users.service;
 
+import com.cointcompany.backend.domain.departments.dto.DepartmentsDto;
+import com.cointcompany.backend.domain.departments.entity.Departments;
+import com.cointcompany.backend.domain.departments.repository.DepartmentsRepository;
 import com.cointcompany.backend.domain.users.dto.UsersDto;
+import com.cointcompany.backend.domain.users.entity.UserDepartment;
 import com.cointcompany.backend.domain.users.entity.Users;
+import com.cointcompany.backend.domain.users.repository.UserDepartmentRepository;
 import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,6 +24,8 @@ import java.util.List;
 public class UsersService {
 
     private final UsersRepository usersRepository;
+    private final DepartmentsRepository departmentsRepository;
+    private final UserDepartmentRepository userDepartmentRepository;
     private final ModelMapper mapper;
 
     public String checkUsers(List<Users> users) {
@@ -29,31 +37,57 @@ public class UsersService {
     }
 
     @Transactional
-    public String saveUsers(Users users) {
+    public String saveUsers(UsersDto.putUsersDepartmentsReq putUsersDepartmentsReq) {
         log.info("save");
-        if (usersRepository.findByLoginId(users.getLoginId()).isPresent()) {
-            return "이미 있는 아이디입니다";
-        } else {
-            usersRepository.save(users);
-            return "SUCCESS";
+
+        Users users = Users.of(
+                putUsersDepartmentsReq.getLoginId(), putUsersDepartmentsReq.getName(),
+                putUsersDepartmentsReq.getPosition(), putUsersDepartmentsReq.getPhone(),
+                putUsersDepartmentsReq.getEmail()
+        );
+        usersRepository.save(users);
+        // 받은 데이터 중에서 부서만 따로 추출
+        List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = putUsersDepartmentsReq.getGetUserDepartmentResList();
+
+        // 부서가 있다면 진행
+        for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
+            if (userDepartmentRepository.findByDepartments_IdNum(getUserDepartmentRes.getIdNum()).get(0).getIdNum() != null) {
+                userDepartmentRepository.save(UserDepartment.of(
+                        users,
+                        departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
+                ));
+            }
         }
+        return "SUCCESS";
 
     }
 
     /**
      * users 테이블에 reg_userid가 비어있으면 안됨!
-     *
      */
     @Transactional(readOnly = true)
     public List<UsersDto.GetUsersRes> findAllUsersToGetUsersRes() {
+
         List<UsersDto.GetUsersRes> usersDtoList = new ArrayList<>();
         List<Users> usersList = usersRepository.findAll();
 
+        List<UserDepartment> userDepartmentList = new ArrayList<>();
+
         for (Users users : usersList) {
-            UsersDto.GetUsersRes usersRes = new UsersDto.GetUsersRes(users);
-            usersRes.setRegUserName(usersRepository.findById(users.getRegUserid()).orElseThrow().getName());
+            List<Departments> departmentsList = new ArrayList<>();
+            userDepartmentList = userDepartmentRepository.findByUsers_IdNum(users.getIdNum());
+            for (UserDepartment userDepartment : userDepartmentList) {
+                departmentsList.add(userDepartment.getDepartments());
+            }
+            List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = departmentsList.stream()
+                    .map(departments -> mapper.map(departments, DepartmentsDto.GetUserDepartmentRes.class))
+                    .collect(Collectors.toList());
+
+            UsersDto.GetUsersRes usersRes = new UsersDto.GetUsersRes(users, getUserDepartmentResList);
+            usersRes.setRegUserid(usersRepository.findById(users.getRegUserid()).orElseThrow().getName());
             usersDtoList.add(usersRes);
         }
+
 
         return usersDtoList;
     }
@@ -65,13 +99,31 @@ public class UsersService {
     }
 
     @Transactional
-    public void modifyUsers(Users users) {
-        Users user = usersRepository.getReferenceById(users.getIdNum());
+    public void modifyUsers(UsersDto.putUsersDepartmentsReq putUsersDepartmentsReq) {
+        Users user = usersRepository.getReferenceById(putUsersDepartmentsReq.getIdNum());
 
-        user.setName(users.getName());
-        user.setPosition(users.getPosition());
-        user.setPhone(users.getPhone());
-        user.setEmail(users.getEmail());
+        user.setName(putUsersDepartmentsReq.getName());
+        user.setPosition(putUsersDepartmentsReq.getPosition());
+        user.setPhone(putUsersDepartmentsReq.getPhone());
+        user.setEmail(putUsersDepartmentsReq.getEmail());
 
+        List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = putUsersDepartmentsReq.getGetUserDepartmentResList();
+
+        // 부서가 있다면 진행
+        for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
+            if (userDepartmentRepository.findByDepartments_IdNum(getUserDepartmentRes.getIdNum()).get(0).getIdNum() != null) {
+                userDepartmentRepository.save(UserDepartment.of(
+                        user,
+                        departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
+                ));
+            }
+        }
+    }
+
+    public List<Users> getUsersByDepartmentId(Long departmentId) {
+        List<UserDepartment> userDepartments = userDepartmentRepository.findByDepartments_IdNum(departmentId);
+        return userDepartments.stream()
+                .map(UserDepartment::getUsers)
+                .collect(Collectors.toList());
     }
 }

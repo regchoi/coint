@@ -41,4 +41,18 @@ public class DepartmentsDto {
         }
     }
 
+    @NoArgsConstructor
+    @Data
+    public static class GetUserDepartmentRes {
+        private Long idNum;
+
+        private String departmentName;
+
+        public GetUserDepartmentRes(Long idNum, String departmentName) {
+            this.idNum = idNum;
+            this.departmentName = departmentName;
+        }
+    }
+
+
 }

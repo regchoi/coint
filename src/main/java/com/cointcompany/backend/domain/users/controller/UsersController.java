@@ -1,18 +1,14 @@
 package com.cointcompany.backend.domain.users.controller;
 
-import com.cointcompany.backend.common.config.security.jwt.security.UserDetailsImpl;
+import com.cointcompany.backend.domain.departments.service.DepartmentsService;
 import com.cointcompany.backend.domain.users.dto.UsersDto;
-import com.cointcompany.backend.domain.users.entity.Users;
 import com.cointcompany.backend.domain.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -23,6 +19,7 @@ import java.util.List;
 public class UsersController {
 
     private final UsersService usersService;
+    private final DepartmentsService departmentsService;
 
     @GetMapping
     public ResponseEntity<List<UsersDto.GetUsersRes>> getUsers () {
@@ -31,16 +28,25 @@ public class UsersController {
 
         return new ResponseEntity<>(usersList, HttpStatus.OK);
     }
+//    @GetMapping
+//    public ResponseEntity<Map<String, Object>> getUsers () {
+//
+//        Map<String, Object> responseDate = new HashMap<>();
+//
+//
+//        List<UsersDto.GetUsersRes> usersList = usersService.findAllUsersToGetUsersRes();
+//        List<DepartmentsDto.GetDepartmentsRes> departments = departmentsService.findAllDepartmentsToGetDepartmentsRes();
+//
+//        responseDate.put("key1", usersList);
+//        responseDate.put("key2", departments);
+//
+//        return new ResponseEntity<>(responseDate, HttpStatus.OK);
+//    }
 
     @PostMapping
-    public ResponseEntity<String> postUsers (@RequestBody List<Users> listUsers) {
+    public ResponseEntity<String> postUsers (@RequestBody List<UsersDto.putUsersDepartmentsReq> usersDepartmentsReqList) {
 
-        String check = usersService.checkUsers(listUsers);
-        if ( check != "SUCCESS")
-
-            return new ResponseEntity<>(check , HttpStatus.BAD_REQUEST);
-
-        for (Users saveUserReq : listUsers) {
+        for (UsersDto.putUsersDepartmentsReq saveUserReq : usersDepartmentsReqList) {
             usersService.saveUsers(saveUserReq);
         }
 
@@ -48,10 +54,9 @@ public class UsersController {
     }
 
     @PutMapping
-    public ResponseEntity<String> putUsers (@RequestBody List<Users> listUsers) {
+    public ResponseEntity<String> putUsers (@RequestBody List<UsersDto.putUsersDepartmentsReq> listUsers) {
 
-        List<Users> usersList = new ArrayList<>();
-        for (Users modifyUserReq : listUsers) {
+        for (UsersDto.putUsersDepartmentsReq modifyUserReq : listUsers) {
             usersService.modifyUsers(modifyUserReq);
 
         }
