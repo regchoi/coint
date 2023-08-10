@@ -11,7 +11,12 @@ interface Data {
     loginId: string;
     name: string;
     position: string;
-    department: any[];
+    // getUserDepartmentResList는 빈배열일 수도 있기 때문에
+    // 아래와 같이 정의해줘야 함
+    getUserDepartmentResList: {
+        idNum: number,
+        departmentName: string
+    }[] | [];
     email: string;
     usergroup: string;
     phone: string;
@@ -25,7 +30,10 @@ const createData = (
     loginId: string,
     name: string,
     position: string,
-    department: any[],
+    getUserDepartmentResList: {
+        idNum: number,
+        departmentName: string
+    }[] | [],
     email: string,
     usergroup: string,
     phone: string,
@@ -37,7 +45,7 @@ const createData = (
         loginId,
         name,
         position,
-        department,
+        getUserDepartmentResList,
         email,
         usergroup,
         phone,
@@ -58,7 +66,7 @@ const headCells: readonly HeadCell[] = [
     {id: 'loginId', numeric: false, disablePadding: false, label: '아이디'},
     {id: 'name', numeric: false, disablePadding: false, label: '이름'},
     {id: 'position', numeric: false, disablePadding: false, label: '직급'},
-    {id: 'department', numeric: false, disablePadding: false, label: '부서'},
+    {id: 'getUserDepartmentResList', numeric: false, disablePadding: false, label: '부서'},
     {id: 'email', numeric: false, disablePadding: false, label: '이메일'},
     {id: 'usergroup', numeric: false, disablePadding: false, label: '사용자 그룹'},
     {id: 'phone', numeric: false, disablePadding: false, label: '전화번호'},

@@ -17,7 +17,6 @@ function getUserId() {
 
 function getName() {
     const tokenInfo = getTokenInfo();
-    console.log(tokenInfo);
     return tokenInfo ? tokenInfo.name : null;
 }
 

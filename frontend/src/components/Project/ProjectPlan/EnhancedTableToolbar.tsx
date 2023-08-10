@@ -25,6 +25,7 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         color: 'black',
         marginLeft: '10px',
         fontSize: '12px',
+        fontWeight: 'bold',
         height: '30px',
         backgroundColor: 'white',
         boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
@@ -77,10 +78,10 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 </Button>
                 <Button variant="contained"
                         startIcon={<AddIcon style={{ color: 'rgb(23, 210, 23)', marginRight: '2px', fontSize: '15px' }} />}
-                        sx={{ ...commonButtonStyles }}
+                        sx={{ ...commonButtonStyles, width: '100px' }}
                         onClick={onAdd}
                 >
-                    추가
+                    신규등록
                 </Button>
                 <Button variant="contained"
                         startIcon={<EditIcon style={{ color: 'gray', marginRight: '2px', fontSize: '15px' }} />}

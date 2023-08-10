@@ -34,7 +34,7 @@ export default function AddModal({ open, onClose, onSave }: ModalProps) {
                 borderRadius: '10px',
             }}>
                 <Typography variant="h6" sx={{ borderBottom: '2px solid #f0f0f0', pb: 2, mb: 2, fontSize: '18px', fontWeight: 'bold' }}>
-                    프로젝트 계획등록
+                    프로젝트 신규등록
                 </Typography>
 
                 <TextField

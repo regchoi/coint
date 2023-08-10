@@ -23,7 +23,9 @@ type EditableRowProps = {
 };
 
 const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onState}) => {
-    const [editedRow, setEditedRow] = useState<Data>(row);
+    const [editedRow, setEditedRow] = useState<Data>({
+        ...row,
+        getUserDepartmentResList: row.getUserDepartmentResList.length ? row.getUserDepartmentResList : [{ idNum: 0, departmentName: "" }]});
     const [departments, setDepartments] = useState<Department[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
 
@@ -92,6 +94,7 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
             </TableCell>
 
             {(Object.keys(editedRow) as Array<keyof Data>).map(key => {
+                console.log(key);
                 // TODO: add user_id, 권한 동적 할당
                 if (key === 'idNum') {
                     return (
@@ -105,59 +108,55 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                     );
                 }
 
-                if (key === 'department' || key === 'usergroup') {
+                if (key === 'getUserDepartmentResList') {
                     return (
-                        <TableCell align="center" key={key} sx={{
+                        <TableCell align="center" key={1} sx={{
                             border: "1px solid rgba(0, 0, 0, 0.12)",
                             padding: "5px",
                             fontSize: "12px",
                             height: "45px"
                         }}>
-                            <Select
-                                value={editedRow[key]}
-                                onChange={(event) => {
-                                    const syntheticEvent = {
-                                        target: {
-                                            value: event.target.value,
-                                            name: event.target.name
-                                        },
-                                        preventDefault: event.preventDefault,
-                                        stopPropagation: event.stopPropagation
-                                    } as React.ChangeEvent<HTMLInputElement>;
-                                    handleRowChange(syntheticEvent, key);
-                                }}
-                                sx={{
-                                    '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: '#409aff',
-                                    },
-                                    '& .MuiInputBase-input': {
-                                        padding: 0,
-                                        fontSize: '12px',
-                                        height: '25px',
-                                        paddingLeft: '10px',
-                                        backgroundColor: '#fff',
-                                        minWidth: '50px'
-                                    }
-                                }}
-                            >
-                                {
-                                    key === 'department' ?
-                                        departments.map(dept => (
-                                            <MenuItem key={dept.idNum} value={dept.idNum}>
-                                                {dept.departmentName}
-                                            </MenuItem>
-                                        ))
-                                    :
-                                    key === 'usergroup' ?
-                                        userGroups.map(usergroup => (
-                                            <MenuItem key={usergroup.idNum} value={usergroup.idNum}>
-                                                {usergroup.usergroupName}
-                                            </MenuItem>
-                                        ))
-                                        :
-                                        null
-                                }
-                            </Select>
+                            {
+                                editedRow[key].map((dept: any, index: number) => (
+                                    <Select
+                                        key={index}
+                                        value={dept.idNum}
+                                        onChange={(event) => {
+                                            const selectedDeptId = event.target.value;
+                                            const updatedDepartments = [...editedRow[key]];
+                                            updatedDepartments[index] = {
+                                                idNum: selectedDeptId,
+                                                departmentName: departments.find(d => d.idNum === selectedDeptId)?.departmentName || ''
+                                            };
+
+                                            const updatedRow = {...editedRow, getUserDepartmentResList: updatedDepartments};
+                                            setEditedRow(updatedRow);
+                                            onRowChange(updatedRow);
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: '#409aff',
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                padding: 0,
+                                                fontSize: '12px',
+                                                height: '25px',
+                                                paddingLeft: '10px',
+                                                backgroundColor: '#fff',
+                                                minWidth: '50px'
+                                            }
+                                        }}
+                                    >
+                                        {
+                                            departments.map(deptOption => (
+                                                <MenuItem key={deptOption.idNum} value={deptOption.idNum}>
+                                                    {deptOption.departmentName}
+                                                </MenuItem>
+                                            ))
+                                        }
+                                    </Select>
+                                ))
+                            }
                         </TableCell>
                     )
                 }

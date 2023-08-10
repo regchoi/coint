@@ -1,7 +1,7 @@
 // data.ts
 
 // tableName 정의
-const tableName: string = '프로젝트 계획';
+const tableName: string = '프로젝트 작업자관리';
 const API_LINK: string = '/api/user';
 
 // 테이블의 구조를 정의
