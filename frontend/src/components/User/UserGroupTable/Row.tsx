@@ -55,7 +55,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                     border: "1px solid rgba(0, 0, 0, 0.12)",
                     padding: "0px 10px",
                     fontSize: "12px",
-                }} align="center" key={key}>{(row[key]).toString().substring(0, 10)}</TableCell>;
+                }} align="center" key={key}>{row[key] && (row[key]).toString().substring(0, 10)}</TableCell>;
             }
             return <TableCell sx={{
                 border: "1px solid rgba(0, 0, 0, 0.12)",
