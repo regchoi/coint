@@ -62,7 +62,6 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                             align="center"
                             key={key}
                         >
-
                             {
                                 // row[key]가 빈배열일 수 있음
                                 // row[key]가 빈배열이 아닐 경우, map을 통해 각 요소를 출력함

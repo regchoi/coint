@@ -201,9 +201,9 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                                         }}
                                     >
                                         {
-                                            departments.map(deptOption => (
-                                                <MenuItem key={deptOption.idNum} value={deptOption.idNum}>
-                                                    {deptOption.departmentName}
+                                            userGroups.map(userOption => (
+                                                <MenuItem key={userOption.idNum} value={userOption.idNum}>
+                                                    {userOption.usergroupName}
                                                 </MenuItem>
                                             ))
                                         }
