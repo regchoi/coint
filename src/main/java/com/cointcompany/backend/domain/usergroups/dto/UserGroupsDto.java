@@ -41,4 +41,17 @@ public class UserGroupsDto {
         }
     }
 
+    @NoArgsConstructor
+    @Data
+    public static class GetUserUserGroupsRes {
+        private Long idNum;
+
+        private String usergroupName;
+
+        public GetUserUserGroupsRes(Long idNum, String usergroupName) {
+            this.idNum = idNum;
+            this.usergroupName = usergroupName;
+        }
+    }
+
 }

@@ -24,7 +24,6 @@ public class Usergroups extends BaseEntity {
 
     private String usergroupName;
 
-    @Lob
     private String description;
 
     private boolean del = Boolean.FALSE;

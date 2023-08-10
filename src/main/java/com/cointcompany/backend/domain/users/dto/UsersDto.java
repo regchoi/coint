@@ -2,6 +2,7 @@ package com.cointcompany.backend.domain.users.dto;
 
 import com.cointcompany.backend.domain.departments.dto.DepartmentsDto;
 import com.cointcompany.backend.domain.departments.entity.Departments;
+import com.cointcompany.backend.domain.usergroups.dto.UserGroupsDto;
 import com.cointcompany.backend.domain.users.entity.Users;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -36,7 +37,10 @@ public class UsersDto {
 
         private List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList;
 
-        public GetUsersRes (Users users, List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList) {
+        private List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList;
+
+        public GetUsersRes (Users users, List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList,
+                            List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList) {
 
             this.idNum = users.getIdNum();
             this.loginId = users.getLoginId();
@@ -47,12 +51,12 @@ public class UsersDto {
             this.regDate = users.getRegDate().toString();
             this.regUserid = null;
             this.getUserDepartmentResList = getUserDepartmentResList;
-
+            this.getUserUserGroupsResList = getUserUserGroupsResList;
         }
     }
     @NoArgsConstructor
     @Data
-    public static class putUsersDepartmentsReq {
+    public static class putUsersReq {
         private Long idNum;
 
         private String loginId;
@@ -67,7 +71,10 @@ public class UsersDto {
 
         private List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList;
 
-        public putUsersDepartmentsReq (Users users, List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList) {
+        private List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList;
+
+        public putUsersReq (Users users, List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList,
+                            List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList) {
 
             this.idNum = users.getIdNum();
             this.loginId = users.getLoginId();
@@ -76,7 +83,7 @@ public class UsersDto {
             this.phone = users.getPhone();
             this.email = users.getEmail();
             this.getUserDepartmentResList = getUserDepartmentResList;
-
+            this.getUserUserGroupsResList = getUserUserGroupsResList;
         }
     }
 

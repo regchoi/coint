@@ -28,25 +28,11 @@ public class UsersController {
 
         return new ResponseEntity<>(usersList, HttpStatus.OK);
     }
-//    @GetMapping
-//    public ResponseEntity<Map<String, Object>> getUsers () {
-//
-//        Map<String, Object> responseDate = new HashMap<>();
-//
-//
-//        List<UsersDto.GetUsersRes> usersList = usersService.findAllUsersToGetUsersRes();
-//        List<DepartmentsDto.GetDepartmentsRes> departments = departmentsService.findAllDepartmentsToGetDepartmentsRes();
-//
-//        responseDate.put("key1", usersList);
-//        responseDate.put("key2", departments);
-//
-//        return new ResponseEntity<>(responseDate, HttpStatus.OK);
-//    }
 
     @PostMapping
-    public ResponseEntity<String> postUsers (@RequestBody List<UsersDto.putUsersDepartmentsReq> usersDepartmentsReqList) {
+    public ResponseEntity<String> postUsers (@RequestBody List<UsersDto.putUsersReq> usersDepartmentsReqList) {
 
-        for (UsersDto.putUsersDepartmentsReq saveUserReq : usersDepartmentsReqList) {
+        for (UsersDto.putUsersReq saveUserReq : usersDepartmentsReqList) {
             usersService.saveUsers(saveUserReq);
         }
 
@@ -54,9 +40,9 @@ public class UsersController {
     }
 
     @PutMapping
-    public ResponseEntity<String> putUsers (@RequestBody List<UsersDto.putUsersDepartmentsReq> listUsers) {
+    public ResponseEntity<String> putUsers (@RequestBody List<UsersDto.putUsersReq> listUsers) {
 
-        for (UsersDto.putUsersDepartmentsReq modifyUserReq : listUsers) {
+        for (UsersDto.putUsersReq modifyUserReq : listUsers) {
             usersService.modifyUsers(modifyUserReq);
 
         }

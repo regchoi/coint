@@ -3,10 +3,15 @@ package com.cointcompany.backend.domain.users.service;
 import com.cointcompany.backend.domain.departments.dto.DepartmentsDto;
 import com.cointcompany.backend.domain.departments.entity.Departments;
 import com.cointcompany.backend.domain.departments.repository.DepartmentsRepository;
+import com.cointcompany.backend.domain.usergroups.dto.UserGroupsDto;
+import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
+import com.cointcompany.backend.domain.usergroups.repository.UserGroupsRepository;
 import com.cointcompany.backend.domain.users.dto.UsersDto;
 import com.cointcompany.backend.domain.users.entity.UserDepartment;
+import com.cointcompany.backend.domain.users.entity.UserUsergroup;
 import com.cointcompany.backend.domain.users.entity.Users;
 import com.cointcompany.backend.domain.users.repository.UserDepartmentRepository;
+import com.cointcompany.backend.domain.users.repository.UserUsergroupRepository;
 import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +30,9 @@ public class UsersService {
 
     private final UsersRepository usersRepository;
     private final DepartmentsRepository departmentsRepository;
+    private final UserGroupsRepository userGroupsRepository;
     private final UserDepartmentRepository userDepartmentRepository;
+    private final UserUsergroupRepository userUsergroupRepository;
     private final ModelMapper mapper;
 
     public String checkUsers(List<Users> users) {
@@ -37,7 +44,7 @@ public class UsersService {
     }
 
     @Transactional
-    public String saveUsers(UsersDto.putUsersDepartmentsReq putUsersDepartmentsReq) {
+    public String saveUsers(UsersDto.putUsersReq putUsersDepartmentsReq) {
         log.info("save");
 
         Users users = Users.of(
@@ -58,6 +65,20 @@ public class UsersService {
                 ));
             }
         }
+
+        List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
+
+        for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
+            if (userUsergroupRepository.findByUsergroups_IdNum(getUserUserGroupsRes.getIdNum()).get(0).getIdNum() != null) {
+                userUsergroupRepository.save(UserUsergroup.of(
+                        users,
+                        userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
+                ));
+            }
+        }
+
+
+
         return "SUCCESS";
 
     }
@@ -72,6 +93,7 @@ public class UsersService {
         List<Users> usersList = usersRepository.findAll();
 
         List<UserDepartment> userDepartmentList = new ArrayList<>();
+        List<UserUsergroup> userUsergroupsList = new ArrayList<>();
 
         for (Users users : usersList) {
             List<Departments> departmentsList = new ArrayList<>();
@@ -83,7 +105,16 @@ public class UsersService {
                     .map(departments -> mapper.map(departments, DepartmentsDto.GetUserDepartmentRes.class))
                     .collect(Collectors.toList());
 
-            UsersDto.GetUsersRes usersRes = new UsersDto.GetUsersRes(users, getUserDepartmentResList);
+            List<Usergroups> usergroupsList = new ArrayList<>();
+            userUsergroupsList = userUsergroupRepository.findByUsers_IdNum(users.getIdNum());
+            for (UserUsergroup userUsergroup : userUsergroupsList) {
+                usergroupsList.add(userUsergroup.getUsergroups());
+            }
+            List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = usergroupsList.stream()
+                    .map(userGroup -> mapper.map(userGroup, UserGroupsDto.GetUserUserGroupsRes.class))
+                    .collect(Collectors.toList());
+
+            UsersDto.GetUsersRes usersRes = new UsersDto.GetUsersRes(users, getUserDepartmentResList, getUserUserGroupsResList);
             usersRes.setRegUserid(usersRepository.findById(users.getRegUserid()).orElseThrow().getName());
             usersDtoList.add(usersRes);
         }
@@ -99,7 +130,7 @@ public class UsersService {
     }
 
     @Transactional
-    public void modifyUsers(UsersDto.putUsersDepartmentsReq putUsersDepartmentsReq) {
+    public void modifyUsers(UsersDto.putUsersReq putUsersDepartmentsReq) {
         Users user = usersRepository.getReferenceById(putUsersDepartmentsReq.getIdNum());
 
         user.setName(putUsersDepartmentsReq.getName());
@@ -118,6 +149,18 @@ public class UsersService {
                 ));
             }
         }
+
+        List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
+
+        for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
+            if (userUsergroupRepository.findByUsergroups_IdNum(getUserUserGroupsRes.getIdNum()).get(0).getIdNum() != null) {
+                userUsergroupRepository.save(UserUsergroup.of(
+                        user,
+                        userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
+                ));
+            }
+        }
+
     }
 
     public List<Users> getUsersByDepartmentId(Long departmentId) {
