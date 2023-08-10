@@ -1,11 +1,12 @@
 // src/redux/store.ts
 import {Action, configureStore, ThunkAction, ThunkDispatch} from '@reduxjs/toolkit';
-import userReducer from './user/userSlice';
 
 import authReducer from './authSlice';
 import tableReducer from './tableSlice';
 import chartReducer from './chartSlice';
 import tabReducer from './tabSlice';
+import subTableReducer from "./subTableSlice";
+import subTableReducer2 from "./subTableSlice2";
 import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 
 // AppThunk라는 타입을 만들어서 사용
@@ -15,8 +16,9 @@ export const store = configureStore({
     reducer: {
         auth: authReducer,
         table: tableReducer,
+        subTable: subTableReducer,
+        subTable2: subTableReducer2,
         chart: chartReducer,
-        user: userReducer,
         tab: tabReducer,
     },
 });

@@ -1,5 +1,6 @@
+// tableSlice.ts
 import { createAsyncThunk, createSlice, PayloadAction, SerializedError } from '@reduxjs/toolkit';
-import axios from '../axiosConfig';
+import axios from './axiosConfig';
 
 // 서버로부터 테이블 데이터를 가져오는 비동기 액션
 export const fetchTableData = createAsyncThunk('table/fetchData', async (apiUrl: string) => {
@@ -10,6 +11,7 @@ export const fetchTableData = createAsyncThunk('table/fetchData', async (apiUrl:
 // 서버에 테이블 데이터를 추가하는 비동기 액션
 export const addTableData = createAsyncThunk('table/addData',
     async ({apiUrl, data}: {apiUrl: string, data: any[]}) => {
+        console.log(data);
         const response = await axios.post(apiUrl, data);
         return response.data;
     });
@@ -45,7 +47,7 @@ const initialState: TableState = {
 };
 
 // 슬라이스 생성
-export const userSlice = createSlice({
+export const subTableSlice2 = createSlice({
     name: 'table',
     initialState,
     reducers: {},
@@ -99,4 +101,4 @@ export const userSlice = createSlice({
     }
 });
 
-export default userSlice.reducer;
+export default subTableSlice2.reducer;

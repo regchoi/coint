@@ -18,7 +18,10 @@ interface Data {
         departmentName: string
     }[] | [];
     email: string;
-    usergroup: string;
+    getUserUserGroupsResList: {
+        idNum: number,
+        usergroupName: string
+    }[] | [];
     phone: string;
     regDate: string;
     regUserid: string;
@@ -35,7 +38,10 @@ const createData = (
         departmentName: string
     }[] | [],
     email: string,
-    usergroup: string,
+    getUserUserGroupsResList: {
+        idNum: number,
+        usergroupName: string
+    }[] | [],
     phone: string,
     regDate: string,
     regUserid: string,
@@ -47,7 +53,7 @@ const createData = (
         position,
         getUserDepartmentResList,
         email,
-        usergroup,
+        getUserUserGroupsResList,
         phone,
         regDate,
         regUserid,
@@ -68,7 +74,7 @@ const headCells: readonly HeadCell[] = [
     {id: 'position', numeric: false, disablePadding: false, label: '직급'},
     {id: 'getUserDepartmentResList', numeric: false, disablePadding: false, label: '부서'},
     {id: 'email', numeric: false, disablePadding: false, label: '이메일'},
-    {id: 'usergroup', numeric: false, disablePadding: false, label: '사용자 그룹'},
+    {id: 'getUserDepartmentResList', numeric: false, disablePadding: false, label: '사용자 그룹'},
     {id: 'phone', numeric: false, disablePadding: false, label: '전화번호'},
     {id: 'regDate', numeric: false, disablePadding: false, label: '등록일'},
     {id: 'regUserid', numeric: false, disablePadding: false, label: '등록자'},

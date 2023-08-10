@@ -13,13 +13,13 @@ import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import Row from "./Row";
 import useTable from "./useTable";
 import {useEffect, useState} from "react";
-import {addTableData, deleteTableData, fetchTableData, updateTableData} from "../../../../redux/subTableSlice";
+import {addTableData, deleteTableData, fetchTableData, updateTableData} from "../../../../redux/subTableSlice2";
 import {AppDispatch, useAppDispatch, useAppSelector} from "../../../../redux/store";
 import EditableRow from "./EditableRow";
 import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
 import ErrorModal from "../../../common/ErrorModal";
 
-export default function UserTable() {
+export default function DepartmentTable() {
     const dispatch = useAppDispatch();
     const [added, setAdded] = useState([] as Data[]);
     const [addId, setAddId] = useState(2147483647);
@@ -29,7 +29,7 @@ export default function UserTable() {
     // 에러 확인 Modal 상태 관리
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
 
-    const { data, loading, error } = useAppSelector(state => state.subTable);
+    const { data, loading, error } = useAppSelector(state => state.subTable2);
 
     // table data를 가져오는 hook
     useEffect(() => {

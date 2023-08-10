@@ -2,6 +2,9 @@ import { Button, Modal, Box, TextField, Typography, Table, TableBody } from "@mu
 import { createData, Data } from "./data";
 import { useState } from "react";
 import UserTable from "./UserTable";
+import DepartmentTable from "./DepartmentTable";
+import SaveIcon from "@mui/icons-material/Save";
+import * as React from "react";
 
 interface ModalProps {
     open: boolean;
@@ -74,7 +77,11 @@ export default function AddModal({ open, onClose, onSave }: ModalProps) {
                     onChange={handleInputChange}
                     fullWidth
                     sx={{ mt: 3 }}
+                    InputProps={{
+                        style: { fontSize: '14px', backgroundColor: 'transparent' }
+                    }}
                     InputLabelProps={{
+                        style: { fontSize: '14px' },
                         shrink: true,
                     }}
                 />
@@ -86,40 +93,42 @@ export default function AddModal({ open, onClose, onSave }: ModalProps) {
                     value={data.endDate}
                     onChange={handleInputChange}
                     fullWidth
-                    sx={{ mt: 3 }}
+                    sx={{ mt: 3, mb: 1 }}
+                    InputProps={{
+                        style: { fontSize: '14px', backgroundColor: 'transparent' }
+                    }}
                     InputLabelProps={{
+                        style: { fontSize: '14px' },
                         shrink: true,
                     }}
                 />
 
-                <Typography variant="subtitle1" sx={{ mt: 3 }}>
-                    프로젝트 참여자
-                </Typography>
+                {/*프로젝트 참여자*/}
                 <UserTable />
 
-
-                <Typography variant="subtitle1" sx={{ mt: 3 }}>
-                    프로젝트 담당부서
-                </Typography>
-                <Table>
-                    <TableBody>
-                        {/* Later, add table rows for departments here */}
-                    </TableBody>
-                </Table>
+                {/*프로젝트 참여부서*/}
+                <DepartmentTable />
 
                 <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button onClick={onClose} color="primary" sx={{ mr: 2 }}>
-                        Cancel
-                    </Button>
                     <Button
-                        onClick={() => {
-                            onSave(data);
-                            onClose();
-                        }}
                         variant="contained"
-                        color="primary"
+                        sx={{
+                            marginLeft: '10px',
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            height: '35px',
+                            backgroundColor: 'rgb(40, 49, 66)',
+                            boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                            textTransform: 'none',
+                            minWidth: '75px',
+                            padding: '0 12px',
+                            '&:hover': {
+                                textDecoration: 'none',
+                                backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                            },
+                        }}
                     >
-                        Save
+                        저장
                     </Button>
                 </Box>
             </Box>
