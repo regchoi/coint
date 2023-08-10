@@ -1,0 +1,25 @@
+/* 나타날 때: 왼쪽에서 시작 */
+.fade-enter {
+    opacity: 0;
+    transform: translateX(-50px);
+}
+
+/* 나타날 때: 원래 위치로 전환 */
+.fade-enter-active {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+    transition: opacity 1000ms, transform 1000ms;
+}
+
+/* 사라질 때: 원래 위치에서 시작 */
+.fade-exit {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+}
+
+/* 사라질 때: 오른쪽으로 전환 */
+.fade-exit-active {
+    opacity: 0;
+    transform: scale(0.9) translateX(50px);
+    transition: opacity 1000ms, transform 1000ms;
+}

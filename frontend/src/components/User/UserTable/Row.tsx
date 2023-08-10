@@ -50,6 +50,23 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                     fontSize: "12px",
                 }} align="center" key={key}></TableCell>;
             }
+            {
+                if (key === 'department') {
+                    return (
+                        <TableCell
+                            sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "0px 10px",
+                                fontSize: "12px",
+                            }}
+                            align="center"
+                            key={key}
+                        >
+                            {row[key]}
+                        </TableCell>
+                    );
+                }
+            }
             if (key === 'regDate') {
                 return <TableCell sx={{
                     border: "1px solid rgba(0, 0, 0, 0.12)",

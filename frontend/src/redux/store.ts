@@ -5,6 +5,7 @@ import userReducer from './user/userSlice';
 import authReducer from './authSlice';
 import tableReducer from './tableSlice';
 import chartReducer from './chartSlice';
+import tabReducer from './tabSlice';
 import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 
 // AppThunk라는 타입을 만들어서 사용
@@ -16,6 +17,7 @@ export const store = configureStore({
         table: tableReducer,
         chart: chartReducer,
         user: userReducer,
+        tab: tabReducer,
     },
 });
 

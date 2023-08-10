@@ -11,7 +11,7 @@ interface Data {
     loginId: string;
     name: string;
     position: string;
-    department: string;
+    department: any[];
     email: string;
     usergroup: string;
     phone: string;
@@ -25,7 +25,7 @@ const createData = (
     loginId: string,
     name: string,
     position: string,
-    department: string,
+    department: any[],
     email: string,
     usergroup: string,
     phone: string,

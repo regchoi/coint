@@ -5,6 +5,8 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import * as React from 'react';
+import {useAppDispatch} from "../../../redux/store";
+import {addOrActivateTab} from "../../../redux/tabSlice";
 
 interface SidebarItemProps {
     title: string;
@@ -16,6 +18,17 @@ interface SidebarItemProps {
 }
 
 const SidebarItem = ({title, icon, open, items, itemLink, onClick}: SidebarItemProps) => {
+    const dispatch = useAppDispatch();
+
+    const handleItemClick = (itemName: string, itemPath: string) => {
+        // Redux에 탭 정보 업데이트
+        dispatch(addOrActivateTab({
+            name: itemName,
+            path: itemPath,
+            active: true
+        }));
+    }
+
     return (
         <React.Fragment>
             <ListItem button onClick={onClick}  sx={{ color: '#c8c8c8'}}>
@@ -26,7 +39,12 @@ const SidebarItem = ({title, icon, open, items, itemLink, onClick}: SidebarItemP
             <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                     {items.map((item, idx) => (
-                        <ListItem button component={Link} to={`${itemLink[idx]}`}>
+                        <ListItem
+                            button
+                            component={Link}
+                            to={`${itemLink[idx]}`}
+                            onClick={() => handleItemClick(item, itemLink[idx])}
+                        >
                             <ListItemIcon style={{minWidth: '40px'}}>&nbsp;</ListItemIcon>
                             <ListItemText primary={item}  sx={{
                                 color: '#c8c8c8',
