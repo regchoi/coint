@@ -134,8 +134,7 @@ export default function UserTable() {
             // 서버에 추가할 데이터 전송
             // added배열이 비어있다면, 아무것도 전송하지 않습니다.
             if(added.length > 0) {
-                // await dispatch(addTableData({apiUrl: API_LINK, data: added}));
-                console.log(added);
+                await dispatch(addTableData({apiUrl: API_LINK, data: added}));
             }
             // 서버 응답을 받은 후에 added 상태 초기화
             setAdded([]);

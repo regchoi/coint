@@ -94,7 +94,6 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
             </TableCell>
 
             {(Object.keys(editedRow) as Array<keyof Data>).map(key => {
-                console.log(key);
                 // TODO: add user_id, 권한 동적 할당
                 if (key === 'idNum') {
                     return (
