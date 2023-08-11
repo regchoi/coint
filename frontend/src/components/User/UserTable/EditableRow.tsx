@@ -25,8 +25,8 @@ type EditableRowProps = {
 const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onState}) => {
     const [editedRow, setEditedRow] = useState<Data>({
         ...row,
-        getUserDepartmentResList: row.getUserDepartmentResList.length ? row.getUserDepartmentResList : [{ idNum: 0, departmentName: "" }],
-        getUserUserGroupsResList: row.getUserUserGroupsResList.length ? row.getUserUserGroupsResList : [{ idNum: 0, usergroupName: "" }]});
+        getUserDepartmentResList: row.getUserDepartmentResList.length ? row.getUserDepartmentResList : [{ userDepartmentIdNum: 0, departmentIdNum: 0, departmentName: "" }],
+        getUserUserGroupsResList: row.getUserUserGroupsResList.length ? row.getUserUserGroupsResList : [{ userUserGroupIdNum: 0, usergroupIdNum: 0, usergroupName: "" }]});
     const [departments, setDepartments] = useState<Department[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
 
@@ -125,7 +125,8 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                                             const selectedDeptId = event.target.value;
                                             const updatedDepartments = [...editedRow[key]];
                                             updatedDepartments[index] = {
-                                                idNum: selectedDeptId,
+                                                ...dept,
+                                                departmentIdNum: selectedDeptId,
                                                 departmentName: departments.find(d => d.idNum === selectedDeptId)?.departmentName || ''
                                             };
 
@@ -178,7 +179,8 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                                             const selectedDeptId = event.target.value;
                                             const updatedUserGroups = [...editedRow[key]];
                                             updatedUserGroups[index] = {
-                                                idNum: selectedDeptId,
+                                                ...dept,
+                                                userIdNum:selectedDeptId,
                                                 usergroupName: userGroups.find(d => d.idNum === selectedDeptId)?.usergroupName || ''
                                             };
 

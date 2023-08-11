@@ -60,28 +60,28 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 </Typography>
             ) : (
                 <Typography
-                    sx={{flex: '1 1 100%', fontWeight: 'bold', fontSize: '13px', color: 'black'}}
+                    sx={{flex: '1 1 100%', fontWeight: 'bold', fontSize: '13px', color: 'black', marginLeft: '10px'}}
                     variant="h6"
                     id="tableTitle"
                     component="div"
                 >
-                    <span style={{fontWeight: 'normal', color: 'rgb(164, 169, 182)'}} ></span>{tableName}
+                    <span style={{fontWeight: 'normal', color: 'rgb(164, 169, 182)'}} >프로젝트관리 &gt; </span>{tableName}
                 </Typography>
             )}
-            <Button variant="contained"
-                    startIcon={<SaveIcon style={{ color: 'rgb(81, 128, 253)', marginRight: '2px', fontSize: '15px' }} />}
-                    sx={{ ...commonButtonStyles }}
-                    onClick={onSave}
-            >
-                저장
-            </Button>
             <Stack direction="row" spacing={1}>
                 <Button variant="contained"
-                        startIcon={<AddIcon style={{ color: 'rgb(23, 210, 23)', marginRight: '2px', fontSize: '15px' }} />}
+                        startIcon={<SaveIcon style={{ color: 'rgb(81, 128, 253)', marginRight: '2px', fontSize: '15px' }} />}
                         sx={{ ...commonButtonStyles }}
+                        onClick={onSave}
+                >
+                    저장
+                </Button>
+                <Button variant="contained"
+                        startIcon={<AddIcon style={{ color: 'rgb(23, 210, 23)', marginRight: '2px', fontSize: '15px' }} />}
+                        sx={{ ...commonButtonStyles, width: '100px' }}
                         onClick={onAdd}
                 >
-                    추가
+                    신규등록
                 </Button>
                 <Button variant="contained"
                         startIcon={<EditIcon style={{ color: 'gray', marginRight: '2px', fontSize: '15px' }} />}
