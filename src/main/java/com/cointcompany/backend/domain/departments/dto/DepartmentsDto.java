@@ -1,5 +1,6 @@
 package com.cointcompany.backend.domain.departments.dto;
 
+import com.cointcompany.backend.domain.departments.entity.Departments;
 import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,24 +20,21 @@ public class DepartmentsDto {
 
         private String regDate;
 
-        private String regUserId;
+        private String regUserid;
 
         private String modDate;
 
-        private String modUserId;
+        private String modUserid;
 
-        public GetDepartmentsRes (
-                Long idNum, String departmentName, String description,
-                String regDate, String regUserId, String modDate, String modUserId
-                ) {
+        public GetDepartmentsRes (Departments departments) {
 
-            this.idNum = idNum;
-            this.departmentName = departmentName;
-            this.description = description;
-            this.regDate = regDate;
-            this.regUserId = regUserId;
-            this.modDate = modDate;
-            this.modUserId = modUserId;
+            this.idNum = departments.getIdNum();
+            this.departmentName = departments.getDepartmentName();
+            this.description = departments.getDescription();
+            this.regDate = String.valueOf(departments.getRegDate());
+            this.regUserid = String.valueOf(departments.getRegUserid());
+            this.modDate = String.valueOf(departments.getModDate());
+            this.modUserid = String.valueOf(departments.getModUserid());
 
         }
     }
@@ -44,13 +42,16 @@ public class DepartmentsDto {
     @NoArgsConstructor
     @Data
     public static class GetUserDepartmentRes {
-        private Long idNum;
+        private Long userDepartmentIdNum;
+
+        private Long departmentIdNum;
 
         private String departmentName;
 
-        public GetUserDepartmentRes(Long idNum, String departmentName) {
-            this.idNum = idNum;
-            this.departmentName = departmentName;
+        public GetUserDepartmentRes(Long userDepartmentIdNum, Departments departments) {
+            this.userDepartmentIdNum = userDepartmentIdNum;
+            this.departmentIdNum = departments.getIdNum();
+            this.departmentName = departments.getDepartmentName();
         }
     }
 

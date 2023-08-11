@@ -5,6 +5,7 @@ import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import com.cointcompany.backend.domain.usergroups.repository.UserGroupsRepository;
 import com.cointcompany.backend.domain.users.dto.UsersDto;
 import com.cointcompany.backend.domain.users.entity.Users;
+import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class UserGroupsService {
 
     private final UserGroupsRepository userGroupsRepository;
+    private final UsersRepository usersRepository;
     private final ModelMapper mapper;
 
     @Transactional
@@ -33,11 +35,19 @@ public class UserGroupsService {
     @Transactional(readOnly = true)
     public List<UserGroupsDto.GetUserGroupsRes> findAllUserGroupsToGetUserGroupsRes() {
 
-        List<Usergroups> usersList = userGroupsRepository.findAll();
-        List<UserGroupsDto.GetUserGroupsRes> usersResList = usersList.stream()
-                .map(usergroups -> mapper.map(usergroups, UserGroupsDto.GetUserGroupsRes.class))
-                .collect(Collectors.toList());
+        List<Usergroups> usergroupsList = userGroupsRepository.findAll();
+        List<UserGroupsDto.GetUserGroupsRes> usersResList = new ArrayList<>();
 
+        for (Usergroups usergroups : usergroupsList) {
+            UserGroupsDto.GetUserGroupsRes getUserGroupsRes = new UserGroupsDto.GetUserGroupsRes(usergroups);
+            if (usergroups.getModUserid() != null) {
+                getUserGroupsRes.setModUserid(usersRepository.findById(usergroups.getModUserid()).orElseThrow().getName());
+            }
+            if (usergroups.getRegUserid() != null) {
+                getUserGroupsRes.setRegUserid(usersRepository.findById(usergroups.getRegUserid()).orElseThrow().getName());
+            }
+            usersResList.add(getUserGroupsRes);
+        }
         return usersResList;
     }
 
