@@ -1,16 +1,18 @@
 package com.cointcompany.backend.domain.departments.service;
 
-import com.cointcompany.backend.common.config.security.jwt.security.UserDetailsImpl;
 import com.cointcompany.backend.domain.departments.dto.DepartmentsDto;
-import com.cointcompany.backend.domain.departments.repository.DepartmentsRepository;
 import com.cointcompany.backend.domain.departments.entity.Departments;
+import com.cointcompany.backend.domain.departments.repository.DepartmentsRepository;
 import com.cointcompany.backend.domain.usergroups.dto.UserGroupsDto;
+import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
+import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class DepartmentsService {
 
     private final DepartmentsRepository departmentsRepository;
+    private final UsersRepository usersRepository;
     private final ModelMapper mapper;
 
     @Transactional
@@ -27,17 +30,25 @@ public class DepartmentsService {
         departmentsRepository.save(departments);
         return "SUCCESS";
     }
-//Todo 사용자가 속해있는 부서만 전송
     @Transactional(readOnly = true)
     public List<DepartmentsDto.GetDepartmentsRes> findAllDepartmentsToGetDepartmentsRes() {
 
         List<Departments> departmentsList = departmentsRepository.findAll();
+        List<DepartmentsDto.GetDepartmentsRes> getDepartmentsResList = new ArrayList<>();
 
-        List<DepartmentsDto.GetDepartmentsRes> departmentsResListResList = departmentsList.stream()
-                .map(departments -> mapper.map(departments, DepartmentsDto.GetDepartmentsRes.class))
-                .collect(Collectors.toList());
+        for (Departments departments : departmentsList) {
+            DepartmentsDto.GetDepartmentsRes getDepartmentsRes = new DepartmentsDto.GetDepartmentsRes(departments);
 
-        return departmentsResListResList;
+            if (departments.getModUserid() != null) {
+                getDepartmentsRes.setModUserid(usersRepository.findById(departments.getModUserid()).orElseThrow().getName());
+            }
+            if (departments.getRegUserid() != null) {
+                getDepartmentsRes.setRegUserid(usersRepository.findById(departments.getRegUserid()).orElseThrow().getName());
+            }
+            getDepartmentsResList.add(getDepartmentsRes);
+        }
+
+        return getDepartmentsResList;
 
     }
 

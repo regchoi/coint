@@ -45,34 +45,35 @@ public class UsersService {
 
     @Transactional
     public String saveUsers(UsersDto.putUsersReq putUsersDepartmentsReq) {
-        log.info("save");
-
-        Users users = Users.of(
-                putUsersDepartmentsReq.getLoginId(), putUsersDepartmentsReq.getName(),
-                putUsersDepartmentsReq.getPosition(), putUsersDepartmentsReq.getPhone(),
-                putUsersDepartmentsReq.getEmail()
-        );
-        usersRepository.save(users);
-        // 받은 데이터 중에서 부서만 따로 추출
-        List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = putUsersDepartmentsReq.getGetUserDepartmentResList();
-
-        // 부서가 있다면 진행
-        for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
-                userDepartmentRepository.save(UserDepartment.of(
-                        users,
-                        departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
-                ));
-        }
-
-        List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
-
-        for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
-                userUsergroupRepository.save(UserUsergroup.of(
-                        users,
-                        userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
-                ));
-
-        }
+//        log.info("save");
+//
+//        Users users = Users.of(
+//                putUsersDepartmentsReq.getLoginId(), putUsersDepartmentsReq.getName(),
+//                putUsersDepartmentsReq.getPosition(), putUsersDepartmentsReq.getPhone(),
+//                putUsersDepartmentsReq.getEmail()
+//        );
+//        usersRepository.save(users);
+//        // 받은 데이터 중에서 부서만 따로 추출
+//        List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = putUsersDepartmentsReq.getGetUserDepartmentResList();
+//
+//        // 부서가 있다면 진행
+//        for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
+//            Long departmentIdNum =
+//                userDepartmentRepository.save(UserDepartment.of(
+//                        users,
+//                        departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
+//                ));
+//        }
+//
+//        List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
+//
+//        for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
+//                userUsergroupRepository.save(UserUsergroup.of(
+//                        users,
+//                        userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
+//                ));
+//
+//        }
 
 
 
@@ -89,27 +90,27 @@ public class UsersService {
         List<UsersDto.GetUsersRes> usersDtoList = new ArrayList<>();
         List<Users> usersList = usersRepository.findAll();
 
-        List<UserDepartment> userDepartmentList = new ArrayList<>();
-        List<UserUsergroup> userUsergroupsList = new ArrayList<>();
+        List<UserDepartment> userDepartmentList;
+        List<UserUsergroup> userUsergroupsList;
 
         for (Users users : usersList) {
-            List<Departments> departmentsList = new ArrayList<>();
-            userDepartmentList = userDepartmentRepository.findByUsers_IdNum(users.getIdNum());
-            for (UserDepartment userDepartment : userDepartmentList) {
-                departmentsList.add(userDepartment.getDepartments());
-            }
-            List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = departmentsList.stream()
-                    .map(departments -> mapper.map(departments, DepartmentsDto.GetUserDepartmentRes.class))
-                    .collect(Collectors.toList());
 
-            List<Usergroups> usergroupsList = new ArrayList<>();
-            userUsergroupsList = userUsergroupRepository.findByUsers_IdNum(users.getIdNum());
-            for (UserUsergroup userUsergroup : userUsergroupsList) {
-                usergroupsList.add(userUsergroup.getUsergroups());
+            userDepartmentList = userDepartmentRepository.findByUsers_IdNum(users.getIdNum());
+            List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = new ArrayList<>();
+            for (UserDepartment userDepartment : userDepartmentList) {
+                DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes = new DepartmentsDto.GetUserDepartmentRes(
+                        userDepartment.getIdNum(), userDepartment.getDepartments());
+                getUserDepartmentResList.add(getUserDepartmentRes);
             }
-            List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = usergroupsList.stream()
-                    .map(userGroup -> mapper.map(userGroup, UserGroupsDto.GetUserUserGroupsRes.class))
-                    .collect(Collectors.toList());
+
+            userUsergroupsList = userUsergroupRepository.findByUsers_IdNum(users.getIdNum());
+            List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = new ArrayList<>();
+            for (UserUsergroup userUsergroup : userUsergroupsList) {
+                UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes = new UserGroupsDto.GetUserUserGroupsRes(
+                        userUsergroup.getIdNum(), userUsergroup.getUsergroups()
+                );
+                getUserUserGroupsResList.add(getUserUserGroupsRes);
+            }
 
             UsersDto.GetUsersRes usersRes = new UsersDto.GetUsersRes(users, getUserDepartmentResList, getUserUserGroupsResList);
             usersRes.setRegUserid(usersRepository.findById(users.getRegUserid()).orElseThrow().getName());
@@ -128,32 +129,33 @@ public class UsersService {
 
     @Transactional
     public void modifyUsers(UsersDto.putUsersReq putUsersDepartmentsReq) {
-        Users user = usersRepository.getReferenceById(putUsersDepartmentsReq.getIdNum());
-
-        user.setName(putUsersDepartmentsReq.getName());
-        user.setPosition(putUsersDepartmentsReq.getPosition());
-        user.setPhone(putUsersDepartmentsReq.getPhone());
-        user.setEmail(putUsersDepartmentsReq.getEmail());
-
-        List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = putUsersDepartmentsReq.getGetUserDepartmentResList();
-
-        // 부서가 있다면 진행
-        for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
-                userDepartmentRepository.save(UserDepartment.of(
-                        user,
-                        departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
-                ));
-
-        }
-
-        List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
-
-        for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
-                userUsergroupRepository.save(UserUsergroup.of(
-                        user,
-                        userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
-                ));
-        }
+//        Users user = usersRepository.getReferenceById(putUsersDepartmentsReq.getIdNum());
+//
+//        user.setName(putUsersDepartmentsReq.getName());
+//        user.setPosition(putUsersDepartmentsReq.getPosition());
+//        user.setPhone(putUsersDepartmentsReq.getPhone());
+//        user.setEmail(putUsersDepartmentsReq.getEmail());
+//
+//        List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = putUsersDepartmentsReq.getGetUserDepartmentResList();
+//
+//        // 부서가 있다면 진행
+//        for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
+//            if (userDepartmentRepository.findByDepartments_IdNumAndUsers_IdNum(getUserDepartmentRes.getIdNum(), user.getIdNum()) == null){
+//                userDepartmentRepository.save(UserDepartment.of(
+//                        user,
+//                        departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
+//                ));
+//            }
+//        }
+//
+//        List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
+//
+//        for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
+//                userUsergroupRepository.save(UserUsergroup.of(
+//                        user,
+//                        userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
+//                ));
+//        }
 
     }
 

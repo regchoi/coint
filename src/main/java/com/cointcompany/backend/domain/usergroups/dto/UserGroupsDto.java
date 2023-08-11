@@ -1,5 +1,6 @@
 package com.cointcompany.backend.domain.usergroups.dto;
 
+import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,24 +20,21 @@ public class UserGroupsDto {
 
         private String regDate;
 
-        private String regUserId;
+        private String regUserid;
 
         private String modDate;
 
-        private String modUserId;
+        private String modUserid;
 
-        public GetUserGroupsRes (
-                Long idNum, String usergroupName, String description,
-                String regDate, String regUserId, String modDate, String modUserId
-                ) {
+        public GetUserGroupsRes (Usergroups usergroups) {
 
-            this.idNum = idNum;
-            this.usergroupName = usergroupName;
-            this.description = description;
-            this.regDate = regDate;
-            this.regUserId = regUserId;
-            this.modDate = modDate;
-            this.modUserId = modUserId;
+            this.idNum = usergroups.getIdNum();
+            this.usergroupName = usergroups.getUsergroupName();
+            this.description = usergroups.getDescription();
+            this.regDate = String.valueOf(usergroups.getRegDate());
+            this.regUserid = String.valueOf(usergroups.getRegUserid());
+            this.modDate = String.valueOf(usergroups.getModDate());
+            this.modUserid = String.valueOf(usergroups.getModUserid());
 
         }
     }
@@ -44,13 +42,16 @@ public class UserGroupsDto {
     @NoArgsConstructor
     @Data
     public static class GetUserUserGroupsRes {
-        private Long idNum;
+        private Long userUsergroupIdNum;
+
+        private Long usergroupIdNum;
 
         private String usergroupName;
 
-        public GetUserUserGroupsRes(Long idNum, String usergroupName) {
-            this.idNum = idNum;
-            this.usergroupName = usergroupName;
+        public GetUserUserGroupsRes(Long userUsergroupIdNum, Usergroups usergroups) {
+            this.userUsergroupIdNum = userUsergroupIdNum;
+            this.usergroupIdNum = usergroups.getIdNum();
+            this.usergroupName = usergroups.getUsergroupName();
         }
     }
 
