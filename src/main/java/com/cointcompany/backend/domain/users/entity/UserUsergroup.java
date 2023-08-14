@@ -1,5 +1,6 @@
 package com.cointcompany.backend.domain.users.entity;
 
+import com.cointcompany.backend.domain.common.BaseEntity;
 import com.cointcompany.backend.domain.departments.entity.Departments;
 import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserUsergroup {
+public class UserUsergroup extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long idNum;

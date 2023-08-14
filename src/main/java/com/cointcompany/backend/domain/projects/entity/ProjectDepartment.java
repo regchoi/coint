@@ -1,4 +1,4 @@
-package com.cointcompany.backend.domain.users.entity;
+package com.cointcompany.backend.domain.projects.entity;
 
 import com.cointcompany.backend.domain.common.BaseEntity;
 import com.cointcompany.backend.domain.departments.entity.Departments;
@@ -11,28 +11,38 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserDepartment extends BaseEntity {
+public class ProjectDepartment extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long idNum;
 
+    private String role;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usersIdNum")
-    private Users users;
+    @JoinColumn(name = "projectsIdNum")
+    private Projects projects;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "departmentsIdNum")
     private Departments departments;
 
-    public static UserDepartment of(Users users, Departments departments) {
-        return UserDepartment.builder()
-                .users(users)
+    public static ProjectDepartment of(
+            String role, Projects projects, Departments departments
+    ) {
+        return ProjectDepartment.builder()
+                .role(role)
+                .projects(projects)
                 .departments(departments)
                 .build();
     }
+
     @Builder
-    public UserDepartment(Users users, Departments departments) {
-        this.users = users;
+    public ProjectDepartment(
+            String role, Projects projects, Departments departments
+    ) {
+        this.role = role;
+        this.projects = projects;
         this.departments = departments;
     }
 }
