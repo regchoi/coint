@@ -2,6 +2,7 @@ package com.cointcompany.backend.domain.users.entity;
 
 import com.cointcompany.backend.common.config.security.jwt.dto.AuthDto;
 import com.cointcompany.backend.domain.common.BaseEntity;
+import com.cointcompany.backend.domain.projects.entity.ProjectUser;
 import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +17,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Where(clause = "del = false")
-@SQLDelete(sql = "UPDATE Users SET del = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE Users SET del = true WHERE id_num = ?")
 public class Users extends BaseEntity {
 
     @Id
@@ -42,6 +43,9 @@ public class Users extends BaseEntity {
 
     @OneToMany(mappedBy = "users", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<UserDepartment> userDepartments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "users", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<ProjectUser> projectUsers = new ArrayList<>();
 
     public static Users of(
             String loginId, String name,

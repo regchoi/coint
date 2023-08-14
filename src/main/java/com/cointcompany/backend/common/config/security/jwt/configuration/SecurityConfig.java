@@ -56,7 +56,8 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/table").permitAll()
+                        .requestMatchers("/api/table/**").permitAll()
+                        .requestMatchers("/api/project/**").permitAll()
                         .anyRequest().authenticated())
 
                 .headers(headers -> headers
