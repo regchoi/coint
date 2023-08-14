@@ -19,6 +19,8 @@ import EditableRow from "./EditableRow";
 import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
 import ErrorModal from "../../common/ErrorModal";
 import AddModal from "./AddModal";
+import { CSSTransition } from 'react-transition-group';
+import "../../../assets/css/common/modal-transition.css";
 
 export default function ProjectPlan() {
     const dispatch = useAppDispatch();
@@ -277,13 +279,17 @@ export default function ProjectPlan() {
             {/*    label="Dense padding"*/}
             {/*/>*/}
 
-            {/*프로젝트 생성 모달*/}
-            <AddModal
-                open={isCreateModalOpen}
-                onClose={() => setCreateModalOpen(false)}
-                onSave={(data: Data) => {}}
-            />
-
+            {/*프로젝트 생성 모달 (필요한 경우에 Transition) */}
+            <CSSTransition
+                in={true}
+                appear={true}
+                timeout={300}
+                classNames="fade">
+                <AddModal
+                    open={isCreateModalOpen}
+                    onClose={() => setCreateModalOpen(false)}
+                />
+            </CSSTransition>
             {/* 삭제 확인 Modal */}
             <Modal
                 open={isDeleteModalOpen}

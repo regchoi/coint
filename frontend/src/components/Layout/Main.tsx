@@ -51,7 +51,7 @@ export default function MainContent({ open, drawerWidth }: MainProps) {
                 <CSSTransition
                     in={inProp}
                     appear={true}
-                    timeout={300}
+                    timeout={500}
                     classNames="fade"
                 >
                     <Outlet />
