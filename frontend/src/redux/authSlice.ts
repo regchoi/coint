@@ -11,8 +11,9 @@ const authAxios = axios.create({
 export const loggedIn = createAsyncThunk('auth/login', async ({id, password}: { id: string; password: string }) => {
     // response의 header에 있는 Authorization 값이 token
     // Authorization의 Bearer: token 형식으로 전달됨
-    const response = await authAxios.post('/api/auth', {email: id, password: password});
+    const response = await authAxios.post('/api/auth', {loginId: id, loginPw: password});
     const token = response.headers.authorization.split(' ')[1];
+    console.log(JSON.parse(atob(token.split('.')[1])));
     localStorage.setItem('token', token);
     return {token};
 })

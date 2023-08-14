@@ -5,6 +5,13 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Typography from '@mui/material/Typography';
 import {List} from "@mui/icons-material";
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import {SyntheticEvent, useState} from "react";
+import { useAppSelector } from '../../redux/store';
+import {RootState} from "../../redux/store";
+import {useNavigate} from "react-router-dom";
+import { useLocation } from 'react-router-dom';
 
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean;
@@ -35,9 +42,18 @@ const StyledAppBar = styled(MuiAppBar, {
 }));
 
 export default function AppBar({ open, handleDrawer, drawerWidth }: AppBarProps) {
+    const location = useLocation();
+    const currentPath = location.pathname;
+    const tabs = useAppSelector((state: RootState) => state.tab);
+    const navigate = useNavigate();
+
+    function handleTabClick(path: string) {
+        navigate(path);
+    }
+
     return (
-        <StyledAppBar position="fixed" open={open} drawerWidth={drawerWidth} sx={{backgroundColor: '#fff', color: '#000'}}>
-            <Toolbar>
+        <StyledAppBar position="fixed" open={open} drawerWidth={drawerWidth} sx={{backgroundColor: '#fff', color: '#000', height: '40px'}}>
+            <Toolbar sx={{height: '40px', minHeight: '40px !important'}}>
                 <IconButton
                     color="inherit"
                     aria-label="open drawer"
@@ -49,9 +65,23 @@ export default function AppBar({ open, handleDrawer, drawerWidth }: AppBarProps)
                         open ? <MenuIcon /> : <List />
                     }
                 </IconButton>
-                <Typography variant="h6" noWrap component="div">
-                    Persistent drawer
-                </Typography>
+
+                <Tabs value={currentPath} aria-label="simple tabs example" sx={{height: '40px', minHeight: "40px"}}>
+                    {tabs.map((tab, index) => (
+                        <Tab
+                            key={index}
+                            label={tab.name}
+                            value={tab.path}
+                            onClick={() => handleTabClick(tab.path)}
+                            sx={{
+                                height: '40px',
+                                minHeight: "40px",
+                                padding: "0 12px",
+                                "&.Mui-selected": { backgroundColor: "#f5f7fa", fontWeight: "bold" }
+                            }}
+                        />
+                    ))}
+                </Tabs>
             </Toolbar>
         </StyledAppBar>
     );

@@ -53,7 +53,7 @@ export default function LogIn() {
     useEffect(() => {
         if (isAuthenticated) {
             // TODO 로그인 성공 시 이동할 페이지
-            navigate('/sampletable');
+            navigate('/');
         }
     }, [isAuthenticated, navigate]);
 
@@ -69,7 +69,7 @@ export default function LogIn() {
         dispatch(loggedIn(credentials)).then(() => {
             if(isAuthenticated) {
                 // TODO 로그인 성공 시 이동할 페이지
-                navigate('/sampletable');
+                navigate('/');
             }
         });
     };

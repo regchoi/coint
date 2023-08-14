@@ -1,7 +1,6 @@
 // tableSlice.ts
 import { createAsyncThunk, createSlice, PayloadAction, SerializedError } from '@reduxjs/toolkit';
 import axios from './axiosConfig';
-import { Data } from '../components/SampleTable/data';
 
 // 서버로부터 테이블 데이터를 가져오는 비동기 액션
 export const fetchTableData = createAsyncThunk('table/fetchData', async (apiUrl: string) => {
@@ -11,14 +10,15 @@ export const fetchTableData = createAsyncThunk('table/fetchData', async (apiUrl:
 
 // 서버에 테이블 데이터를 추가하는 비동기 액션
 export const addTableData = createAsyncThunk('table/addData',
-    async ({apiUrl, data}: {apiUrl: string, data: Data[]}) => {
+    async ({apiUrl, data}: {apiUrl: string, data: any[]}) => {
+        console.log(data);
         const response = await axios.post(apiUrl, data);
         return response.data;
 });
 
 // 서버에 테이블 데이터를 업데이트하는 비동기 액션
 export const updateTableData = createAsyncThunk('table/updateData',
-    async ({apiUrl, data}: {apiUrl: string, data: Data[]}) => {
+    async ({apiUrl, data}: {apiUrl: string, data: any[]}) => {
         const response = await axios.put(apiUrl, data);
         return response.data;
 });
@@ -34,7 +34,7 @@ export const deleteTableData = createAsyncThunk(
 
 // 초기 상태 타입
 interface TableState {
-    data: Data[];
+    data: any[];
     loading: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: SerializedError | null;
 }
@@ -57,7 +57,7 @@ export const tableSlice = createSlice({
             .addCase(fetchTableData.pending, (state) => {
                 state.loading = 'loading';
             })
-            .addCase(fetchTableData.fulfilled, (state, action: PayloadAction<Data[]>) => {
+            .addCase(fetchTableData.fulfilled, (state, action: PayloadAction<any[]>) => {
                 state.loading = 'succeeded';
                 state.data = action.payload;
             })
@@ -69,7 +69,7 @@ export const tableSlice = createSlice({
             .addCase(addTableData.pending, (state) => {
                 state.loading = 'loading';
             })
-            .addCase(addTableData.fulfilled, (state, action: PayloadAction<Data[]>) => {
+            .addCase(addTableData.fulfilled, (state, action: PayloadAction<any[]>) => {
                 state.loading = 'succeeded';
             })
             .addCase(addTableData.rejected, (state, action: any) => {
@@ -80,7 +80,7 @@ export const tableSlice = createSlice({
             .addCase(updateTableData.pending, (state) => {
                 state.loading = 'loading';
             })
-            .addCase(updateTableData.fulfilled, (state, action: PayloadAction<Data[]>) => {
+            .addCase(updateTableData.fulfilled, (state, action: PayloadAction<any[]>) => {
                 state.loading = 'succeeded';
             })
             .addCase(updateTableData.rejected, (state, action: any) => {
@@ -91,7 +91,7 @@ export const tableSlice = createSlice({
             .addCase(deleteTableData.pending, (state) => {
                 state.loading = 'loading';
             })
-            .addCase(deleteTableData.fulfilled, (state, action: PayloadAction<Data[]>) => {
+            .addCase(deleteTableData.fulfilled, (state, action: PayloadAction<any[]>) => {
                 state.loading = 'succeeded';
             })
             .addCase(deleteTableData.rejected, (state, action: any) => {

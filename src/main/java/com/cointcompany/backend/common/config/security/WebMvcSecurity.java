@@ -21,6 +21,7 @@ public class WebMvcSecurity implements WebMvcConfigurer {
                         HttpMethod.PUT.name(),
                         HttpMethod.DELETE.name(),
                         HttpMethod.PATCH.name())
+                .exposedHeaders("Authorization")
                 .allowCredentials(false)
                 .maxAge(3600);
     }
