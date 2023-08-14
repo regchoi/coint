@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Where(clause = "del = false")
-@SQLDelete(sql = "UPDATE Usergroups SET del = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE Usergroups SET del = true WHERE id_num = ?")
 public class Usergroups extends BaseEntity {
 
     @Id
