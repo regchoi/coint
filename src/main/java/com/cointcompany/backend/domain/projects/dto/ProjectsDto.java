@@ -41,19 +41,12 @@ public class ProjectsDto {
     @Data
     public static class GetProjectRes {
         private Long idNum;
-
         private String projectName;
-
         private String description;
-
         private String startDate;
-
         private String endDate;
-
         private String status;
-
         private String regDate;
-
         private String regUserid;
 
         public GetProjectRes (Projects projects) {
@@ -67,6 +60,16 @@ public class ProjectsDto {
             this.regDate = String.valueOf(projects.getRegDate());
             this.regUserid = String.valueOf(projects.getRegUserid());
 
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class ProjectTaskDto {
+        private String projectName;
+
+        public ProjectTaskDto (Projects projects) {
+            this.projectName = projects.getProjectName();
         }
     }
 

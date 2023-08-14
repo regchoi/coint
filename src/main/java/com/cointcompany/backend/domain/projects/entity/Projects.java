@@ -1,6 +1,7 @@
 package com.cointcompany.backend.domain.projects.entity;
 
 import com.cointcompany.backend.domain.common.BaseEntity;
+import com.cointcompany.backend.domain.tasks.entity.Tasks;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -36,6 +37,9 @@ public class Projects extends BaseEntity {
     private boolean del = Boolean.FALSE;
 
     @OneToMany(mappedBy = "projects", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Tasks> tasksList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "projects", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<ProjectDepartment> projectsDepartments = new ArrayList<>();
 
     @OneToMany(mappedBy = "projects", orphanRemoval = true, cascade = CascadeType.ALL)
@@ -67,6 +71,5 @@ public class Projects extends BaseEntity {
         this.status = status;
         this.del = del;
     }
-
 
 }

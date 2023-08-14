@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/table/**").permitAll()
                         .requestMatchers("/api/project/**").permitAll()
+                        .requestMatchers("/api/task/**").permitAll()
                         .anyRequest().authenticated())
 
                 .headers(headers -> headers
