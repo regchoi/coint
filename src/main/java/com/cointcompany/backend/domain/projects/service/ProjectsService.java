@@ -35,11 +35,6 @@ public class ProjectsService {
     public List<ProjectsDto.GetProjectRes> getProjects(Long userId) {
 
         List<ProjectUser> projectUserList = projectUserRepository.findProjectUserByUsers_IdNum(userId);
-        for (ProjectUser projectUser : projectUserList) {
-            log.info("userID = {}", projectUser.getUsers().getIdNum());
-            log.info("projectID = {}", projectUser.getProjects().getIdNum());
-        }
-
         List<ProjectsDto.GetProjectRes> getProjectResList = new ArrayList<>();
 
         for (ProjectUser projectUser : projectUserList) {
@@ -88,16 +83,15 @@ public class ProjectsService {
     public void modifyProjects (Projects getProjectRes) {
 
         Projects projects = projectsRepository.findById(getProjectRes.getIdNum()).orElseThrow();
-        projects.setProjectName(projects.getProjectName());
-        projects.setDescription(projects.getDescription());
-        projects.setStartDate(projects.getStartDate());
-        projects.setEndDate(projects.getEndDate());
-        projects.setStatus(projects.getStatus());
+        projects.setProjectName(getProjectRes.getProjectName());
+        projects.setDescription(getProjectRes.getDescription());
+        projects.setStartDate(getProjectRes.getStartDate());
+        projects.setEndDate(getProjectRes.getEndDate());
+        projects.setStatus(getProjectRes.getStatus());
 
     }
     @Transactional
     public void deleteProjects (Long projectId) {
-        Projects projects = projectsRepository.findById(projectId).orElseThrow();
 
         projectsRepository.deleteById(projectId);
 
