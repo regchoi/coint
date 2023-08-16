@@ -3,8 +3,6 @@ package com.cointcompany.backend.domain.usergroups.service;
 import com.cointcompany.backend.domain.usergroups.dto.UserGroupsDto;
 import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import com.cointcompany.backend.domain.usergroups.repository.UserGroupsRepository;
-import com.cointcompany.backend.domain.users.dto.UsersDto;
-import com.cointcompany.backend.domain.users.entity.Users;
 import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor

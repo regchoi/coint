@@ -1,16 +1,10 @@
 package com.cointcompany.backend.common.config;
 
 import com.cointcompany.backend.common.config.security.jwt.security.UserDetailsImpl;
-import com.cointcompany.backend.domain.users.entity.Users;
-import com.cointcompany.backend.domain.users.repository.UsersRepository;
-import com.nimbusds.oauth2.sdk.util.JWTClaimsSetUtils;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
