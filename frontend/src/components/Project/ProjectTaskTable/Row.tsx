@@ -18,10 +18,6 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
 
     const navigate = useNavigate();
 
-    const handleRedirect = (idNum: number) => {
-        navigate(`/project/task/${idNum}`);
-    };
-
     return (
         <TableRow
             hover
@@ -69,8 +65,8 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                 }
 
                 const handleRedirect = (idNum: number) => {
-                    navigate(`/project/task/${idNum}`);
-                }
+                    alert('TODO: Modal창으로 프로젝트 상세 정보 보여주기');
+                };
 
                 if (key === 'detail') {
                     return (
@@ -80,7 +76,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                             fontSize: "12px",
                             width: "120px"
                         }} align="center" key={key}>
-                            <IconButton onClick={() => handleRedirect(row.idNum)}>  {/* 아이콘 버튼에 클릭 이벤트 연결 */}
+                            <IconButton onClick={() => handleRedirect}>  {/* 아이콘 버튼에 클릭 이벤트 연결 */}
                                 <SearchIcon/>
                             </IconButton>
                         </TableCell>

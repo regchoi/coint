@@ -7,47 +7,54 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import {createData, Data, tableName, API_LINK, headCells} from "./data";
+import {createData, Data, DepartmentData, tableName, API_LINK, headCells} from "./data";
 import EnhancedTableHead from "./EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import Row from "./Row";
 import useTable from "./useTable";
 import {useEffect, useState} from "react";
-import {addTableData, deleteTableData, fetchTableData, updateTableData} from "../../../../redux/subTableSlice2";
 import {AppDispatch, useAppDispatch, useAppSelector} from "../../../../redux/store";
 import EditableRow from "./EditableRow";
-import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
+import {Button, IconButton, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
 import ErrorModal from "../../../common/ErrorModal";
+import AddDepartmentTable from "./AddDepartmentTable";
+import CloseIcon from "@mui/icons-material/Close";
+import ProjectContext from "../ProjectContext";
+
+const DepartmentType = (departmentData: DepartmentData[]): Data[] => {
+    return departmentData && departmentData.map((dept) => {
+        return {
+            idNum: dept.idNum,
+            departmentName: dept.departmentName,
+            role: dept.role,
+        }
+    });
+}
 
 export default function DepartmentTable() {
     const dispatch = useAppDispatch();
     const [added, setAdded] = useState([] as Data[]);
     const [addId, setAddId] = useState(2147483647);
     const [updated, setUpdated] = useState([] as Data[]);
+    // 사용자 추가 Modal 상태 관리
+    const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
     // 삭제 확인 Modal 상태 관리
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     // 에러 확인 Modal 상태 관리
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
 
-    const { data, loading, error } = useAppSelector(state => state.subTable2);
-
-    // table data를 가져오는 hook
-    useEffect(() => {
-        dispatch(fetchTableData(API_LINK));
-    }, [dispatch]);
-
-    // 요청 실패 시 에러 처리
-    // error가 undefined일 수 있음
-    useEffect(() => {
-        if (error) {
-            setErrorModalOpen(true);
-        }
-    }, [error]);
-
-    // Error Modal 닫기
-    const handleCloseErrorModal = () => {
-        setErrorModalOpen(false);
+    const context = React.useContext(ProjectContext);
+    if (!context) {
+        throw new Error("Cannot find ProjectProvider");
     }
+    const { departmentsList, setDepartmentsList } = context;
+    const transformedUsersList = DepartmentType(departmentsList);
+    const [localUsersList, setLocalUsersList] = useState(transformedUsersList);
+
+    useEffect(() => {
+        const transformedUsers = DepartmentType(departmentsList);
+        setLocalUsersList(transformedUsers);
+    }, [departmentsList]);
 
     // selected 해제를 위한 함수
     const dummyEvent = {
@@ -59,21 +66,20 @@ export default function DepartmentTable() {
 
     // added data를 추가하는 함수
     const handleAdd = () => {
+        handleOpenAddUserModal();
     }
     // added data의 각 항목을 변경하는 함수
     const handleAddRowChange = (updatedRow: Data) => {
-        setAdded(updatedRows => {
-            const existingRow = updatedRows.find(row => row.idNum === updatedRow.idNum);
-            if (existingRow) {
-                return updatedRows.map(row => row.idNum === updatedRow.idNum ? updatedRow : row);
-            } else {
-                return [...updatedRows, {...updatedRow, idNum: addId}];
-            }
-        });
-        setAddId(addId + 1);  // addId 값을 증가시킵니다.
     };
 
-
+    // 사용자 추가 Modal 열기
+    const handleOpenAddUserModal = () => {
+        setIsAddUserModalOpen(true);
+    };
+    // 사용자 추가 Modal 닫기
+    const handleCloseAddUseModal = () => {
+        setIsAddUserModalOpen(false);
+    };
     // 삭제 확인 Modal 열기
     const handleOpenDeleteModal = () => {
         setDeleteModalOpen(true);
@@ -84,72 +90,9 @@ export default function DepartmentTable() {
     };
     // 선택된 항목들을 삭제하는 함수
     const handleDelete = async () => {
-        try {
-            // selected 배열에 있는 id_num들을 추출합니다.
-            const selectedForDeletion = data.filter(row => selected.includes(row.idNum)).map(row => row.idNum);
-
-            // 서버에 삭제할 데이터 전송
-            await dispatch(deleteTableData({ apiUrl: API_LINK, ids: selectedForDeletion }));
-
-            // 삭제 완료 후에 selected 상태 초기화
-            handleSelectAllClick(dummyEvent); // dummyEvent를 통해 selected 상태 초기화
-
-            // 삭제 확인 Modal 닫기
-            handleCloseDeleteModal();
-
-            // 서버의 데이터를 다시 불러오기
-            dispatch(fetchTableData(API_LINK));
-        } catch (error) {
-            // 에러 처리
-            console.error('Error while deleting data:', error);
-        }
     };
-
-    // selected 항목들을 updated 상태로 이동시키는 함수
-    const handleUpdate = () => {
-        const selectedRows = data.filter(row => selected.includes(row.idNum));
-        setUpdated([...updated, ...selectedRows]);
-        // 이동한 항목들은 selected에서 제거
-        handleSelectAllClick(dummyEvent); // dummyEvent를 통해 selected 상태 초기화
-    };
-
     // updated data의 각 항목을 변경하는 함수
     const handleUpdateRowChange = (updatedRow: Data) => {
-        setUpdated(updatedRows => {
-            const existingRow = updatedRows.find(row => row.idNum === updatedRow.idNum);
-            if (existingRow) {
-                return updatedRows.map(row => row.idNum === updatedRow.idNum ? updatedRow : row);
-            } else {
-                return [...updatedRows, updatedRow];
-            }
-        });
-    }
-
-    // save 버튼을 누르면 일괄적으로 정보를 저장하는 함수
-    const handleSave = async () => {
-        try {
-            // 서버에 추가할 데이터 전송
-            // added배열이 비어있다면, 아무것도 전송하지 않습니다.
-            if(added.length > 0) {
-                await dispatch(addTableData({apiUrl: API_LINK, data: added}));
-            }
-            // 서버 응답을 받은 후에 added 상태 초기화
-            setAdded([]);
-
-            // 서버에 업데이트할 데이터 전송
-            // updated배열이 비어있다면, 아무것도 전송하지 않습니다.
-            if(updated.length > 0) {
-                await dispatch(updateTableData({apiUrl: API_LINK, data: updated}));
-            }
-            // 서버 응답을 받은 후에 updated 상태 초기화
-            setUpdated([]);
-
-            // table 데이터 가져오기
-            dispatch(fetchTableData(API_LINK));
-        } catch (error) {
-            // 에러 처리
-            console.error('Error while saving data:', error);
-        }
     }
 
     // table 관련 hook들을 관리하는 커스텀 hook
@@ -172,7 +115,7 @@ export default function DepartmentTable() {
         initialOrderBy: 'idNum',
         initialOrder: 'asc',
         initialRowsPerPage: 5,
-        rowsData: data,
+        rowsData: localUsersList,
     });
 
     return (
@@ -182,9 +125,6 @@ export default function DepartmentTable() {
                     numSelected={selected.length}
                     tableName={tableName}
                     onAdd={handleAdd}
-                    onUpdate={handleUpdate}
-                    onSave={handleSave}
-                    onDelete={handleOpenDeleteModal}    // 삭제 버튼 클릭 시, 삭제 확인 Modal 열기
                 />
                 <TableContainer sx={{borderRadius: '3px'}}>
                     <Table
@@ -198,7 +138,7 @@ export default function DepartmentTable() {
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
                             onRequestSort={handleRequestSort}
-                            rowCount={data.length}
+                            rowCount={localUsersList.length}
                         />
                         <TableBody>
                             {visibleRows.map((row, index) => {
@@ -259,7 +199,7 @@ export default function DepartmentTable() {
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={data.length}
+                    count={localUsersList.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
@@ -271,6 +211,51 @@ export default function DepartmentTable() {
             {/*    control={<Switch checked={dense} onChange={handleChangeDense}/>}*/}
             {/*    label="Dense padding"*/}
             {/*/>*/}
+
+            {/* 사용자 추가 Modal */}
+            <Modal
+                open={isAddUserModalOpen}
+                onClose={handleOpenAddUserModal}
+                aria-labelledby="delete-modal-title"
+                aria-describedby="delete-modal-description"
+            >
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    p: 4,
+                    minWidth: 300,
+                    minHeight: '50vh',
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
+                    borderRadius: '10px',
+                }}>
+                    <Typography variant="h6"
+                                component={"div"}
+                                sx={{
+                                    borderBottom: '2px solid #f0f0f0',
+                                    pb: 2,
+                                    mb: 2,
+                                    fontSize: '18px',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                    <span>
+                    업무 부서관리
+                    </span>
+                        <IconButton onClick={handleCloseAddUseModal} size="small" sx={{ padding: '0' }}>
+                            <CloseIcon />
+                        </IconButton>
+                    </Typography>
+
+                    <AddDepartmentTable onClose={handleCloseAddUseModal} />
+                </Box>
+            </Modal>
 
             {/* 삭제 확인 Modal */}
             <Modal
@@ -313,7 +298,7 @@ export default function DepartmentTable() {
                 open={isErrorModalOpen}
                 onClose={() => setErrorModalOpen(false)}
                 title="요청 실패"
-                description={error?.message || ""}
+                description={"요청에 실패하였습니다. 다시 시도해주세요."}
             />
 
         </Box>

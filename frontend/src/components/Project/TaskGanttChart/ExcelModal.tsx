@@ -8,23 +8,24 @@ import {
     TableBody,
     IconButton,
     Grid,
-    TextareaAutosize
+    TextareaAutosize, InputLabel, FormControl, Select, MenuItem
 } from "@mui/material";
-import { useState } from "react";
-import UserTable from "./UserTable";
-import DepartmentTable from "./DepartmentTable";
+import {useEffect, useState} from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import * as React from "react";
 import axios from "../../../redux/axiosConfig";
 import ErrorModal from "../../common/ErrorModal";
 import SuccessModal from "../../common/SuccessModal";
-import ProjectContext from './ProjectContext';
 import {fetchTableData} from "../../../redux/tableSlice";
-import {API_LINK} from "./data";
 import {AppDispatch, useAppDispatch, useAppSelector} from "../../../redux/store";
 
-type Data = {
+type ProjectResponse = {
+    idNum: number;
     projectName: string;
+}
+
+type Data = {
+    taskName: string;
     description: string;
     startDate: string;
     endDate: string;
@@ -50,8 +51,14 @@ interface ModalProps {
     onClose: () => void;
 }
 
-export default function AddModal({ open, onClose }: ModalProps) {
+const API_LINK = '/api/task';
+
+export default function ExcelModal({ open, onClose }: ModalProps) {
+
     const dispatch = useAppDispatch();
+    const [projects, setProjects] = useState<ProjectResponse[]>([]);
+    const [selectProject, setSelectProject] = useState<ProjectResponse | null>(null);
+
     // Modal의 페이지네이션 구현
     const [page, setPage] = useState(1);
     const [data, setData] = useState<Data>({} as Data);
@@ -62,7 +69,23 @@ export default function AddModal({ open, onClose }: ModalProps) {
     const [usersList, setUsersList] = React.useState<User[]>([]);
     const [departmentsList, setDepartmentsList] = React.useState<Department[]>([]);
 
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    useEffect(() => {
+        // 프로젝트 목록 불러오기
+        axios.get('/api/project')
+            .then((response) => {
+                const projectData = response.data.map((projectData: ProjectResponse) => ({
+                    idNum: projectData.idNum,
+                    projectName: projectData.projectName,
+                }));
+                setProjects(projectData);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, []);
+
+
+        const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setData(prevData => ({ ...prevData, [event.target.name]: event.target.value }));
     };
 
@@ -75,19 +98,27 @@ export default function AddModal({ open, onClose }: ModalProps) {
     const handleProjectSave = async () => {
         if (page === 1) {
             try {
-                const response = await axios.post('/api/project', {
-                    projectName: data.projectName,
-                    description: data.description,
-                    startDate: data.startDate,
-                    endDate: data.endDate,
-                });
-                if(response.data) {
-                    setProjectIdNum(response.data);
-                } else {
+                // project 선택 validation
+                if(!selectProject) {
                     setErrorModalOpen(true);
-                    setErrorMessage('성공적으로 프로젝트를 등록하지 못했습니다.');
+                    setErrorMessage('프로젝트를 선택하지 않았습니다.');
+                    return;
+                } else {
+                    const response = await axios.post(`/api/task/${selectProject.idNum}`, {
+                        taskName: data.taskName,
+                        description: data.description,
+                        startDate: data.startDate,
+                        endDate: data.endDate,
+                    });
+
+                    if(response.data) {
+                        setProjectIdNum(response.data);
+                    } else {
+                        setErrorModalOpen(true);
+                        setErrorMessage('성공적으로 프로젝트를 등록하지 못했습니다.');
+                    }
+                    setPage(page+1);
                 }
-                setPage(page+1);
             } catch (error) {
                 setErrorModalOpen(true);
                 if (error instanceof Error) {
@@ -99,9 +130,9 @@ export default function AddModal({ open, onClose }: ModalProps) {
         } else if (page === 2) {
             console.log(projectIdNum);
             try {
-                await axios.post(`/api/project/user/${projectIdNum}`, usersList.map((user) => {
+                await axios.post(`/api/task/user/${projectIdNum}`, usersList.map((user) => {
                     // usersList에서 idNum과 role만 전송
-                    return { userId: user.idNum, projectId: projectIdNum, role: user.role };
+                    return { userId: user.idNum, taskId: projectIdNum, role: user.role };
                 }));
                 setPage(page+1);
             } catch (error) {
@@ -114,9 +145,9 @@ export default function AddModal({ open, onClose }: ModalProps) {
             }
         } else if (page === 3) {
             try {
-                await axios.post(`/api/project/department/${projectIdNum}`, departmentsList.map((department) => {
+                await axios.post(`/api/task/department/${projectIdNum}`, departmentsList.map((department) => {
                     // departmentsList에서 idNum과 role만 전송
-                    return { departmentId: department.idNum, projectId: projectIdNum, role: department.role };
+                    return { departmentId: department.idNum, taskId: projectIdNum, role: department.role };
                 }));
 
                 // 프로젝트 등록 성공 시, 성공 Modal 띄우고 모든 Modal 닫기
@@ -133,12 +164,6 @@ export default function AddModal({ open, onClose }: ModalProps) {
     }
 
     return (
-        <ProjectContext.Provider value={{
-            usersList,
-            setUsersList,
-            departmentsList,
-            setDepartmentsList,
-        }}>
             <Modal open={open}>
                 <Box sx={{
                     position: 'absolute',
@@ -167,7 +192,7 @@ export default function AddModal({ open, onClose }: ModalProps) {
                                     alignItems: 'center'
                                 }}>
                         <span>
-                        프로젝트 신규등록
+                        신규업무 등록
                         </span>
                         <IconButton onClick={onClose} size="small" sx={{ padding: '0' }}>
                             <CloseIcon />
@@ -177,11 +202,39 @@ export default function AddModal({ open, onClose }: ModalProps) {
                     {page === 1 && (
                         // 프로젝트 정보 입력 컴포넌트
                         <Box>
+                            <FormControl sx={{ mt: 1, display: 'block' }}>
+                                <InputLabel id="demo-simple-select-label">프로젝트 선택</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    name="projectName"
+                                    label="프로젝트 선택"
+                                    value={selectProject == null ? '' : selectProject.projectName}
+                                    sx={{ minWidth: '50%' }}
+                                >
+                                    {projects.map((project) =>
+                                        (
+                                        <MenuItem
+                                            value={project.projectName}
+                                            key={project.idNum}
+                                            onClick={() => {
+                                                setSelectProject({
+                                                    idNum: project.idNum,
+                                                    projectName: project.projectName
+                                                });
+                                            }}
+                                        >
+                                            {project.projectName}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+
                             <TextField
-                                label="프로젝트명"
-                                name="projectName"
+                                label="업무명"
+                                name="taskName"
                                 variant="filled"
-                                value={data.projectName}
+                                value={data.taskName}
                                 onChange={handleInputChange}
                                 sx={{ mt: 1, width: '50%' }}
                                 InputProps={{
@@ -192,10 +245,10 @@ export default function AddModal({ open, onClose }: ModalProps) {
                                 }}
                             />
                             <TextareaAutosize
-                                aria-label="프로젝트 상세설명"
+                                aria-label="업무내용"
                                 minRows={4}
                                 name="description"
-                                placeholder="프로젝트 상세설명을 입력하세요"
+                                placeholder="업무의 상세내용을 입력하세요"
                                 value={data.description}
                                 onChange={handleInputChange}
                                 style={{
@@ -212,7 +265,7 @@ export default function AddModal({ open, onClose }: ModalProps) {
                             <Grid container spacing={2} sx={{mt: 3}}>
                                 <Grid item xs={6}>
                                     <TextField
-                                        label="프로젝트 시작예정일"
+                                        label="업무 시작예정일"
                                         variant="outlined"
                                         type="date"
                                         name="startDate"
@@ -230,7 +283,7 @@ export default function AddModal({ open, onClose }: ModalProps) {
                                 </Grid>
                                 <Grid item xs={6}>
                                     <TextField
-                                        label="프로젝트 종료예정일"
+                                        label="업무 종료예정일"
                                         variant="outlined"
                                         type="date"
                                         name="endDate"
@@ -247,18 +300,6 @@ export default function AddModal({ open, onClose }: ModalProps) {
                                     />
                                 </Grid>
                             </Grid>
-                        </Box>
-                    )}
-                    {page === 2 && (
-                        // 프로젝트 참여자 컴포넌트
-                        <Box sx={{mb: 7}}>
-                            <UserTable />
-                        </Box>
-                        )}
-                    {page === 3 && (
-                        // 프로젝트 참여부서 컴포넌트
-                        <Box sx={{mb: 7}}>
-                            <DepartmentTable />
                         </Box>
                     )}
 
@@ -282,7 +323,7 @@ export default function AddModal({ open, onClose }: ModalProps) {
                             }}
                             onClick={handleProjectSave}
                         >
-                            저장 ( {page} / 3 )
+                            저장
                         </Button>
                     </Box>
 
@@ -291,7 +332,7 @@ export default function AddModal({ open, onClose }: ModalProps) {
                         open={isSuccessModalOpen}
                         onClose={SuccessClose}
                         title={""}
-                        description={"프로젝트가 성공적으로 등록되었습니다"}
+                        description={"신규업무가 성공적으로 등록되었습니다"}
                     />
 
                     {/*에러 발생 Modal*/}
@@ -303,6 +344,5 @@ export default function AddModal({ open, onClose }: ModalProps) {
                     />
                 </Box>
             </Modal>
-        </ProjectContext.Provider>
     );
 }

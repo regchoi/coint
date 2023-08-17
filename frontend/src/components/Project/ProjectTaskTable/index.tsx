@@ -19,6 +19,8 @@ import EditableRow from "./EditableRow";
 import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
 import ErrorModal from "../../common/ErrorModal";
 import AddModal from "./AddModal";
+import { CSSTransition } from 'react-transition-group';
+import "../../../assets/css/common/modal-transition.css";
 
 export default function ProjectTaskTable() {
     const dispatch = useAppDispatch();
@@ -129,33 +131,6 @@ export default function ProjectTaskTable() {
         });
     }
 
-    // save 버튼을 누르면 일괄적으로 정보를 저장하는 함수
-    const handleSave = async () => {
-        try {
-            // 서버에 추가할 데이터 전송
-            // added배열이 비어있다면, 아무것도 전송하지 않습니다.
-            if(added.length > 0) {
-                await dispatch(addTableData({apiUrl: API_LINK, data: added}));
-            }
-            // 서버 응답을 받은 후에 added 상태 초기화
-            setAdded([]);
-
-            // 서버에 업데이트할 데이터 전송
-            // updated배열이 비어있다면, 아무것도 전송하지 않습니다.
-            if(updated.length > 0) {
-                await dispatch(updateTableData({apiUrl: API_LINK, data: updated}));
-            }
-            // 서버 응답을 받은 후에 updated 상태 초기화
-            setUpdated([]);
-
-            // table 데이터 가져오기
-            dispatch(fetchTableData(API_LINK));
-        } catch (error) {
-            // 에러 처리
-            console.error('Error while saving data:', error);
-        }
-    }
-
     // table 관련 hook들을 관리하는 커스텀 hook
     const {
         order,
@@ -188,7 +163,6 @@ export default function ProjectTaskTable() {
                     tableName={tableName}
                     onAdd={handleAdd}
                     onUpdate={handleUpdate}
-                    onSave={handleSave}
                     onDelete={handleOpenDeleteModal}    // 삭제 버튼 클릭 시, 삭제 확인 Modal 열기
                 />
                 <TableContainer sx={{borderRadius: '3px'}}>
@@ -277,13 +251,17 @@ export default function ProjectTaskTable() {
             {/*    label="Dense padding"*/}
             {/*/>*/}
 
-            {/*프로젝트 생성 모달*/}
-            <AddModal
-                open={isCreateModalOpen}
-                onClose={() => setCreateModalOpen(false)}
-                onSave={(data: Data) => {}}
-            />
-
+            {/*프로젝트 생성 모달 (필요한 경우에 Transition) */}
+            <CSSTransition
+                in={true}
+                appear={true}
+                timeout={300}
+                classNames="fade">
+                <AddModal
+                    open={isCreateModalOpen}
+                    onClose={() => setCreateModalOpen(false)}
+                />
+            </CSSTransition>
             {/* 삭제 확인 Modal */}
             <Modal
                 open={isDeleteModalOpen}
