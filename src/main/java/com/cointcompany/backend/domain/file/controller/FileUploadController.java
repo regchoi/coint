@@ -8,10 +8,7 @@ import com.cointcompany.backend.domain.tasks.repository.TasksRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -86,31 +83,30 @@ public class FileUploadController {
             return "File is empty.";
         }
 
-        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0);
-            Iterator<Row> rowIterator = sheet.iterator();
-
-            // 첫 번째 행은 헤더이므로 건너뛰고 데이터를 읽습니다.
-            if (rowIterator.hasNext()) {
-                rowIterator.next(); // 첫 번째 행(헤더)을 건너뜁니다.
-            }
-
-            while (rowIterator.hasNext()) {
-                Row row = rowIterator.next();
-                int start = row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getYear()*10000
-                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getMonthValue()*100
-                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
-
-                int end = row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getYear()*10000
-                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getMonthValue()*100
-                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
-
-                if (start - end > 0) {
-                    return "시작날짜와 종료날짜가 올바르지 않습니다.";
-                }
-            }
-
-        }
+//        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+//            Sheet sheet = workbook.getSheetAt(0);
+//            Iterator<Row> rowIterator = sheet.iterator();
+//
+//            // 첫 번째 행은 헤더이므로 건너뛰고 데이터를 읽습니다.
+//            if (rowIterator.hasNext()) {
+//                rowIterator.next(); // 첫 번째 행(헤더)을 건너뜁니다.
+//            }
+//
+//            while (rowIterator.hasNext()) {
+//                Row row = rowIterator.next();
+//                int start = row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getYear()*10000
+//                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getMonthValue()*100
+//                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
+//
+//                int end = row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getYear()*10000
+//                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getMonthValue()*100
+//                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
+//
+//                if (start - end > 0) {
+//                    return "시작날짜와 종료날짜가 올바르지 않습니다.";
+//                }
+//            }
+//        }
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -130,6 +126,7 @@ public class FileUploadController {
                         projectsRepository.findById((long) row.getCell(5).getNumericCellValue()).orElseThrow()
 
                 );
+                tasksRepository.save(tasks);
             }
 
             return "File uploaded successfully.";
@@ -154,18 +151,30 @@ public class FileUploadController {
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        short dateFormat = workbook.createDataFormat().getFormat("yyyy-MM-dd");
+        dateCellStyle.setDataFormat(dateFormat);
+
+
         for (Tasks tasks : tasksList) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(tasks.getTaskName());
             row.createCell(1).setCellValue(tasks.getDescription());
+//            row.createCell(2).setCellValue(tasks.getStartDate());
+//            row.createCell(3).setCellValue(tasks.getEndDate());
             row.createCell(4).setCellValue(tasks.getStatus());
             // ... 다른 필드에 따라 셀들 생성
 
-            // 날짜 데이터 포맷팅 및 셀 생성
+//            // 날짜 데이터 포맷팅 및 셀 생성
             Cell dateCell = row.createCell(2);
-            dateCell.setCellValue(tasks.getStartDate().format(dateFormatter));
+            LocalDate localDate = tasks.getStartDate();
+            dateCell.setCellValue(java.sql.Date.valueOf(localDate));
+            dateCell.setCellStyle(dateCellStyle);
             dateCell = row.createCell(3);
-            dateCell.setCellValue(tasks.getEndDate().format(dateFormatter));
+            localDate = tasks.getEndDate();
+            dateCell.setCellValue(java.sql.Date.valueOf(localDate));
+            dateCell.setCellStyle(dateCellStyle);
+
         }
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -175,4 +184,3 @@ public class FileUploadController {
         workbook.close();
     }
 }
-
