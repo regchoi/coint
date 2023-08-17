@@ -4,6 +4,9 @@ package com.cointcompany.backend.common.config.security.jwt.controller;
 import com.cointcompany.backend.common.config.security.jwt.dto.AuthDto;
 import com.cointcompany.backend.common.config.security.jwt.service.AuthService;
 import com.cointcompany.backend.common.config.security.jwt.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Tag(name = "인증", description = "인증 API 명세서")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -22,7 +26,8 @@ public class AuthApiController {
 
     private final long COOKIE_EXPIRATION = 7776000; // 90일
 
-    // 회원가입
+    @Operation(summary = "회원가입")
+    @ApiResponse(responseCode = "200", description = "회원가입 성공")
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@RequestBody @Valid AuthDto.SignupDto signupDto) {
         String encodedPassword = encoder.encode(signupDto.getLoginPw());
@@ -33,7 +38,8 @@ public class AuthApiController {
     }
 
     // 로그인 -> 토큰 발급
-//    @PostMapping("/login")
+    @Operation(summary = "로그인")
+    @ApiResponse(responseCode = "200", description = "로그인 성공")
     @PostMapping
     public ResponseEntity<?> login(@RequestBody @Valid AuthDto.LoginDto loginDto) {
         // User 등록 및 Refresh Token 저장
@@ -53,6 +59,8 @@ public class AuthApiController {
                 .build();
     }
 
+    @Operation(summary = "토큰 유효성 검사")
+    @ApiResponse(responseCode = "200", description = "검사 성공")
     @PostMapping("/validate")
     public ResponseEntity<?> validate(@RequestHeader("Authorization") String requestAccessToken) {
         if (!authService.validate(requestAccessToken)) {
@@ -62,6 +70,8 @@ public class AuthApiController {
         }
     }
     // 토큰 재발급
+    @Operation(summary = "토큰 재발행")
+    @ApiResponse(responseCode = "200", description = "발행 성공")
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@CookieValue(name = "refresh-token") String requestRefreshToken,
                                      @RequestHeader("Authorization") String requestAccessToken) {
@@ -95,6 +105,8 @@ public class AuthApiController {
     }
 
     // 로그아웃
+    @Operation(summary = "로그아웃")
+    @ApiResponse(responseCode = "200", description = "로그아웃 성공")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String requestAccessToken) {
         authService.logout(requestAccessToken);

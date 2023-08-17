@@ -1,137 +1,289 @@
-import { Button, Modal, Box, TextField, Typography, Table, TableBody } from "@mui/material";
-import { createData, Data } from "./data";
+import {
+    Button,
+    Modal,
+    Box,
+    TextField,
+    Typography,
+    Table,
+    TableBody,
+    IconButton,
+    Grid,
+    TextareaAutosize
+} from "@mui/material";
 import { useState } from "react";
 import UserTable from "./UserTable";
 import DepartmentTable from "./DepartmentTable";
-import SaveIcon from "@mui/icons-material/Save";
+import CloseIcon from "@mui/icons-material/Close";
 import * as React from "react";
+import axios from "../../../redux/axiosConfig";
+import ErrorModal from "../../common/ErrorModal";
+import ProjectContext from './ProjectContext';
+
+type Data = {
+    projectName: string;
+    description: string;
+    startDate: string;
+    endDate: string;
+}
+
+type User = {
+    idNum: number;
+    name: string;
+    email: string;
+    department: string;
+    role: string;
+}
+
+type Department = {
+    idNum: number;
+    departmentName: string;
+    description: string;
+    role: string;
+}
 
 interface ModalProps {
     open: boolean;
     onClose: () => void;
-    onSave: (data: Data) => void;
 }
 
-export default function AddModal({ open, onClose, onSave }: ModalProps) {
-    const [data, setData] = useState<Data>(createData(1, '', '', '', '', '', '', '', ''));
-    const [participants, setParticipants] = useState<string[]>([]);
-    const [departments, setDepartments] = useState<string[]>([]);
+export default function AddModal({ open, onClose }: ModalProps) {
+    // Modal의 페이지네이션 구현
+    const [page, setPage] = useState(1);
+    const [data, setData] = useState<Data>({} as Data);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [isErrorModalOpen, setErrorModalOpen] = useState<boolean>(false);
+    const [projectIdNum, setProjectIdNum] = useState<number>(0);
+    const [usersList, setUsersList] = React.useState<User[]>([]);
+    const [departmentsList, setDepartmentsList] = React.useState<Department[]>([]);
 
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setData(prevData => ({ ...prevData, [event.target.name]: event.target.value }));
     };
 
+    const handleProjectSave = async () => {
+        if (page === 1) {
+            try {
+                const response = await axios.post('/api/project', {
+                    projectName: data.projectName,
+                    description: data.description,
+                    startDate: data.startDate,
+                    endDate: data.endDate,
+                });
+                if(response.data && response.data.idNum) {
+                    setProjectIdNum(response.data.idNum);
+                }
+                setPage(page+1);
+            } catch (error) {
+                setErrorModalOpen(true);
+                if (error instanceof Error) {
+                    setErrorMessage(error.message);
+                } else {
+                    setErrorMessage('An unexpected error occurred');
+                }
+            }
+        } else if (page === 2) {
+            try {
+                await axios.post(`/api/project/user/${projectIdNum}`, {
+                    // usersList에서 idNum과 role만 전송
+                    usersList: usersList.map((user) => {
+                        return { idNum: user.idNum, projectId: projectIdNum, role: user.role };
+                    })
+                });
+                setPage(page+1);
+            } catch (error) {
+                setErrorModalOpen(true);
+                if (error instanceof Error) {
+                    setErrorMessage(error.message);
+                } else {
+                    setErrorMessage('An unexpected error occurred');
+                }
+            }
+        } else if (page === 3) {
+            try {
+                await axios.post(`/api/project/department/${projectIdNum}`, {
+                    // departmentsList에서 idNum과 role만 전송
+                    departmentsList: departmentsList.map((department) => {
+                        return { idNum: department.idNum, projectId: projectIdNum, role: department.role };
+                    })
+                });
+                setPage(page+1);
+            } catch (error) {
+                setErrorModalOpen(true);
+                if (error instanceof Error) {
+                    setErrorMessage(error.message);
+                } else {
+                    setErrorMessage('An unexpected error occurred');
+                }
+            }
+        }
+    }
+
     return (
-        <Modal open={open} onClose={onClose}>
-            <Box sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                bgcolor: 'background.paper',
-                boxShadow: 24,
-                p: 4,
-                minWidth: 300,
-                maxHeight: '90vh',
-                overflowY: 'auto',
-                borderRadius: '10px',
-            }}>
-                <Typography variant="h6" sx={{ borderBottom: '2px solid #f0f0f0', pb: 2, mb: 2, fontSize: '18px', fontWeight: 'bold' }}>
-                    프로젝트 신규등록
-                </Typography>
+        <ProjectContext.Provider value={{
+            usersList,
+            setUsersList,
+            departmentsList,
+            setDepartmentsList,
+        }}>
+            <Modal open={open}>
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    bgcolor: 'background.paper',
+                    boxShadow: 24,
+                    p: 4,
+                    minWidth: 600,
+                    minHeight: '40vh',
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
+                    borderRadius: '10px',
+                }}>
+                    <Typography variant="h6"
+                                component={"div"}
+                                sx={{
+                                    borderBottom: '2px solid #f0f0f0',
+                                    pb: 2,
+                                    mb: 2,
+                                    fontSize: '18px',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                        <span>
+                        프로젝트 신규등록
+                        </span>
+                        <IconButton onClick={onClose} size="small" sx={{ padding: '0' }}>
+                            <CloseIcon />
+                        </IconButton>
+                    </Typography>
 
-                <TextField
-                    label="프로젝트명"
-                    name="projectName"
-                    variant="filled"
-                    value={data.projectName}
-                    onChange={handleInputChange}
-                    sx={{ mt: 1, width: '50%' }}
-                    InputProps={{
-                        style: { fontSize: '14px', backgroundColor: 'transparent' }
-                    }}
-                    InputLabelProps={{
-                        style: { fontSize: '14px' },
-                    }}
-                />
-                <TextField
-                    label="프로젝트 상세설명"
-                    name="projectDescription"
-                    variant="filled"
-                    value={data.projectName}
-                    onChange={handleInputChange}
-                    sx={{ mt: 1, width: '100%' }}
-                    InputProps={{
-                        style: { fontSize: '14px', backgroundColor: 'transparent' }
-                    }}
-                    InputLabelProps={{
-                        style: { fontSize: '14px' },
-                    }}
-                />
-                <TextField
-                    label="Project Start Date"
-                    variant="outlined"
-                    type="date"
-                    name="startDate"
-                    value={data.startDate}
-                    onChange={handleInputChange}
-                    fullWidth
-                    sx={{ mt: 3 }}
-                    InputProps={{
-                        style: { fontSize: '14px', backgroundColor: 'transparent' }
-                    }}
-                    InputLabelProps={{
-                        style: { fontSize: '14px' },
-                        shrink: true,
-                    }}
-                />
-                <TextField
-                    label="Project End Date"
-                    variant="outlined"
-                    type="date"
-                    name="endDate"
-                    value={data.endDate}
-                    onChange={handleInputChange}
-                    fullWidth
-                    sx={{ mt: 3, mb: 1 }}
-                    InputProps={{
-                        style: { fontSize: '14px', backgroundColor: 'transparent' }
-                    }}
-                    InputLabelProps={{
-                        style: { fontSize: '14px' },
-                        shrink: true,
-                    }}
-                />
+                    {page === 1 && (
+                        // 프로젝트 정보 입력 컴포넌트
+                        <Box>
+                            <TextField
+                                label="프로젝트명"
+                                name="projectName"
+                                variant="filled"
+                                value={data.projectName}
+                                onChange={handleInputChange}
+                                sx={{ mt: 1, width: '50%' }}
+                                InputProps={{
+                                    style: { fontSize: '14px', backgroundColor: 'transparent' }
+                                }}
+                                InputLabelProps={{
+                                    style: { fontSize: '14px' },
+                                }}
+                            />
+                            <TextareaAutosize
+                                aria-label="프로젝트 상세설명"
+                                minRows={4}
+                                name="description"
+                                placeholder="프로젝트 상세설명을 입력하세요"
+                                value={data.description}
+                                onChange={handleInputChange}
+                                style={{
+                                    fontSize: '14px',
+                                    width: '100%',
+                                    padding: '10px',
+                                    marginTop: '10px',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '4px',
+                                    resize: 'vertical'
+                                }}
+                            />
 
-                {/*프로젝트 참여자*/}
-                <UserTable />
+                            <Grid container spacing={2} sx={{mt: 3}}>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        label="프로젝트 시작예정일"
+                                        variant="outlined"
+                                        type="date"
+                                        name="startDate"
+                                        value={data.startDate}
+                                        onChange={handleInputChange}
+                                        fullWidth
+                                        InputProps={{
+                                            style: { fontSize: '14px', backgroundColor: 'transparent' }
+                                        }}
+                                        InputLabelProps={{
+                                            style: { fontSize: '14px' },
+                                            shrink: true,
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        label="프로젝트 종료예정일"
+                                        variant="outlined"
+                                        type="date"
+                                        name="endDate"
+                                        value={data.endDate}
+                                        onChange={handleInputChange}
+                                        fullWidth
+                                        InputProps={{
+                                            style: { fontSize: '14px', backgroundColor: 'transparent' }
+                                        }}
+                                        InputLabelProps={{
+                                            style: { fontSize: '14px' },
+                                            shrink: true,
+                                        }}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    )}
+                    {page === 2 && (
+                        // 프로젝트 참여자 컴포넌트
+                        <Box sx={{mb: 7}}>
+                            <UserTable />
+                        </Box>
+                        )}
+                    {page === 3 && (
+                        // 프로젝트 참여부서 컴포넌트
+                        <Box sx={{mb: 7}}>
+                            <DepartmentTable />
+                        </Box>
+                    )}
 
-                {/*프로젝트 참여부서*/}
-                <DepartmentTable />
+                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                            variant="contained"
+                            sx={{
+                                marginLeft: '10px',
+                                fontSize: '14px',
+                                fontWeight: 'bold',
+                                height: '35px',
+                                backgroundColor: 'rgb(40, 49, 66)',
+                                boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                textTransform: 'none',
+                                minWidth: '75px',
+                                padding: '0 12px',
+                                '&:hover': {
+                                    textDecoration: 'none',
+                                    backgroundColor: 'rgb(40, 49, 66, 0.8)',
+                                },
+                            }}
+                            onClick={handleProjectSave}
+                        >
+                            저장 ( {page} / 3 )
+                        </Button>
+                    </Box>
 
-                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button
-                        variant="contained"
-                        sx={{
-                            marginLeft: '10px',
-                            fontSize: '14px',
-                            fontWeight: 'bold',
-                            height: '35px',
-                            backgroundColor: 'rgb(40, 49, 66)',
-                            boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
-                            textTransform: 'none',
-                            minWidth: '75px',
-                            padding: '0 12px',
-                            '&:hover': {
-                                textDecoration: 'none',
-                                backgroundColor: 'rgb(0, 0, 0, 0.1)',
-                            },
-                        }}
-                    >
-                        저장
-                    </Button>
+                    {/*
+                에러 발생 Modal
+                ErrorModal은 Error처리 시 Modal을 띄워줄 수 있는 재사용 가능한 컴포넌트입니다.
+                 */}
+                    <ErrorModal
+                        open={isErrorModalOpen}
+                        onClose={() => setErrorModalOpen(false)}
+                        title="요청 실패"
+                        description={errorMessage || ""}
+                    />
                 </Box>
-            </Box>
-        </Modal>
+            </Modal>
+        </ProjectContext.Provider>
     );
 }

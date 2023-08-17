@@ -14,12 +14,14 @@ interface Data {
     // getUserDepartmentResList는 빈배열일 수도 있기 때문에
     // 아래와 같이 정의해줘야 함
     getUserDepartmentResList: {
-        idNum: number,
+        userDepartmentIdNum: number,
+        departmentIdNum: number,
         departmentName: string
     }[] | [];
     email: string;
     getUserUserGroupsResList: {
-        idNum: number,
+        userUserGroupIdNum: number,
+        usergroupIdNum: number,
         usergroupName: string
     }[] | [];
     phone: string;
@@ -34,12 +36,14 @@ const createData = (
     name: string,
     position: string,
     getUserDepartmentResList: {
-        idNum: number,
+        userDepartmentIdNum: number,
+        departmentIdNum: number,
         departmentName: string
     }[] | [],
     email: string,
     getUserUserGroupsResList: {
-        idNum: number,
+        userUserGroupIdNum: number,
+        usergroupIdNum: number,
         usergroupName: string
     }[] | [],
     phone: string,

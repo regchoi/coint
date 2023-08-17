@@ -11,6 +11,7 @@ import UserGroupTable from "./components/User/UserGroupTable";
 import DepartmentTable from "./components/User/DepartmentTable";
 // Project
 import ProjectPlan from "./components/Project/ProjectPlan";
+import ProjectTaskTable from "./components/Project/ProjectTaskTable";
 
 
 // Example
@@ -36,6 +37,7 @@ const ROUTES = {
     DEPARTMENTTABLE: '/system/department',
     // Project
     PROJECTPLAN: '/project/plan',
+    PROJECTTASKTABLE: '/project/task',
 
     // Example
     // SAMPLE_TABLE: '/sampletable',
@@ -68,7 +70,9 @@ const App: React.FC = () => {
                         <Route path={ROUTES.USERTABLE} element={<UserTable/>}/>
                         <Route path={ROUTES.USERGROUPTABLE} element={<UserGroupTable/>}/>
                         <Route path={ROUTES.DEPARTMENTTABLE} element={<DepartmentTable/>}/>
+
                         <Route path={ROUTES.PROJECTPLAN} element={<ProjectPlan/>}/>
+                        <Route path={ROUTES.PROJECTTASKTABLE} element={<ProjectTaskTable/>}/>
 
                         {/* Example*/}
                         {/*<Route path={ROUTES.SAMPLE_TABLE} element={<SampleTable/>}/>*/}

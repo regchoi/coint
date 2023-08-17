@@ -12,6 +12,14 @@ interface Data {
     role: string;
 }
 
+interface UserData {
+    idNum: number;
+    name: string;
+    email: string;
+    department: string;
+    role: string;
+}
+
 // 빈 데이터 생성을 위한 함수
 const createData = (
     idNum: number,
@@ -39,5 +47,5 @@ const headCells: readonly HeadCell[] = [
 ];
 
 
-export type {Data, HeadCell};
+export type {Data, UserData, HeadCell};
 export {createData, headCells, tableName, API_LINK}
