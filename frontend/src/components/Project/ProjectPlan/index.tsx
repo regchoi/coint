@@ -95,7 +95,7 @@ export default function ProjectPlan() {
             const selectedForDeletion = data.filter(row => selected.includes(row.idNum)).map(row => row.idNum);
 
             // 서버에 삭제할 데이터 전송
-            await dispatch(deleteTableData({ apiUrl: API_LINK, ids: selectedForDeletion }));
+            await dispatch(deleteTableData({ apiUrl: `${API_LINK}/delete`, ids: selectedForDeletion }));
 
             // 삭제 완료 후에 selected 상태 초기화
             handleSelectAllClick(dummyEvent); // dummyEvent를 통해 selected 상태 초기화

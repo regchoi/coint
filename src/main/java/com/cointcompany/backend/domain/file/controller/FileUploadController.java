@@ -86,31 +86,31 @@ public class FileUploadController {
             return "File is empty.";
         }
 
-        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0);
-            Iterator<Row> rowIterator = sheet.iterator();
-
-            // 첫 번째 행은 헤더이므로 건너뛰고 데이터를 읽습니다.
-            if (rowIterator.hasNext()) {
-                rowIterator.next(); // 첫 번째 행(헤더)을 건너뜁니다.
-            }
-
-            while (rowIterator.hasNext()) {
-                Row row = rowIterator.next();
-                int start = row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getYear()*10000
-                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getMonthValue()*100
-                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
-
-                int end = row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getYear()*10000
-                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getMonthValue()*100
-                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
-
-                if (start - end > 0) {
-                    return "시작날짜와 종료날짜가 올바르지 않습니다.";
-                }
-            }
-
-        }
+//        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+//            Sheet sheet = workbook.getSheetAt(0);
+//            Iterator<Row> rowIterator = sheet.iterator();
+//
+//            // 첫 번째 행은 헤더이므로 건너뛰고 데이터를 읽습니다.
+//            if (rowIterator.hasNext()) {
+//                rowIterator.next(); // 첫 번째 행(헤더)을 건너뜁니다.
+//            }
+//
+//            while (rowIterator.hasNext()) {
+//                Row row = rowIterator.next();
+//                int start = row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getYear()
+//                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getMonthValue()
+//                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
+//
+//                int end = row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getYear()
+//                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getMonthValue()
+//                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
+//
+//                if (start - end > 0) {
+//                    return "시작날짜와 종료날짜가 올바르지 않습니다.";
+//                }
+//            }
+//
+//        }
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);

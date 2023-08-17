@@ -7,12 +7,16 @@ type ViewSwitcherProps = {
     isChecked: boolean;
     onViewListChange: (isChecked: boolean) => void;
     onViewModeChange: (viewMode: ViewMode) => void;
+    downloadExcel: () => void;
+    uploadExcel: () => void;
 };
 
 export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
                                                               onViewModeChange,
                                                               onViewListChange,
                                                               isChecked,
+                                                              downloadExcel,
+                                                              uploadExcel,
                                                           }) => {
     return (
         <div className="ViewContainer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -103,6 +107,7 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
                     label="업무 세부내용"
                 />
                 <Button
+                    onClick={downloadExcel}
                     variant="contained"
                     startIcon={
                         <i
@@ -110,6 +115,16 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
                             style={{
                                 fontSize: "15px",
                                 color: "green",
+                                marginRight: "2px",
+                            }}
+                        />
+                    }
+                    endIcon={
+                        <i
+                            className="mdi mdi-download"
+                            style={{
+                                fontSize: "15px",
+                                color: "indianred",
                                 marginRight: "2px",
                             }}
                         />
@@ -131,9 +146,52 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
                         },
                     }}
                 >
-                    추가
+                    엑셀 다운로드
                 </Button>
 
+                <Button
+                    onClick={uploadExcel}
+                    variant="contained"
+                    startIcon={
+                        <i
+                            className="mdi mdi-microsoft-excel"
+                            style={{
+                                fontSize: "15px",
+                                color: "green",
+                                marginRight: "2px",
+                            }}
+                        />
+                    }
+                    endIcon={
+                        <i
+                            className="mdi mdi-upload"
+                            style={{
+                                fontSize: "15px",
+                                color: "green",
+                                marginRight: "2px",
+                            }}
+                        />
+
+                    }
+                    sx={{
+                        color: 'black',
+                        marginLeft: '10px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        height: '30px',
+                        backgroundColor: 'white',
+                        boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                        textTransform: 'none',
+                        minWidth: '75px',
+                        padding: '0 12px',
+                        '&:hover': {
+                            textDecoration: 'none',
+                            backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                        },
+                    }}
+                >
+                    엑셀 업로드
+                </Button>
             </div>
         </div>
     );

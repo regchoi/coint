@@ -4,14 +4,16 @@ import { ViewSwitcher } from "./viewSwitcher";
 import {convertToGanttTasks, getStartEndDateForProject, initTasks} from "./helper";
 import "gantt-task-react/dist/index.css";
 import axios from "../../../redux/axiosConfig";
+import { saveAs } from 'file-saver';
 import {
     Autocomplete,
     AutocompleteChangeDetails,
-    AutocompleteChangeReason, Box, Grid,
+    AutocompleteChangeReason, AutocompleteInputChangeReason, Box, Grid,
     TextField
 } from "@mui/material";
-import ExcelModal from "./ExcelModal";
+import ExcelModal from "./UploadExcelModal";
 import ErrorModal from "../../common/ErrorModal";
+import {FileDownload} from "@mui/icons-material";
 
 type ProjectSelectResponse = {
     idNum: number;
@@ -35,32 +37,118 @@ type TaskResponse = {
     projectName: string;
 }
 
-
 const TaskGanttChart = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [options, setOptions] = useState<ProjectSelectResponse[]>([]);
+    const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
     const [view, setView] = useState<ViewMode>(ViewMode.Day);
     const [tasks, setTasks] = useState<Task[]>(initTasks());
     const [isChecked, setIsChecked] = useState(true);
+    const [isErrorModalOpen, setErrorModalOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
+    const [taskResponses, setTaskResponses] = useState<TaskResponse[]>([]);
+    const [isExcelModalOpen, setExcelModalOpen] = useState(false);
 
     useEffect(() => {
+        // 프로젝트 목록 불러오기
+        axios.get('/api/project')
+            .then((response) => {
+                setOptions(response.data);
+            })
+            .catch((error) => {
+                setErrorModalOpen(true)
+                setErrorMessage("프로젝트 목록을 불러오는데 실패했습니다.")
+            });
+
         const fetchData = async () => {
             try {
                 const projectResponse = await axios.get("/api/project");
-                const projectResponses: ProjectResponse[] = projectResponse.data;
+                setProjectResponses(projectResponse.data);
 
                 const taskResponse = await axios.get("/api/task");
-                const taskResponses: TaskResponse[] = taskResponse.data;
+                setTaskResponses(taskResponse.data);
 
-                const ganttTasks = convertToGanttTasks(projectResponses, taskResponses);
+                const ganttTasks = convertToGanttTasks(projectResponse.data, taskResponse.data);
                 setTasks(ganttTasks);
             } catch (error) {
-                console.error("Error fetching data:", error);
+                setErrorModalOpen(true)
+                setErrorMessage("프로젝트 목록을 불러오는데 실패했습니다.")
             }
         };
 
         fetchData();
     }, []);
+
+
+    // 프로젝트 엑셀 다운로드
+
+    const downloadProjectExcel = async (projectId: number) => {
+        try {
+            const response = await axios.get(`/download/excel/${projectId}`, {
+                responseType: 'blob',
+            });
+
+            if (response.status === 200) {
+                const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                saveAs(blob, `Project_${projectId}.xlsx`);
+            } else {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Failed to download project excel:', error);
+            setErrorModalOpen(true)
+            setErrorMessage("프로젝트 엑셀 다운로드에 실패했습니다.")
+        }
+    };
+
+    const handleDownload = () => {
+        if (selectedProjectId) {
+            downloadProjectExcel(selectedProjectId);
+        } else {
+            setErrorModalOpen(true)
+            setErrorMessage("프로젝트를 선택해주세요.")
+        }
+    };
+
+    const handleFileUpload = async (files: File[]) => {
+        if (files.length === 0) {
+            return;
+        }
+        const file = files[0];
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const response = await axios.post("/upload/excel", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            if (response.status === 200) {
+                console.log("File uploaded successfully.");
+            } else {
+                setErrorModalOpen(true)
+                setErrorMessage("엑셀파일 저장에 실패했습니다.")
+            }
+        } catch (error) {
+            type ErrorResponse = {
+                message: string;
+            }
+            const errorResponse = error as ErrorResponse;
+            console.error("Error occurred while uploading a file:", error);
+
+            setErrorModalOpen(true)
+
+            setErrorMessage(errorResponse.message)
+        }
+    };
+
+
+    const openExcelModal = () => {
+        setExcelModalOpen(true);
+    }
 
     let columnWidth = 65;
     if (view === ViewMode.Year) {
@@ -71,19 +159,37 @@ const TaskGanttChart = () => {
         columnWidth = 250;
     }
 
-    const handleSearchChange = (
+    const handleInputChange = (
         event: SyntheticEvent<Element, Event>,
-        value: string | null,
-        reason: AutocompleteChangeReason,
-        details?: AutocompleteChangeDetails<string> | undefined
+        newValue: string,
+        reason: AutocompleteInputChangeReason
     ) => {
-            setSearchTerm(value || "");
+        setSearchTerm(newValue);
+
+        // 검색어가 비어 있으면 전체 데이터를 다시 조회
+        if (newValue === "") {
+            const ganttTasks = convertToGanttTasks(projectResponses, taskResponses);
+            setTasks(ganttTasks);
+            return;
+        }
+
+        const selectedProject = options.find(option => option.projectName === newValue);
+        if (selectedProject) {
+            setSelectedProjectId(selectedProject.idNum);
+            const projectId = selectedProject.idNum;
+            const filteredProjects = projectResponses.filter(pr => pr.idNum === projectId);
+            const filteredTasks = taskResponses.filter(tr => tr.projectName === newValue);
+            const ganttTasks = convertToGanttTasks(filteredProjects, filteredTasks);
+            setTasks(ganttTasks);
+        }
     };
 
     const autocompleteOptions = options.map(option => option.projectName);
-    const filteredOptions = autocompleteOptions.filter(option =>
-        option.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredOptions = searchTerm === ""
+        ? autocompleteOptions.filter(option =>
+            option.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        : autocompleteOptions;
 
     const handleSearchSubmit = async () => {
         const selectedProject = options.find(option => option.projectName === searchTerm);
@@ -160,14 +266,15 @@ const TaskGanttChart = () => {
                         height: "100%",
                         display: "flex",
                         flexDirection: "column",
-                        pt: 2,
+                        backgroundColor: "#fff",
+                        p: 2,
                     }}
                 >
-                    <div className="SearchBox" style={{ width: '100%', marginBottom: '10px'}}>
+                    <div className="SearchBox" style={{ width: '15%', marginBottom: '10px'}}>
                         <Autocomplete
                             options={filteredOptions}
                             value={searchTerm}
-                            onChange={handleSearchChange}
+                            onInputChange={handleInputChange}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
@@ -177,7 +284,7 @@ const TaskGanttChart = () => {
                                     placeholder="프로젝트명을 입력해주세요"
                                     InputProps={{
                                         ...params.InputProps,
-                                        style: { fontSize: '14px', backgroundColor: 'transparent' }
+                                        style: { fontSize: '14px', backgroundColor: '#fff' }
                                     }}
                                     InputLabelProps={{
                                         style: { fontSize: '14px' },
@@ -191,6 +298,8 @@ const TaskGanttChart = () => {
                         onViewModeChange={viewMode => setView(viewMode)}
                         onViewListChange={setIsChecked}
                         isChecked={isChecked}
+                        downloadExcel={handleDownload}
+                        uploadExcel={openExcelModal}
                     />
                     <Gantt
                         tasks={tasks}
@@ -207,6 +316,21 @@ const TaskGanttChart = () => {
                     />
                 </Box>
             </Grid>
+
+            {/*엑셀 업로드 Modal*/}
+            <ExcelModal
+                open={isExcelModalOpen}
+                onClose={() => setExcelModalOpen(false)}
+                onUpload={handleFileUpload}
+            />
+
+            {/*에러 발생 Modal*/}
+            <ErrorModal
+                open={isErrorModalOpen}
+                onClose={() => setErrorModalOpen(false)}
+                title="요청 실패"
+                description={errorMessage || ""}
+            />
         </Grid>
     );
 };
