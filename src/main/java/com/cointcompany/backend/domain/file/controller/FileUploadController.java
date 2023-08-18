@@ -140,6 +140,14 @@ public class FileUploadController {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Sheet1");
 
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        short dateFormat = workbook.createDataFormat().getFormat("yyyy-MM-dd");
+        dateCellStyle.setDataFormat(dateFormat);
+
+//        CellStyle hiddenCellStyle = workbook.createCellStyle();
+//        hiddenCellStyle.setHidden(true);
+
+
         int rowNum = 0;
         Row headerRow = sheet.createRow(rowNum++);
         headerRow.createCell(0).setCellValue("taskName");
@@ -147,25 +155,21 @@ public class FileUploadController {
         headerRow.createCell(2).setCellValue("startDate");
         headerRow.createCell(3).setCellValue("endDate");
         headerRow.createCell(4).setCellValue("status");
+        headerRow.createCell(5).setCellValue("taskId");
         // ... 다른 헤더 셀들 생성
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        CellStyle dateCellStyle = workbook.createCellStyle();
-        short dateFormat = workbook.createDataFormat().getFormat("yyyy-MM-dd");
-        dateCellStyle.setDataFormat(dateFormat);
+        sheet.setColumnWidth(5,0);
+//        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 
         for (Tasks tasks : tasksList) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(tasks.getTaskName());
             row.createCell(1).setCellValue(tasks.getDescription());
-//            row.createCell(2).setCellValue(tasks.getStartDate());
-//            row.createCell(3).setCellValue(tasks.getEndDate());
             row.createCell(4).setCellValue(tasks.getStatus());
             // ... 다른 필드에 따라 셀들 생성
 
-//            // 날짜 데이터 포맷팅 및 셀 생성
+            // 날짜 데이터 포맷팅 및 셀 생성
             Cell dateCell = row.createCell(2);
             LocalDate localDate = tasks.getStartDate();
             dateCell.setCellValue(java.sql.Date.valueOf(localDate));
@@ -175,6 +179,9 @@ public class FileUploadController {
             dateCell.setCellValue(java.sql.Date.valueOf(localDate));
             dateCell.setCellStyle(dateCellStyle);
 
+            Cell cell = row.createCell(5);
+            cell.setCellValue(tasks.getIdNum());
+//            cell.setCellStyle(hiddenCellStyle);
         }
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
