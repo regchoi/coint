@@ -32,7 +32,12 @@ dependencies {
     implementation 'org.springframework.security:spring-security-crypto'
 //    implementation 'org.springframework.session:spring-session-jdbc'
 
+    //Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+
+    //엑셀 -> Entity
+    implementation 'org.apache.poi:poi:5.0.0'
+    implementation 'org.apache.poi:poi-ooxml:5.0.0'
 
     // com.sun.xml.bind
     implementation 'com.sun.xml.bind:jaxb-impl:4.0.1'
