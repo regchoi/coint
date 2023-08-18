@@ -8,10 +8,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Where(clause = "del = false")
+@SQLDelete(sql = "UPDATE TaskUser SET del = true WHERE id_num = ?")
 public class TaskUser extends BaseEntity {
 
     @Id
@@ -19,6 +23,8 @@ public class TaskUser extends BaseEntity {
     private Long idNum;
 
     private String role;
+
+    private boolean del = Boolean.FALSE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tasksIdNum")
@@ -31,13 +37,15 @@ public class TaskUser extends BaseEntity {
     public static TaskUser of(String role, Tasks tasks, Users users) {
         return TaskUser.builder()
                 .role(role)
+                .del(false)
                 .tasks(tasks)
                 .users(users)
                 .build();
     }
     @Builder
-    public TaskUser(String role, Tasks tasks, Users users) {
+    public TaskUser(String role, Boolean del, Tasks tasks, Users users) {
         this.role = role;
+        this.del = del;
         this.tasks = tasks;
         this.users = users;
     }
