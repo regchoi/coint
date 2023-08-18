@@ -1,7 +1,7 @@
 // data.ts
 
 // tableName 정의
-const tableName: string = '프로젝트 참여부서관리';
+const tableName: string = '업무 부서관리';
 const API_LINK: string = '/api/user';
 
 // 테이블의 구조를 정의
@@ -9,6 +9,13 @@ const API_LINK: string = '/api/user';
 interface Data {
     idNum: number;
     departmentName: string;
+    role: string;
+}
+
+interface DepartmentData {
+    idNum: number;
+    departmentName: string;
+    description: string;
     role: string;
 }
 
@@ -39,5 +46,5 @@ const headCells: readonly HeadCell[] = [
 ];
 
 
-export type {Data, HeadCell};
+export type {Data, DepartmentData, HeadCell};
 export {createData, headCells, tableName, API_LINK}

@@ -166,7 +166,7 @@ export default function AddDepartmentTable(props: AddDepartmentTableProps) {
                                     justifyContent: 'space-between',
                                 }}>
                     <span>
-                    {title === 'Choices' ? "부서 조회" : "프로젝트 참여부서"}
+                    {title === 'Choices' ? "부서 조회" : "업무 참여부서"}
                     </span>
                     </Typography>
                 }

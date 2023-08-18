@@ -22,5 +22,4 @@ public class AuditorAwareImpl implements AuditorAware<Long> {
 
         return Optional.of(users.getUserId());
     }
-
 }

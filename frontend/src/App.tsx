@@ -12,7 +12,9 @@ import DepartmentTable from "./components/User/DepartmentTable";
 // Project
 import ProjectPlan from "./components/Project/ProjectPlan";
 import ProjectTaskTable from "./components/Project/ProjectTaskTable";
-
+import TaskGanttChart from "./components/Project/TaskGanttChart";
+// Document
+import FileDrive from "./components/Document/FileDrive";
 
 // Example
 // import SampleTable from "./components/SampleTable";
@@ -38,6 +40,9 @@ const ROUTES = {
     // Project
     PROJECTPLAN: '/project/plan',
     PROJECTTASKTABLE: '/project/task',
+    TASKGANTTCHART: '/project/task/ganttchart',
+    // Document
+    FILEDRIVE: '/document/drive',
 
     // Example
     // SAMPLE_TABLE: '/sampletable',
@@ -50,7 +55,6 @@ const ROUTES = {
     // DOCUMENTEDITOR: '/documenteditor',
     // CALENDAR: '/calendar',
     // TASKLIST: '/tasklist',
-    NOT_FOUND: '*'
 }
 
 const App: React.FC = () => {
@@ -73,6 +77,9 @@ const App: React.FC = () => {
 
                         <Route path={ROUTES.PROJECTPLAN} element={<ProjectPlan/>}/>
                         <Route path={ROUTES.PROJECTTASKTABLE} element={<ProjectTaskTable/>}/>
+                        <Route path={ROUTES.TASKGANTTCHART} element={<TaskGanttChart/>}/>
+
+                        <Route path={ROUTES.FILEDRIVE} element={<FileDrive/>}/>
 
                         {/* Example*/}
                         {/*<Route path={ROUTES.SAMPLE_TABLE} element={<SampleTable/>}/>*/}

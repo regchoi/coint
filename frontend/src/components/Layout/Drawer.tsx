@@ -15,7 +15,8 @@ import {
     Factory, GridView,
     PieChart,
     SignalCellularAlt,
-    Streetview
+    Streetview,
+    CloudDownload
 } from "@mui/icons-material";
 import SidebarItem from "./SidebarItem";
 
@@ -50,7 +51,8 @@ export default function SideDrawer({ open, drawerWidth }: DrawerProps) {
     // Auth 정보에 따라 다른 SidebarItem을 보여주게 변경 가능
     const initialSidebarItems: SidebarItemState[] = [
 
-        {title: "프로젝트관리", icon: <ListAlt sx={{ color: '#c8c8c8' }} />, items: ["프로젝트 계획", "업무관리"], itemLink: ["/project/plan", "/project/task"], open: false},
+        {title: "문서관리", icon: <CloudDownload sx={{ color: '#c8c8c8' }} />, items: ["드라이브"], itemLink: ["/document/drive"], open: false},
+        {title: "프로젝트관리", icon: <ListAlt sx={{ color: '#c8c8c8' }} />, items: ["프로젝트 계획", "업무관리", "업무일정"], itemLink: ["/project/plan", "/project/task", "/project/task/ganttchart"], open: false},
         {title: "시스템관리", icon: <Settings sx={{ color: '#c8c8c8' }} />, items: ["사용자 관리", "사용자 그룹 관리", "부서 관리"], itemLink: ["/system/user", "/system/usergroup", "/system/department"], open: false},
 
         // Example

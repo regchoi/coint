@@ -17,7 +17,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import * as React from "react";
 import axios from "../../../redux/axiosConfig";
 import ErrorModal from "../../common/ErrorModal";
+import SuccessModal from "../../common/SuccessModal";
 import ProjectContext from './ProjectContext';
+import {fetchTableData} from "../../../redux/tableSlice";
+import {API_LINK} from "./data";
+import {AppDispatch, useAppDispatch, useAppSelector} from "../../../redux/store";
 
 type Data = {
     projectName: string;
@@ -47,17 +51,25 @@ interface ModalProps {
 }
 
 export default function AddModal({ open, onClose }: ModalProps) {
+    const dispatch = useAppDispatch();
     // Modal의 페이지네이션 구현
     const [page, setPage] = useState(1);
     const [data, setData] = useState<Data>({} as Data);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [isErrorModalOpen, setErrorModalOpen] = useState<boolean>(false);
+    const [isSuccessModalOpen, setSuccessModalOpen] = useState<boolean>(false);
     const [projectIdNum, setProjectIdNum] = useState<number>(0);
     const [usersList, setUsersList] = React.useState<User[]>([]);
     const [departmentsList, setDepartmentsList] = React.useState<Department[]>([]);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setData(prevData => ({ ...prevData, [event.target.name]: event.target.value }));
+    };
+
+    const SuccessClose = () => {
+        dispatch(fetchTableData(API_LINK));
+        setSuccessModalOpen(false);
+        onClose();
     };
 
     const handleProjectSave = async () => {
@@ -69,8 +81,11 @@ export default function AddModal({ open, onClose }: ModalProps) {
                     startDate: data.startDate,
                     endDate: data.endDate,
                 });
-                if(response.data && response.data.idNum) {
-                    setProjectIdNum(response.data.idNum);
+                if(response.data) {
+                    setProjectIdNum(response.data);
+                } else {
+                    setErrorModalOpen(true);
+                    setErrorMessage('성공적으로 프로젝트를 등록하지 못했습니다.');
                 }
                 setPage(page+1);
             } catch (error) {
@@ -78,17 +93,16 @@ export default function AddModal({ open, onClose }: ModalProps) {
                 if (error instanceof Error) {
                     setErrorMessage(error.message);
                 } else {
-                    setErrorMessage('An unexpected error occurred');
+                    setErrorMessage('성공적으로 프로젝트를 등록하지 못했습니다.');
                 }
             }
         } else if (page === 2) {
+            console.log(projectIdNum);
             try {
-                await axios.post(`/api/project/user/${projectIdNum}`, {
+                await axios.post(`/api/project/user/${projectIdNum}`, usersList.map((user) => {
                     // usersList에서 idNum과 role만 전송
-                    usersList: usersList.map((user) => {
-                        return { idNum: user.idNum, projectId: projectIdNum, role: user.role };
-                    })
-                });
+                    return { userId: user.idNum, projectId: projectIdNum, role: user.role };
+                }));
                 setPage(page+1);
             } catch (error) {
                 setErrorModalOpen(true);
@@ -100,13 +114,13 @@ export default function AddModal({ open, onClose }: ModalProps) {
             }
         } else if (page === 3) {
             try {
-                await axios.post(`/api/project/department/${projectIdNum}`, {
+                await axios.post(`/api/project/department/${projectIdNum}`, departmentsList.map((department) => {
                     // departmentsList에서 idNum과 role만 전송
-                    departmentsList: departmentsList.map((department) => {
-                        return { idNum: department.idNum, projectId: projectIdNum, role: department.role };
-                    })
-                });
-                setPage(page+1);
+                    return { departmentId: department.idNum, projectId: projectIdNum, role: department.role };
+                }));
+
+                // 프로젝트 등록 성공 시, 성공 Modal 띄우고 모든 Modal 닫기
+                setSuccessModalOpen(true);
             } catch (error) {
                 setErrorModalOpen(true);
                 if (error instanceof Error) {
@@ -272,10 +286,15 @@ export default function AddModal({ open, onClose }: ModalProps) {
                         </Button>
                     </Box>
 
-                    {/*
-                에러 발생 Modal
-                ErrorModal은 Error처리 시 Modal을 띄워줄 수 있는 재사용 가능한 컴포넌트입니다.
-                 */}
+                    {/*성공 Modal*/}
+                    <SuccessModal
+                        open={isSuccessModalOpen}
+                        onClose={SuccessClose}
+                        title={""}
+                        description={"프로젝트가 성공적으로 등록되었습니다"}
+                    />
+
+                    {/*에러 발생 Modal*/}
                     <ErrorModal
                         open={isErrorModalOpen}
                         onClose={() => setErrorModalOpen(false)}
