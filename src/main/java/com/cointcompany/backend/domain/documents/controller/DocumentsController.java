@@ -1,7 +1,11 @@
-package com.cointcompany.backend.domain.file.controller;
+package com.cointcompany.backend.domain.documents.controller;
 
-import com.cointcompany.backend.domain.file.entity.FileUploads;
-import com.cointcompany.backend.domain.file.repository.FileUploadRepository;
+import com.cointcompany.backend.domain.directories.repository.DirectoriesRepository;
+import com.cointcompany.backend.domain.documents.dto.DocumentsDto;
+import com.cointcompany.backend.domain.documents.repository.DocumentsRepository;
+import com.cointcompany.backend.domain.documents.service.DocumentsService;
+import com.cointcompany.backend.domain.file.entity.Files;
+import com.cointcompany.backend.domain.file.repository.FilesRepository;
 import com.cointcompany.backend.domain.projects.repository.ProjectsRepository;
 import com.cointcompany.backend.domain.tasks.entity.Tasks;
 import com.cointcompany.backend.domain.tasks.repository.TasksRepository;
@@ -11,70 +15,47 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/document")
 @Slf4j
-public class FileUploadController {
+public class DocumentsController {
 
-    private final FileUploadRepository fileUploadRepository;
+    private final FilesRepository filesRepository;
+    private final DocumentsRepository documentsRepository;
+    private final DirectoriesRepository directoriesRepository;
     private final ProjectsRepository projectsRepository;
     private final TasksRepository tasksRepository;
+    private final DocumentsService documentsService;
 
+    @GetMapping
+    public List<DocumentsDto.GetDocuments> getDocumentsList() {
+        return documentsService.findAllDocuments();
+    }
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-            FileUploads fileUploads = FileUploads.of(
-                    URLEncoder.encode(file.getOriginalFilename(), StandardCharsets.UTF_8),
-                    file.getBytes());
-
-            fileUploadRepository.save(fileUploads);
-
-            return ResponseEntity.ok("File uploaded and saved to DB successfully!");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed.");
-        }
+    public ResponseEntity<String> uploadDocuments(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("directoryId") Long directoryId
+            ) {
+        return documentsService.uploadDocuments(file, directoryId);
     }
 
-    @GetMapping("/download/{id}")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
-        Optional<FileUploads> fileUploads = fileUploadRepository.findById(id);
+    @GetMapping("/download/{documentId}")
+    public ResponseEntity<byte[]> downloadDocuments(@PathVariable Long documentId) {
 
-        if (fileUploads.isPresent()) {
-            FileUploads uploadedFile = fileUploads.get();
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + uploadedFile.getFileName() + "\"")
-                    .body(uploadedFile.getFileData());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/download/list")
-    public FileUploads getFileData() {
-        List<FileUploads> fileUploadsList = fileUploadRepository.findAll();
-        FileUploads uploads = fileUploadsList.get(3);
-        uploads.setFileName(
-                URLDecoder.decode(uploads.getFileName(), StandardCharsets.UTF_8)
-        );
-        return uploads;
+        return documentsService.downloadDocuments(documentId);
     }
 
     @PostMapping("/upload/excel")
@@ -82,33 +63,6 @@ public class FileUploadController {
         if (file.isEmpty()) {
             return "File is empty.";
         }
-
-//        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-//            Sheet sheet = workbook.getSheetAt(0);
-//            Iterator<Row> rowIterator = sheet.iterator();
-//
-//            // 첫 번째 행은 헤더이므로 건너뛰고 데이터를 읽습니다.
-//            if (rowIterator.hasNext()) {
-//                rowIterator.next(); // 첫 번째 행(헤더)을 건너뜁니다.
-//            }
-//
-//            while (rowIterator.hasNext()) {
-//                Row row = rowIterator.next();
-//                int start = row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getYear()*10000
-//                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getMonthValue()*100
-//                        + row.getCell(2).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
-//
-//                int end = row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getYear()*10000
-//                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getMonthValue()*100
-//                        + row.getCell(3).getLocalDateTimeCellValue().toLocalDate().getDayOfMonth();
-//
-//                if (start - end > 0) {
-//                    return "시작날짜와 종료날짜가 올바르지 않습니다.";
-//                }
-//            }
-
-//
-//        }
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
