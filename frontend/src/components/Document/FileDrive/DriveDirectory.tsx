@@ -8,7 +8,7 @@ import {
     ListItemText,
     ListItemAvatar,
     ListItemSecondaryAction,
-    Grid, Menu, MenuItem, MenuProps, PopoverPosition, Divider, LinearProgress
+    Grid, Menu, MenuItem, MenuProps, PopoverPosition, Divider
 } from '@mui/material';
 import {MoreVert, DeleteOutline} from "@mui/icons-material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -72,8 +72,16 @@ const StyledMenu = styled((props: MenuProps) => (
     },
 }));
 
-const Drive: React.FC = () => {
-    const [documents, setDocuments] = useState<docResponse[]>([]);
+const DriveDirectory: React.FC = () => {
+    const [documents, setDocuments] = useState<docResponse[]>([
+        {idNum: 1, docName: 'file1.txt', regUserid: 'user1', regDate: '2022-08-16'},
+        {idNum: 2, docName: 'image.jpg', regUserid: 'user2', regDate: '2022-08-15'},
+        {idNum: 3, docName: 'document.pdf', regUserid: 'user3', regDate: '2022-08-14'},
+        {idNum: 4, docName: 'powerpoint.ppt', regUserid: 'user4', regDate: '2022-08-13'},
+        {idNum: 5, docName: 'document.doc', regUserid: 'user5', regDate: '2022-08-12'},
+        {idNum: 6, docName: 'data.xlsx', regUserid: 'user6', regDate: '2022-08-11'},
+        {idNum: 7, docName: '7.zip', regUserid: 'user7', regDate: '2022-08-10'},
+    ]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [renameModalOpen, setRenameModalOpen] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState({ docName: '', idNum: 0 });
@@ -87,7 +95,6 @@ const Drive: React.FC = () => {
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [directoryId, setDirectoryId] = useState(1);
-    const [loading, setLoading] = useState(true);
 
     // 파일 리스트 조회
     useEffect(() => {
@@ -97,9 +104,8 @@ const Drive: React.FC = () => {
     // 파일 리스트 조회
     const getFiles = async () => {
         try {
-            const response = await axios.get(`/api/document/${directoryId}`);
+            const response = await axios.get(`/api/document`);
             setDocuments(response.data);
-            setLoading(false);
         } catch (error) {
             setErrorMessage('파일 리스트 조회 실패');
             setErrorModalOpen(true);
@@ -290,7 +296,7 @@ const Drive: React.FC = () => {
     };
 
     const handleRename = (idNum: number, newName: string) => {
-        axios.put(`/api/documents/${directoryId}/${idNum}`, { docName: newName })
+        axios.put(`/api/documents/${idNum}`, { docName: newName })
             .then((res) => {
                 const updatedDocuments = documents.map((doc) => {
                     if (doc.idNum === idNum) {
@@ -308,8 +314,7 @@ const Drive: React.FC = () => {
     };
 
     return (
-        <Box sx={{ flexGrow: 1, maxWidth: '1200px', backgroundColor: '#fff', borderRadius: '15px', p: 2,  }}>
-            {loading && <LinearProgress/>}
+        <Box sx={{ flexGrow: 1, maxWidth: '400px', backgroundColor: '#fff', borderRadius: '15px', p: 2,  }}>
             {/*icon 추가를 위한 코드*/}
             <link href="https://cdn.materialdesignicons.com/6.4.95/css/materialdesignicons.min.css" rel="stylesheet" />
 
@@ -468,4 +473,4 @@ const Drive: React.FC = () => {
     );
 };
 
-export default Drive;
+export default DriveDirectory;

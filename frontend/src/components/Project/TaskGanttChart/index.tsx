@@ -98,7 +98,7 @@ const TaskGanttChart = () => {
         } catch (error) {
             console.error('Failed to download project excel:', error);
             setErrorModalOpen(true)
-            setErrorMessage("프로젝트 엑셀 다운로드에 실패했습니다.")
+            setErrorMessage("엑셀파일 다운로드에 실패했습니다.")
         }
     };
 
@@ -130,7 +130,7 @@ const TaskGanttChart = () => {
                 console.log("File uploaded successfully.");
             } else {
                 setErrorModalOpen(true)
-                setErrorMessage("엑셀파일 저장에 실패했습니다.")
+                setErrorMessage("엑셀파일 업로드에 실패했습니다.")
             }
         } catch (error) {
             type ErrorResponse = {
