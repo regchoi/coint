@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/task")
-@CrossOrigin
+//@CrossOrigin
 public class TasksController {
 
     private final TasksService tasksService;

@@ -42,6 +42,7 @@ public class SecurityConfig {
         httpSecurity
                 // jwt 토큰 사용을 위한 설정
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
@@ -59,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/table/**").permitAll()
                         .requestMatchers("/api/project/**").permitAll()
                         .requestMatchers("/api/task/**").permitAll()
+                        .requestMatchers("/api/document/**").permitAll()
                         .requestMatchers("/swagger-ui/index.html").permitAll()
                         .anyRequest().permitAll())
 

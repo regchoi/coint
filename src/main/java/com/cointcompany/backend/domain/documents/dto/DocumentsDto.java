@@ -45,12 +45,9 @@ public class DocumentsDto {
 
         private String docName;
 
-        private Long directoriesIdNum;
-
-        public PostDocuments (Documents documents, Long directoriesIdNum) {
+        public PostDocuments (Documents documents) {
 
             this.docName = documents.getDocName();
-            this.directoriesIdNum = directoriesIdNum;
 
         }
     }
