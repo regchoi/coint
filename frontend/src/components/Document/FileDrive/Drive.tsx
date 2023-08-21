@@ -318,8 +318,8 @@ const Drive: React.FC = () => {
         }
     };
 
-    const handleRename = (idNum: number, newName: string) => {
-        axios.put(`/api/documents/${projectIdNum}/${idNum}`, { docName: newName })
+    const handleRename = async (idNum: number, newName: string) => {
+        await axios.put(`/api/documents/${projectIdNum}/${idNum}`, { docName: newName })
             .then((res) => {
                 const updatedDocuments = documents.map((doc) => {
                     if (doc.idNum === idNum) {
@@ -362,7 +362,9 @@ const Drive: React.FC = () => {
                                     </Typography>
                                 </Box>
                             ) : (
-                                <Box>
+                                <Box sx={{minHeight: '500px'}}>
+                                    {/*세부기능 버튼 추가*/}
+
                                     <ListItem sx={{
                                         width: '100%',
                                         borderBottom: '1px solid var(--dt-outline-variant,#dadce0)'
@@ -473,6 +475,7 @@ const Drive: React.FC = () => {
                                                         open={Boolean(anchorEl)}
                                                         onClose={handleMenuClose}
                                                     >
+                                                        {/* TODO 공유 기능 추가 */}
                                                         <MenuItem onClick={() => handleMenuItemClick("download")}
                                                                   sx={{...fontStyles}}>
                                                             <CloudDownloadIcon sx={{marginRight: '8px'}}/>
