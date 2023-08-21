@@ -16,6 +16,7 @@ import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,8 @@ public class UsersService {
     private final UserGroupsRepository userGroupsRepository;
     private final UserDepartmentRepository userDepartmentRepository;
     private final UserUsergroupRepository userUsergroupRepository;
-    private final ModelMapper mapper;
+    private final ModelMapper modelMapper;
+    private final BCryptPasswordEncoder encoder;
 
     public String checkUsers(List<Users> users) {
         for (Users user : users) {
@@ -43,51 +45,13 @@ public class UsersService {
         return "SUCCESS";
     }
 
-    @Transactional
-    public String saveUsers(UsersDto.putUsersReq putUsersDepartmentsReq) {
-//        log.info("save");
-//
-//        Users users = Users.of(
-//                putUsersDepartmentsReq.getLoginId(), putUsersDepartmentsReq.getName(),
-//                putUsersDepartmentsReq.getPosition(), putUsersDepartmentsReq.getPhone(),
-//                putUsersDepartmentsReq.getEmail()
-//        );
-//        usersRepository.save(users);
-//        // 받은 데이터 중에서 부서만 따로 추출
-//        List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = putUsersDepartmentsReq.getGetUserDepartmentResList();
-//
-//        // 부서가 있다면 진행
-//        for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
-//            Long departmentIdNum =
-//                userDepartmentRepository.save(UserDepartment.of(
-//                        users,
-//                        departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
-//                ));
-//        }
-//
-//        List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
-//
-//        for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
-//                userUsergroupRepository.save(UserUsergroup.of(
-//                        users,
-//                        userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
-//                ));
-//
-//        }
-
-
-
-        return "SUCCESS";
-
-    }
-
     /**
-     * users 테이블에 reg_userid가 비어있으면 안됨!
+     * users 테이블에 reg_userId가 비어있으면 안됨!
      */
     @Transactional(readOnly = true)
-    public List<UsersDto.GetUsersRes> findAllUsersToGetUsersRes() {
+    public List<UsersDto.GetUsers> findAllUsersToGetUsersRes() {
 
-        List<UsersDto.GetUsersRes> usersDtoList = new ArrayList<>();
+        List<UsersDto.GetUsers> usersDtoList = new ArrayList<>();
         List<Users> usersList = usersRepository.findAll();
 
         List<UserDepartment> userDepartmentList;
@@ -112,7 +76,7 @@ public class UsersService {
                 getUserUserGroupsResList.add(getUserUserGroupsRes);
             }
 
-            UsersDto.GetUsersRes usersRes = new UsersDto.GetUsersRes(users, getUserDepartmentResList, getUserUserGroupsResList);
+            UsersDto.GetUsers usersRes = new UsersDto.GetUsers(users, getUserDepartmentResList, getUserUserGroupsResList);
             usersRes.setRegUserid(usersRepository.findById(users.getRegUserid()).orElseThrow().getName());
             usersDtoList.add(usersRes);
         }
@@ -121,42 +85,69 @@ public class UsersService {
         return usersDtoList;
     }
 
-    @Transactional
-    public void removeUsers(Long userId) {
-        Users user = usersRepository.findById(userId).orElseThrow();
-        user.setDel(Boolean.TRUE);
-    }
-
-    @Transactional
-    public void modifyUsers(UsersDto.putUsersReq putUsersDepartmentsReq) {
-//        Users user = usersRepository.getReferenceById(putUsersDepartmentsReq.getIdNum());
+//    @Transactional
+//    public String saveUsers(UsersDto.putUsersReq putUsersDepartmentsReq) {
 //
-//        user.setName(putUsersDepartmentsReq.getName());
-//        user.setPosition(putUsersDepartmentsReq.getPosition());
-//        user.setPhone(putUsersDepartmentsReq.getPhone());
-//        user.setEmail(putUsersDepartmentsReq.getEmail());
-//
+//        Users users = Users.of(
+//                putUsersDepartmentsReq.getLoginId(), putUsersDepartmentsReq.getName(),
+//                putUsersDepartmentsReq.getPosition(), putUsersDepartmentsReq.getPhone(),
+//                putUsersDepartmentsReq.getEmail()
+//        );
+//        usersRepository.save(users);
+//        // 받은 데이터 중에서 부서만 따로 추출
 //        List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList = putUsersDepartmentsReq.getGetUserDepartmentResList();
 //
 //        // 부서가 있다면 진행
 //        for (DepartmentsDto.GetUserDepartmentRes getUserDepartmentRes : getUserDepartmentResList) {
-//            if (userDepartmentRepository.findByDepartments_IdNumAndUsers_IdNum(getUserDepartmentRes.getIdNum(), user.getIdNum()) == null){
-//                userDepartmentRepository.save(UserDepartment.of(
-//                        user,
-//                        departmentsRepository.findById(getUserDepartmentRes.getIdNum()).orElseThrow()
-//                ));
-//            }
+//            userDepartmentRepository.save(UserDepartment.of(
+//                    users,
+//                    departmentsRepository.findById(getUserDepartmentRes.getDepartmentIdNum()).orElseThrow()
+//            ));
 //        }
 //
 //        List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList = putUsersDepartmentsReq.getGetUserUserGroupsResList();
 //
 //        for (UserGroupsDto.GetUserUserGroupsRes getUserUserGroupsRes : getUserUserGroupsResList) {
-//                userUsergroupRepository.save(UserUsergroup.of(
-//                        user,
-//                        userGroupsRepository.findById(getUserUserGroupsRes.getIdNum()).orElseThrow()
-//                ));
+//            userUsergroupRepository.save(UserUsergroup.of(
+//                    users,
+//                    userGroupsRepository.findById(getUserUserGroupsRes.getUsergroupIdNum()).orElseThrow()
+//            ));
 //        }
+//
+//        return "SUCCESS";
+//
+//    }
+    @Transactional
+    public String saveUsers(UsersDto.SaveUsers saveUsers) {
 
+        Users users = Users.of(
+                saveUsers.getLoginId(),
+                saveUsers.getName(),
+                saveUsers.getPosition(),
+                saveUsers.getPhone(),
+                saveUsers.getEmail()
+        );
+        users.setLoginPw(encoder.encode(users.getLoginPw()));
+        usersRepository.save(users);
+
+        return "SUCCESS";
+
+    }
+
+    @Transactional
+    public void modifyUsers(UsersDto.ModifyUsers modifyUsers) {
+        Users user = usersRepository.getReferenceById(modifyUsers.getIdNum());
+        user.setName(modifyUsers.getName());
+        user.setPosition(modifyUsers.getPosition());
+        user.setPhone(modifyUsers.getPhone());
+        user.setEmail(modifyUsers.getEmail());
+
+    }
+
+    @Transactional
+    public void removeUsers(Long userId) {
+        Users user = usersRepository.findById(userId).orElseThrow();
+        user.setDel(Boolean.TRUE);
     }
 
     public List<Users> getUsersByDepartmentId(Long departmentId) {

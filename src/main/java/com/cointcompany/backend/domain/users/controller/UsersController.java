@@ -28,38 +28,64 @@ public class UsersController {
     @Operation(summary = "사용자 정보 전체 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
-    public ResponseEntity<List<UsersDto.GetUsersRes>> getUsers () {
+    public ResponseEntity<List<UsersDto.GetUsers>> getUsers () {
 
-        List<UsersDto.GetUsersRes> usersList = usersService.findAllUsersToGetUsersRes();
+        List<UsersDto.GetUsers> usersList = usersService.findAllUsersToGetUsersRes();
 
         return new ResponseEntity<>(usersList, HttpStatus.OK);
     }
 
+//    @Operation(summary = "사용자 신규 등록")
+//    @ApiResponse(responseCode = "200", description = "등록 성공")
+//    @PostMapping
+//    public ResponseEntity<String> postUsers (@RequestBody List<UsersDto.putUsersReq> usersDepartmentsReqList) {
+//
+//        for (UsersDto.putUsersReq saveUserReq : usersDepartmentsReqList) {
+//            usersService.saveUsers(saveUserReq);
+//        }
+//
+//        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+//    }
     @Operation(summary = "사용자 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping
-    public ResponseEntity<String> postUsers (@RequestBody List<UsersDto.putUsersReq> usersDepartmentsReqList) {
+    public ResponseEntity<String> saveUsers (@RequestBody List<UsersDto.SaveUsers> usersDepartmentsReqList) {
 
-        for (UsersDto.putUsersReq saveUserReq : usersDepartmentsReqList) {
+        for (UsersDto.SaveUsers saveUserReq : usersDepartmentsReqList) {
             usersService.saveUsers(saveUserReq);
         }
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+//    @Operation(summary = "사용자 수정")
+//    @ApiResponse(responseCode = "200", description = "수정 성공")
+//    @PutMapping
+//    public ResponseEntity<String> putUsers (@RequestBody List<UsersDto.modifyUsers> modifyUsersList) {
+//
+//        for (UsersDto.modifyUsers modifyUsers : modifyUsersList) {
+//            usersService.modifyUsers(modifyUserReq);
+//
+//        }
+//
+//        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+//    }
     @Operation(summary = "사용자 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @PutMapping
-    public ResponseEntity<String> putUsers (@RequestBody List<UsersDto.putUsersReq> listUsers) {
+    public ResponseEntity<String> putUsers (@RequestBody List<UsersDto.ModifyUsers> modifyUsersList) {
 
-        for (UsersDto.putUsersReq modifyUserReq : listUsers) {
-            usersService.modifyUsers(modifyUserReq);
+        for (UsersDto.ModifyUsers modifyUsers : modifyUsersList) {
+            usersService.modifyUsers(modifyUsers);
 
         }
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    /**
+     * 일괄 삭제를 사용하기 위하여 DeleteMapping 대신 PostMapping 사용
+     */
     @Operation(summary = "사용자 삭제")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
     @PostMapping("/delete")

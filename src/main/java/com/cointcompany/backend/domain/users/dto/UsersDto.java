@@ -18,7 +18,7 @@ public class UsersDto {
 
     @NoArgsConstructor
     @Data
-    public static class GetUsersRes {
+    public static class GetUsers {
         private Long idNum;
 
         private String loginId;
@@ -39,7 +39,7 @@ public class UsersDto {
 
         private List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList;
 
-        public GetUsersRes (Users users, List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList,
+        public GetUsers (Users users, List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList,
                             List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList) {
 
             this.idNum = users.getIdNum();
@@ -54,9 +54,66 @@ public class UsersDto {
             this.getUserUserGroupsResList = getUserUserGroupsResList;
         }
     }
+//    @NoArgsConstructor
+//    @Data
+//    public static class putUsersReq {
+//        private Long idNum;
+//
+//        private String loginId;
+//
+//        private String name;
+//
+//        private String position;
+//
+//        private String phone;
+//
+//        private String email;
+//
+//        private List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList;
+//
+//        private List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList;
+//
+//        public putUsersReq (Users users, List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList,
+//                            List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList) {
+//
+//            this.idNum = users.getIdNum();
+//            this.loginId = users.getLoginId();
+//            this.name = users.getName();
+//            this.position = users.getPosition();
+//            this.phone = users.getPhone();
+//            this.email = users.getEmail();
+//            this.getUserDepartmentResList = getUserDepartmentResList;
+//            this.getUserUserGroupsResList = getUserUserGroupsResList;
+//        }
+//    }
     @NoArgsConstructor
     @Data
-    public static class putUsersReq {
+    public static class SaveUsers {
+
+        private String loginId;
+
+        private String name;
+
+        private String position;
+
+        private String phone;
+
+        private String email;
+
+        public SaveUsers (Users users) {
+
+            this.loginId = users.getLoginId();
+            this.name = users.getName();
+            this.position = users.getPosition();
+            this.phone = users.getPhone();
+            this.email = users.getEmail();
+
+        }
+    }
+    @NoArgsConstructor
+    @Data
+    public static class ModifyUsers {
+
         private Long idNum;
 
         private String loginId;
@@ -69,12 +126,7 @@ public class UsersDto {
 
         private String email;
 
-        private List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList;
-
-        private List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList;
-
-        public putUsersReq (Users users, List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList,
-                            List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList) {
+        public ModifyUsers (Users users) {
 
             this.idNum = users.getIdNum();
             this.loginId = users.getLoginId();
@@ -82,9 +134,9 @@ public class UsersDto {
             this.position = users.getPosition();
             this.phone = users.getPhone();
             this.email = users.getEmail();
-            this.getUserDepartmentResList = getUserDepartmentResList;
-            this.getUserUserGroupsResList = getUserUserGroupsResList;
+
         }
     }
+
 
 }

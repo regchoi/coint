@@ -57,6 +57,10 @@ public class UserGroupsController {
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
+
+    /**
+     * 일괄 삭제를 사용하기 위하여 DeleteMapping 대신 PostMapping 사용
+     */
     @Operation(summary = "사용자 그룹 삭제")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
     @PostMapping("/delete")

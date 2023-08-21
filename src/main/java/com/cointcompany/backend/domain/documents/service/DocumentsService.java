@@ -33,22 +33,22 @@ public class DocumentsService {
     private final DocumentsRepository documentsRepository;
     private final FilesRepository filesRepository;
 
-    @Transactional(readOnly = true)
-    public List<DocumentsDto.GetDocuments> findAllDocuments() {
-
-        List<DocumentsDto.GetDocuments> getDocumentsList = new ArrayList<>();
-        List<Documents> documentsList = documentsRepository.findAll();
-
-        for (Documents documents : documentsList) {
-            DocumentsDto.GetDocuments getDocuments = new DocumentsDto.GetDocuments(
-                            documents,
-                            documents.getFiles().getIdNum(),
-                            documents.getDirectories().getIdNum());
-            getDocumentsList.add(getDocuments);
-        }
-
-        return getDocumentsList;
-    }
+//    @Transactional(readOnly = true)
+//    public List<DocumentsDto.GetDocuments> findAllDocuments() {
+//
+//        List<DocumentsDto.GetDocuments> getDocumentsList = new ArrayList<>();
+//        List<Documents> documentsList = documentsRepository.findAll();
+//
+//        for (Documents documents : documentsList) {
+//            DocumentsDto.GetDocuments getDocuments = new DocumentsDto.GetDocuments(
+//                            documents,
+//                            documents.getFiles().getIdNum(),
+//                            documents.getDirectories().getIdNum());
+//            getDocumentsList.add(getDocuments);
+//        }
+//
+//        return getDocumentsList;
+//    }
 
     @Transactional
     public ResponseEntity<String> uploadDocuments(MultipartFile file, Long directoryId) {
@@ -90,22 +90,37 @@ public class DocumentsService {
         }
 
     }
-    @Transactional
-    public String modifyDirectories(DirectoriesDto.PostDirectories postDirectories, Long directoriesIdNum) {
 
-        Directories directories = directoriesRepository.findById(directoriesIdNum).orElseThrow();
-        directories.setDirName(postDirectories.getDirName());
+    @Transactional(readOnly = true)
+    public List<DocumentsDto.GetDocuments> findAllDocuments(Long directoryId) {
+
+        List<DocumentsDto.GetDocuments> getDocumentsList = new ArrayList<>();
+        List<Documents> documentsList = documentsRepository.findByDirectories_IdNum(directoryId);
+
+        for (Documents documents : documentsList) {
+            DocumentsDto.GetDocuments getDocuments = new DocumentsDto.GetDocuments(documents);
+            getDocumentsList.add(getDocuments);
+        }
+
+        return getDocumentsList;
+    }
+
+    @Transactional
+    public String modifyDocuments(DocumentsDto.PostDocuments postDocuments, Long documentId) {
+
+        Documents documents = documentsRepository.findById(documentId).orElseThrow();
+        documents.setDocName(postDocuments.getDocName());
 
         return "SUCCESS";
 
     }
 
     @Transactional
-    public String removeDirectories(Long directoriesIdNum) {
+    public String removeDocuments(Long documentsIdNum) {
 
         //삭제하기 전 연결 된 Document 먼저 삭제
 
-        directoriesRepository.deleteById(directoriesIdNum);
+        directoriesRepository.deleteById(documentsIdNum);
 
         return "SUCCESS";
     }

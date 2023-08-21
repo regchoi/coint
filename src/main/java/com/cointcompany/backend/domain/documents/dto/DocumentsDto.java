@@ -24,12 +24,12 @@ public class DocumentsDto {
 
         private String modUserid;
 
-        public GetDocuments (Documents documents, Long filesIdNum, Long directoriesIdNum) {
+        public GetDocuments (Documents documents) {
 
             this.idNum = documents.getIdNum();
             this.docName = documents.getDocName();
-            this.filesIdNum = filesIdNum;
-            this.directoriesIdNum = directoriesIdNum;
+            this.filesIdNum = documents.getFiles().getIdNum();
+            this.directoriesIdNum = documents.getDirectories().getIdNum();
 //            this.modDate = documents.getModDate().toString().isEmpty()?
 //                    String.valueOf(documents.getRegDate()): String.valueOf(documents.getModDate());
 //            this.modUserid = documents.getModUserid().toString().isEmpty()?
@@ -45,14 +45,11 @@ public class DocumentsDto {
 
         private String docName;
 
-        private Long filesIdNum;
-
         private Long directoriesIdNum;
 
-        public PostDocuments (Documents documents, Long filesIdNum, Long directoriesIdNum) {
+        public PostDocuments (Documents documents, Long directoriesIdNum) {
 
             this.docName = documents.getDocName();
-            this.filesIdNum = filesIdNum;
             this.directoriesIdNum = directoriesIdNum;
 
         }
