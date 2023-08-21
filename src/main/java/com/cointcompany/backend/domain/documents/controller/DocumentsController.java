@@ -4,28 +4,26 @@ import com.cointcompany.backend.domain.directories.repository.DirectoriesReposit
 import com.cointcompany.backend.domain.documents.dto.DocumentsDto;
 import com.cointcompany.backend.domain.documents.repository.DocumentsRepository;
 import com.cointcompany.backend.domain.documents.service.DocumentsService;
-import com.cointcompany.backend.domain.file.entity.Files;
 import com.cointcompany.backend.domain.file.repository.FilesRepository;
 import com.cointcompany.backend.domain.projects.repository.ProjectsRepository;
 import com.cointcompany.backend.domain.tasks.entity.Tasks;
 import com.cointcompany.backend.domain.tasks.repository.TasksRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,14 +38,14 @@ public class DocumentsController {
     private final TasksRepository tasksRepository;
     private final DocumentsService documentsService;
 
-    @GetMapping
-    public List<DocumentsDto.GetDocuments> getDocumentsList() {
-        return documentsService.findAllDocuments();
-    }
-    @PostMapping("/upload")
+//    @GetMapping
+//    public List<DocumentsDto.GetDocuments> getDocumentsList() {
+//        return documentsService.findAllDocuments();
+//    }
+    @PostMapping("/upload/{directoryId}")
     public ResponseEntity<String> uploadDocuments(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("directoryId") Long directoryId
+            @PathVariable Long directoryId
             ) {
         return documentsService.uploadDocuments(file, directoryId);
     }
@@ -100,10 +98,6 @@ public class DocumentsController {
         short dateFormat = workbook.createDataFormat().getFormat("yyyy-MM-dd");
         dateCellStyle.setDataFormat(dateFormat);
 
-//        CellStyle hiddenCellStyle = workbook.createCellStyle();
-//        hiddenCellStyle.setHidden(true);
-
-
         int rowNum = 0;
         Row headerRow = sheet.createRow(rowNum++);
         headerRow.createCell(0).setCellValue("taskName");
@@ -115,8 +109,6 @@ public class DocumentsController {
         // ... 다른 헤더 셀들 생성
 
         sheet.setColumnWidth(5,0);
-//        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
 
         for (Tasks tasks : tasksList) {
             Row row = sheet.createRow(rowNum++);
@@ -137,7 +129,6 @@ public class DocumentsController {
 
             Cell cell = row.createCell(5);
             cell.setCellValue(tasks.getIdNum());
-//            cell.setCellStyle(hiddenCellStyle);
         }
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -145,5 +136,22 @@ public class DocumentsController {
 
         workbook.write(response.getOutputStream());
         workbook.close();
+    }
+
+    @Operation(summary = "문서 전체 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/{directoryId}")
+    public ResponseEntity<List<DocumentsDto.GetDocuments>> getDocuments (@PathVariable Long directoryId) {
+
+        return new ResponseEntity<>(documentsService.findAllDocuments(directoryId), HttpStatus.OK);
+    }
+    @Operation(summary = "문서 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/{directoryId}/{documentId}")
+    public ResponseEntity<String> modifyDocuments (
+            @PathVariable Long documentId,
+            @RequestParam DocumentsDto.PostDocuments postDocuments) {
+
+        return new ResponseEntity<>(documentsService.modifyDocuments(postDocuments, documentId), HttpStatus.OK);
     }
 }

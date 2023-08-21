@@ -58,7 +58,7 @@ public class DirectoriesService {
     @Transactional
     public String removeDirectories(Long directoriesIdNum) {
 
-        //삭제하기 전 연결 된 Document 먼저 삭제
+        //todo:삭제하기 전 연결 된 Document 먼저 삭제
 
         directoriesRepository.deleteById(directoriesIdNum);
 

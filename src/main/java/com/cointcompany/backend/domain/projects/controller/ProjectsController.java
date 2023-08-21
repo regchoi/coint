@@ -98,7 +98,7 @@ public class ProjectsController {
 
     @Operation(summary = "프로젝트 삭제")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
-    @GetMapping("/delete/{projectId}")
+    @DeleteMapping("/delete/{projectId}")
     public ResponseEntity<String> deleteProjects (@PathVariable Long projectId) {
 
         projectsService.deleteProjects(projectId);

@@ -1,11 +1,7 @@
 package com.cointcompany.backend.domain.tasks.controller;
 
 import com.cointcompany.backend.common.config.security.jwt.security.UserDetailsImpl;
-import com.cointcompany.backend.domain.projects.dto.ProjectsDto;
-import com.cointcompany.backend.domain.projects.entity.Projects;
-import com.cointcompany.backend.domain.projects.service.ProjectsService;
 import com.cointcompany.backend.domain.tasks.dto.TasksDto;
-import com.cointcompany.backend.domain.tasks.entity.Tasks;
 import com.cointcompany.backend.domain.tasks.service.TasksService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Tag(name = "업무", description = "업무 API 명세서")
@@ -92,7 +86,7 @@ public class TasksController {
 
     @Operation(summary = "업무 삭제")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
-    @GetMapping("/{projectId}/delete/{taskId}")
+    @DeleteMapping("/{projectId}/delete/{taskId}")
     public ResponseEntity<String> deleteUserGroups (
             @PathVariable Long taskId
     ) {
