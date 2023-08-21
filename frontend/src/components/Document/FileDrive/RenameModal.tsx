@@ -18,7 +18,6 @@ interface RenameModalProps {
 
 const RenameModal: React.FC<RenameModalProps> = ({ open, handleClose, document, handleRename }) => {
     const [newName, setNewName] = useState('');
-    console.log(document)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNewName(e.target.value);

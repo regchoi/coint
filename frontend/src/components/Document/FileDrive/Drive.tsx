@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     Box,
     Avatar,
@@ -19,6 +19,7 @@ import RenameModal from "./RenameModal";
 import axios from "../../../redux/axiosConfig";
 import ErrorModal from "../../common/ErrorModal";
 import { useDropzone } from 'react-dropzone';
+import SuccessModal from "../../common/SuccessModal";
 
 interface docResponse {
     idNum: number;
@@ -89,6 +90,8 @@ const Drive: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [files, setFiles] = useState<File[]>([]);
     const [isUploading, setIsUploading] = useState(false);
+    const [successModalOpen, setSuccessModalOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
 
     // 공용 폰트 스타일
@@ -99,8 +102,30 @@ const Drive: React.FC = () => {
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
-        handleFileUpload();
     }, []);
+
+    // files 상태가 변경되면 파일 업로드를 수행
+    useEffect(() => {
+        const uploadFiles = async () => {
+            if (files.length > 0) {
+                handleFileUpload()
+                    .then(() => {
+                        setSuccessMessage('파일 업로드 성공');
+                        setSuccessModalOpen(true);
+                        setIsUploading(false);
+                        return;
+                    })
+                    .catch((error) => {
+                        setErrorMessage('파일 업로드 실패');
+                        setErrorModalOpen(true);
+                        setIsUploading(false);
+                        return;
+                    });
+            }
+        };
+
+        uploadFiles();
+    }, [files]);
 
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
@@ -118,10 +143,25 @@ const Drive: React.FC = () => {
 
     const handleFileUpload = async () => {
         setIsUploading(true);
-        setIsUploading(true);
-        setErrorMessage('파일 업로드 미연동');
-        setErrorModalOpen(true);
+        if (files.length > 0) {
+            const formData = new FormData();
+            formData.append('file', files[0]);
+            const response = await axios.post('/api/document/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            if (response.status === 200) {
+                console.log(response.data)
+                return Promise.resolve();
+            } else {
+                return Promise.reject();
+            }
+        } else {
+            return Promise.reject();
+        }
     };
+
 
     const handleFileDownload = async (fileName: string) => {
         // 파일 다운로드 로직...
@@ -369,6 +409,14 @@ const Drive: React.FC = () => {
                 onClose={() => setErrorModalOpen(false)}
                 title="요청 실패"
                 description={errorMessage || ""}
+            />
+
+            {/*성공 확인 Modal*/}
+            <SuccessModal
+                open={successModalOpen}
+                onClose={() => setSuccessModalOpen(false)}
+                title="요청 성공"
+                description={successMessage || ""}
             />
         </Box>
     );
