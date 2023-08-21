@@ -15,6 +15,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { getIconByFileType } from "./getIconByFileType";
 import {alpha, styled} from "@mui/material/styles";
 import RenameModal from "./RenameModal";
@@ -319,7 +321,7 @@ const Drive: React.FC = () => {
     };
 
     const handleRename = async (idNum: number, newName: string) => {
-        await axios.put(`/api/documents/${projectIdNum}/${idNum}`, { docName: newName })
+        await axios.put(`/api/document/${projectIdNum}/${idNum}`, { docName: newName })
             .then((res) => {
                 const updatedDocuments = documents.map((doc) => {
                     if (doc.idNum === idNum) {
@@ -342,7 +344,13 @@ const Drive: React.FC = () => {
             {/*icon 추가를 위한 코드*/}
             <link href="https://cdn.materialdesignicons.com/6.4.95/css/materialdesignicons.min.css" rel="stylesheet" />
 
-                    <List sx={{width: '100%'}} {...rootProps}>
+                    <List sx={{
+                        width: '100%',
+                        // focus 시에 outline이 생기는 것을 방지
+                        '&:focus': {
+                            outline: 'none',
+                        }
+                    }} {...rootProps}>
                         <input {...getInputProps()} />
                         {
                             isDragActive ? (
@@ -499,6 +507,19 @@ const Drive: React.FC = () => {
                                                                     이름변경
                                                                 </MenuItem>
                                                         }
+                                                        <Divider sx={{my: 0.5}}/>
+                                                        <MenuItem onClick={() => handleMenuItemClick("move")}
+                                                                  sx={{...fontStyles}}>
+                                                            <DriveFileRenameOutlineIcon
+                                                                sx={{marginRight: '8px'}}/>
+                                                            이동
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => handleMenuItemClick("copy")}
+                                                                  sx={{...fontStyles}}>
+                                                            <DriveFileRenameOutlineIcon
+                                                                sx={{marginRight: '8px'}}/>
+                                                            복사
+                                                        </MenuItem>
                                                         <Divider sx={{my: 0.5}}/>
                                                         <MenuItem onClick={() => handleMenuItemClick("delete")}
                                                                   sx={{...fontStyles}}>
