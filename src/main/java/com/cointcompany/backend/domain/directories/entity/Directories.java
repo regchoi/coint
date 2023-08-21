@@ -35,6 +35,9 @@ public class Directories extends BaseEntity {
     @OneToMany(mappedBy = "directories", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Documents> documents;
 
+    @OneToMany(mappedBy = "directories", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<DirectoryUsers> directoryUsers;
+
     public static Directories of (
             String dirName, Directories directories
     ) {

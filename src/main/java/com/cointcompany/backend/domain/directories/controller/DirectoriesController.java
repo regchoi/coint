@@ -23,15 +23,15 @@ public class DirectoriesController {
 
     private final DirectoriesService directoriesService;
 
-    @Operation(summary = "디렉토리 전체 조회")
-    @ApiResponse(responseCode = "200", description = "조회 성공")
-    @GetMapping
-    public ResponseEntity<List<DirectoriesDto.GetDirectories>> getDirectories () {
-
-        List<DirectoriesDto.GetDirectories> directoriesList = directoriesService.findAllDirectories();
-
-        return new ResponseEntity<>(directoriesList, HttpStatus.OK);
-    }
+//    @Operation(summary = "디렉토리 전체 조회")
+//    @ApiResponse(responseCode = "200", description = "조회 성공")
+//    @GetMapping
+//    public ResponseEntity<List<DirectoriesDto.GetDirectories>> getDirectories () {
+//
+//        List<DirectoriesDto.GetDirectories> directoriesList = directoriesService.findAllDirectories();
+//
+//        return new ResponseEntity<>(directoriesList, HttpStatus.OK);
+//    }
 
     @Operation(summary = "디렉토리 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
@@ -67,6 +67,16 @@ public class DirectoriesController {
         directoriesService.removeDirectories(directoryId);
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "디렉토리 사용자 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping
+    public ResponseEntity<List<DirectoriesDto.GetDirectoryUsers>> getDirectoryUsers () {
+
+        List<DirectoriesDto.GetDirectoryUsers> directoryUsersList = directoriesService.findDirectoryUsers();
+
+        return new ResponseEntity<>(directoryUsersList, HttpStatus.OK);
     }
 
 }

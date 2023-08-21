@@ -2,6 +2,7 @@ package com.cointcompany.backend.domain.users.entity;
 
 import com.cointcompany.backend.common.config.security.jwt.dto.AuthDto;
 import com.cointcompany.backend.domain.common.BaseEntity;
+import com.cointcompany.backend.domain.directories.entity.DirectoryUsers;
 import com.cointcompany.backend.domain.documents.entity.DocumentUsers;
 import com.cointcompany.backend.domain.projects.entity.ProjectUser;
 import jakarta.persistence.*;
@@ -54,6 +55,9 @@ public class Users extends BaseEntity {
 
     @OneToMany(mappedBy = "users", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<DocumentUsers> documentUsers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "users", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<DirectoryUsers> directoryUsers = new ArrayList<>();
 
     public static Users of(
             String loginId, String name,

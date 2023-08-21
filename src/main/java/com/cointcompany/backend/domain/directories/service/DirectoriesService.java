@@ -2,7 +2,9 @@ package com.cointcompany.backend.domain.directories.service;
 
 import com.cointcompany.backend.domain.directories.dto.DirectoriesDto;
 import com.cointcompany.backend.domain.directories.entity.Directories;
+import com.cointcompany.backend.domain.directories.entity.DirectoryUsers;
 import com.cointcompany.backend.domain.directories.repository.DirectoriesRepository;
+import com.cointcompany.backend.domain.directories.repository.DirectoryUsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.List;
 public class DirectoriesService {
 
     private final DirectoriesRepository directoriesRepository;
+    private final DirectoryUsersRepository directoryUsersRepository;
 
     @Transactional(readOnly = true)
     public List<DirectoriesDto.GetDirectories> findAllDirectories() {
@@ -33,11 +36,11 @@ public class DirectoriesService {
     }
 
     @Transactional
-    public String saveDirectories(DirectoriesDto.PostDirectories postDirectories, Long parentDirectoriesIdNum) {
+    public String saveDirectories(DirectoriesDto.PostDirectories postDirectories, Long parentDirectoriesId) {
 
         Directories directories = Directories.of(
                 postDirectories.getDirName(),
-                directoriesRepository.findById(parentDirectoriesIdNum).orElseThrow()
+                directoriesRepository.findById(parentDirectoriesId).orElseThrow()
         );
 
         directoriesRepository.save(directories);
@@ -46,9 +49,9 @@ public class DirectoriesService {
     }
 
     @Transactional
-    public String modifyDirectories(DirectoriesDto.PostDirectories postDirectories, Long directoriesIdNum) {
+    public String modifyDirectories(DirectoriesDto.PostDirectories postDirectories, Long directoriesId) {
 
-        Directories directories = directoriesRepository.findById(directoriesIdNum).orElseThrow();
+        Directories directories = directoriesRepository.findById(directoriesId).orElseThrow();
         directories.setDirName(postDirectories.getDirName());
 
         return "SUCCESS";
@@ -56,13 +59,38 @@ public class DirectoriesService {
     }
 
     @Transactional
-    public String removeDirectories(Long directoriesIdNum) {
+    public String removeDirectories(Long directoriesId) {
 
-        //todo:삭제하기 전 연결 된 Document 먼저 삭제
-
-        directoriesRepository.deleteById(directoriesIdNum);
+        directoriesRepository.deleteById(directoriesId);
 
         return "SUCCESS";
     }
+
+    @Transactional(readOnly = true)
+    public List<DirectoriesDto.GetDirectoryUsers> findDirectoryUsers() {
+
+        List<DirectoriesDto.GetDirectoryUsers> getDirectoryUsersList = new ArrayList<>();
+        List<DirectoryUsers> directoryUsersList = directoryUsersRepository.findAll();
+
+        for (DirectoryUsers directoryUsers : directoryUsersList) {
+            DirectoriesDto.GetDirectoryUsers getDirectories = new DirectoriesDto.GetDirectoryUsers(directoryUsers);
+            getDirectoryUsersList.add(getDirectories);
+        }
+
+        return getDirectoryUsersList;
+    }
+//    @Transactional(readOnly = true)
+//    public List<DirectoriesDto.GetDirectoryUsers> findDirectoryUsers(Long userId) {
+//
+//        List<DirectoriesDto.GetDirectoryUsers> getDirectoryUsersList = new ArrayList<>();
+//        List<DirectoryUsers> directoryUsersList = directoryUsersRepository.findByUsers_IdNumAnd(userId);
+//
+//        for (DirectoryUsers directoryUsers : directoryUsersList) {
+//            DirectoriesDto.GetDirectoryUsers getDirectories = new DirectoriesDto.GetDirectoryUsers(directoryUsers);
+//            getDirectoryUsersList.add(getDirectories);
+//        }
+//
+//        return getDirectoryUsersList;
+//    }
 
 }

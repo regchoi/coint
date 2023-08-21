@@ -1,12 +1,9 @@
 package com.cointcompany.backend.domain.directories.dto;
 
-import com.cointcompany.backend.domain.departments.dto.DepartmentsDto;
 import com.cointcompany.backend.domain.directories.entity.Directories;
-import com.cointcompany.backend.domain.usergroups.dto.UserGroupsDto;
+import com.cointcompany.backend.domain.directories.entity.DirectoryUsers;
 import com.cointcompany.backend.domain.users.entity.Users;
 import lombok.*;
-
-import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
@@ -39,6 +36,21 @@ public class DirectoriesDto {
         public PostDirectories (String dirName) {
 
             this.dirName = dirName;
+
+        }
+    }
+    @NoArgsConstructor
+    @Data
+    public static class GetDirectoryUsers {
+
+        private Long directoriesIdNum;
+
+        private Long usersIdNum;
+
+        public GetDirectoryUsers (DirectoryUsers directoryUsers) {
+
+            this.directoriesIdNum = directoryUsers.getDirectories().getIdNum();
+            this.usersIdNum = directoryUsers.getUsers().getIdNum();
 
         }
     }

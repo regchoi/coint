@@ -1,6 +1,5 @@
 package com.cointcompany.backend.domain.documents.service;
 
-import com.cointcompany.backend.domain.directories.dto.DirectoriesDto;
 import com.cointcompany.backend.domain.directories.entity.Directories;
 import com.cointcompany.backend.domain.directories.repository.DirectoriesRepository;
 import com.cointcompany.backend.domain.documents.dto.DocumentsDto;
@@ -116,11 +115,9 @@ public class DocumentsService {
     }
 
     @Transactional
-    public String removeDocuments(Long documentsIdNum) {
+    public String removeDocuments(Long documentId) {
 
-        //삭제하기 전 연결 된 Document 먼저 삭제
-
-        directoriesRepository.deleteById(documentsIdNum);
+        documentsRepository.deleteById(documentId);
 
         return "SUCCESS";
     }

@@ -10,6 +10,7 @@ import com.cointcompany.backend.domain.tasks.entity.Tasks;
 import com.cointcompany.backend.domain.tasks.repository.TasksRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
 
+@Tag(name = "파일", description = "파일 API 명세서")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/document")
@@ -42,6 +44,8 @@ public class DocumentsController {
 //    public List<DocumentsDto.GetDocuments> getDocumentsList() {
 //        return documentsService.findAllDocuments();
 //    }
+    @Operation(summary = "파일 업로드")
+    @ApiResponse(responseCode = "200", description = "업로드 성공")
     @PostMapping("/upload/{directoryId}")
     public ResponseEntity<String> uploadDocuments(
             @RequestParam("file") MultipartFile file,
@@ -50,12 +54,16 @@ public class DocumentsController {
         return documentsService.uploadDocuments(file, directoryId);
     }
 
+    @Operation(summary = "파일 다운로드")
+    @ApiResponse(responseCode = "200", description = "다운로드 성공")
     @GetMapping("/download/{documentId}")
     public ResponseEntity<byte[]> downloadDocuments(@PathVariable Long documentId) {
 
         return documentsService.downloadDocuments(documentId);
     }
 
+    @Operation(summary = "엑셀 업로드")
+    @ApiResponse(responseCode = "200", description = "엑셀 업로드 성공")
     @PostMapping("/upload/excel")
     public String uploadExcel(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
@@ -87,6 +95,8 @@ public class DocumentsController {
         }
     }
 
+    @Operation(summary = "엑셀 다운로드")
+    @ApiResponse(responseCode = "200", description = "다운로드 성공")
     @GetMapping("/download/excel/{projectId}")
     public void downloadExcel(HttpServletResponse response, @PathVariable Long projectId) throws IOException {
         List<Tasks> tasksList = tasksRepository.findByProjectsIdNum(projectId);
@@ -138,14 +148,14 @@ public class DocumentsController {
         workbook.close();
     }
 
-    @Operation(summary = "문서 전체 조회")
+    @Operation(summary = "파일 전체 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{directoryId}")
     public ResponseEntity<List<DocumentsDto.GetDocuments>> getDocuments (@PathVariable Long directoryId) {
 
         return new ResponseEntity<>(documentsService.findAllDocuments(directoryId), HttpStatus.OK);
     }
-    @Operation(summary = "문서 수정")
+    @Operation(summary = "파일 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @PutMapping("/{directoryId}/{documentId}")
     public ResponseEntity<String> modifyDocuments (
@@ -153,5 +163,13 @@ public class DocumentsController {
             @RequestParam DocumentsDto.PostDocuments postDocuments) {
 
         return new ResponseEntity<>(documentsService.modifyDocuments(postDocuments, documentId), HttpStatus.OK);
+    }
+    @Operation(summary = "파일 삭제")
+    @ApiResponse(responseCode = "200", description = "삭제 성공")
+    @DeleteMapping("/{directoryId}/{documentId}")
+    public ResponseEntity<String> deleteDocuments (
+            @PathVariable Long documentId) {
+
+        return new ResponseEntity<>(documentsService.removeDocuments(documentId), HttpStatus.OK);
     }
 }
