@@ -1,476 +1,182 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {
-    Box,
-    Avatar,
-    IconButton,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemAvatar,
-    ListItemSecondaryAction,
-    Grid, Menu, MenuItem, MenuProps, PopoverPosition, Divider
-} from '@mui/material';
-import {MoreVert, DeleteOutline} from "@mui/icons-material";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import { getIconByFileType } from "./getIconByFileType";
-import {alpha, styled} from "@mui/material/styles";
-import RenameModal from "./RenameModal";
+import * as React from 'react';
+import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
+import { alpha, styled } from '@mui/material/styles';
+import TreeView from '@mui/lab/TreeView';
+import TreeItem, { TreeItemProps, treeItemClasses } from '@mui/lab/TreeItem';
+import Collapse from '@mui/material/Collapse';
+import { useSpring, animated } from '@react-spring/web';
+import { TransitionProps } from '@mui/material/transitions';
+import FolderIcon from '@mui/icons-material/Folder';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import {useContext, useEffect, useState} from "react";
 import axios from "../../../redux/axiosConfig";
 import ErrorModal from "../../common/ErrorModal";
-import { useDropzone } from 'react-dropzone';
 import SuccessModal from "../../common/SuccessModal";
-import {saveAs} from "file-saver";
+import {Box, LinearProgress} from "@mui/material";
+import DriveContext from "./DriveContext";
 
-interface docResponse {
+type dirResponse = {
     idNum: number;
-    docName: string;
-    regUserid: string;
-    regDate: string;
+    dirName: string;
+    parentDirectoriesIdNum: number;
 }
 
-const StyledMenu = styled((props: MenuProps) => (
-    <Menu
-        elevation={0}
-        anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-        }}
-        transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-        }}
-        {...props}
-    />
+function MinusSquare(props: SvgIconProps) {
+    return (
+        <FolderOpenIcon sx={{ width: 14, height: 14 }} {...props} />
+    );
+}
+
+function PlusSquare(props: SvgIconProps) {
+    return (
+        <FolderIcon sx={{ width: 14, height: 14 }} {...props}  />
+    );
+}
+
+function CloseSquare(props: SvgIconProps) {
+    return (
+        <FolderOpenIcon
+            className="close"
+            fontSize="inherit"
+            sx={{ width: 14, height: 14 }}
+            {...props}
+        >
+            {/* tslint:disable-next-line: max-line-length */}
+            <path d="M17.485 17.512q-.281.281-.682.281t-.696-.268l-4.12-4.147-4.12 4.147q-.294.268-.696.268t-.682-.281-.281-.682.294-.669l4.12-4.147-4.12-4.147q-.294-.268-.294-.669t.281-.682.682-.281.696 .268l4.12 4.147 4.12-4.147q.294-.268.696-.268t.682.281 .281.669-.294.682l-4.12 4.147 4.12 4.147q.294.268 .294.669t-.281.682zM22.047 22.074v0 0-20.147 0h-20.12v0 20.147 0h20.12zM22.047 24h-20.12q-.803 0-1.365-.562t-.562-1.365v-20.147q0-.776.562-1.351t1.365-.575h20.147q.776 0 1.351.575t.575 1.351v20.147q0 .803-.575 1.365t-1.378.562v0z" />
+        </FolderOpenIcon>
+    );
+}
+
+function TransitionComponent(props: TransitionProps) {
+    const style = useSpring({
+        from: {
+            opacity: 0,
+            transform: 'translate3d(20px,0,0)',
+        },
+        to: {
+            opacity: props.in ? 1 : 0,
+            transform: `translate3d(${props.in ? 0 : 20}px,0,0)`,
+        },
+    });
+
+    return (
+        <animated.div style={style}>
+            <Collapse {...props} />
+        </animated.div>
+    );
+}
+
+const StyledTreeItem = styled((props: TreeItemProps) => (
+    <TreeItem {...props} TransitionComponent={TransitionComponent} />
 ))(({ theme }) => ({
-    '& .MuiPaper-root': {
-        border: 'none',
-        borderRadius: 3,
-        marginTop: theme.spacing(1),
-        minWidth: 180,
-        color:
-            theme.palette.mode === 'light' ? 'rgb(55, 65, 81)' : theme.palette.grey[300],
-        boxShadow:
-            'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.02) 0px 0px 0px 1px, rgba(0, 0, 0, 0.06) 0px 3px 3px -2px, rgba(0, 0, 0, 0.03) 0px 2px 4px -1px',
-        '& .MuiMenu-list': {
-            padding: '4px 0',
+    [`& .${treeItemClasses.iconContainer}`]: {
+        '& .close': {
+            opacity: 0.3,
         },
-        '& .MuiMenuItem-root': {
-            '& .MuiSvgIcon-root': {
-                fontSize: 18,
-                color: theme.palette.text.secondary,
-                marginRight: theme.spacing(1.5),
-            },
-            '&:active': {
-                backgroundColor: alpha(
-                    theme.palette.primary.main,
-                    theme.palette.action.selectedOpacity,
-                ),
-            },
-        },
+    },
+    [`& .${treeItemClasses.group}`]: {
+        marginLeft: 15,
+        paddingLeft: 18,
+        borderLeft: `1px dashed ${alpha(theme.palette.text.primary, 0.4)}`,
     },
 }));
 
-const DriveDirectory: React.FC = () => {
-    const [documents, setDocuments] = useState<docResponse[]>([
-        {idNum: 1, docName: 'file1.txt', regUserid: 'user1', regDate: '2022-08-16'},
-        {idNum: 2, docName: 'image.jpg', regUserid: 'user2', regDate: '2022-08-15'},
-        {idNum: 3, docName: 'document.pdf', regUserid: 'user3', regDate: '2022-08-14'},
-        {idNum: 4, docName: 'powerpoint.ppt', regUserid: 'user4', regDate: '2022-08-13'},
-        {idNum: 5, docName: 'document.doc', regUserid: 'user5', regDate: '2022-08-12'},
-        {idNum: 6, docName: 'data.xlsx', regUserid: 'user6', regDate: '2022-08-11'},
-        {idNum: 7, docName: '7.zip', regUserid: 'user7', regDate: '2022-08-10'},
-    ]);
-    const [selectedItems, setSelectedItems] = useState<number[]>([]);
-    const [renameModalOpen, setRenameModalOpen] = useState(false);
-    const [selectedDocument, setSelectedDocument] = useState({ docName: '', idNum: 0 });
-    const firstSelectedIndexRef = useRef<number | null>(null);
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [menuPosition, setMenuPosition] = useState<PopoverPosition | undefined>(undefined);
+export default function CustomizedTreeView() {
+    const [directories, setDirectories] = useState<dirResponse[]>([]);
+    const [rootDir, setRootDir] = useState<dirResponse>({} as dirResponse);
+    const [loading, setLoading] = useState(true);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [files, setFiles] = useState<File[]>([]);
-    const [isUploading, setIsUploading] = useState(false);
     const [successModalOpen, setSuccessModalOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [directoryId, setDirectoryId] = useState(1);
 
-    // 파일 리스트 조회
-    useEffect(() => {
-        getFiles();
-    }, []);
-
-    // 파일 리스트 조회
-    const getFiles = async () => {
-        try {
-            const response = await axios.get(`/api/document`);
-            setDocuments(response.data);
-        } catch (error) {
-            setErrorMessage('파일 리스트 조회 실패');
-            setErrorModalOpen(true);
-            return;
-        }
+    const context = useContext(DriveContext);
+    if (!context) {
+        throw new Error("Cannot find ProjectProvider");
     }
+    const { projectIdNum, setProjectIdNum, accessLevel } = context;
 
-    // 공용 폰트 스타일
-    const fontStyles = {
-        font: 'var(--dt-title-small-font,500 .875rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
-        letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)',
-    };
-
-    const onDrop = useCallback((acceptedFiles: File[]) => {
-        setFiles(acceptedFiles);
-    }, []);
-
-    // files 상태가 변경되면 파일 업로드를 수행
+    // 폴더 조회
     useEffect(() => {
-        const uploadFiles = async () => {
-            if (files.length > 0) {
-                handleFileUpload()
-                    .then(() => {
-                        setSuccessMessage('파일 업로드 성공');
-                        setSuccessModalOpen(true);
-                        setIsUploading(false);
-                        return;
-                    })
-                    .catch((error) => {
-                        setErrorMessage('파일 업로드 실패');
-                        setErrorModalOpen(true);
-                        setIsUploading(false);
-                        return;
-                    });
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(`/api/directory`);
+                setDirectories(response.data);
+                setLoading(false);
+            } catch (error) {
+                setErrorMessage('폴더 조회 실패');
+                setErrorModalOpen(true);
+                return;
             }
         };
+        fetchData();
+    }, []);
 
-        uploadFiles();
-    }, [files]);
-
-    const { getRootProps, getInputProps } = useDropzone({
-        onDrop,
-        multiple: false,
-    });
-
-    const handleNoneClick = (event: React.MouseEvent<HTMLElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-
-    const rootProps = getRootProps({
-        onClick: handleNoneClick,
-    });
-
-    const handleFileUpload = async () => {
-
-        setIsUploading(true);
-        if (files.length > 0) {
-            const formData = new FormData();
-            formData.append('file', files[0]);
-            const response = await axios.post(`/api/document/upload/${directoryId}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            if (response.status === 200) {
-                return Promise.resolve();
-            } else {
-                return Promise.reject();
-            }
+    // 루트 디렉토리 설정
+    useEffect(() => {
+        if(directories.length === 0) {
+            return;
         } else {
-            return Promise.reject();
-        }
-    };
-
-
-    const handleFileDownload = async (idNumList: number[]) => {
-        for (const idNum of idNumList) {
-            const response = await axios.get(`/api/document/download/${idNum}`, {
-                responseType: 'blob',
-            });
-            if (response.status === 200) {
-                // 파일 다운로드
-                const blob = new Blob([response.data], { type: 'application/octet-stream' });
-                saveAs(blob, response.headers['filename']);
+            const rootDir = directories.find(dir => dir.idNum === dir.parentDirectoriesIdNum);
+            if (rootDir) {
+                setRootDir(rootDir);
             } else {
-                setErrorMessage('파일 다운로드 실패');
+                setErrorMessage('루트 폴더 조회 실패');
                 setErrorModalOpen(true);
-                return;
             }
         }
-    };
+    }, [directories]);
 
-    const handleFileDelete = async (idNumList: number[]) => {
-        for (const idNum of idNumList) {
-            const response = await axios.delete(`/api/document/${idNum}`);
-            if (response.status === 200) {
-                // 파일 삭제
-                setDocuments(documents.filter((document) => document.idNum !== idNum));
-                setSuccessMessage('파일 삭제 성공');
-                setSuccessModalOpen(true);
-            } else {
-                setErrorMessage('파일 삭제 실패');
-                setErrorModalOpen(true);
-                return;
-            }
-        }
-    };
-
-    const handleRightClick = (event: React.MouseEvent<HTMLElement>) => {
-        event.preventDefault(); // 기본 브라우저 메뉴를 무시
-        setAnchorEl(event.currentTarget);
-        setMenuPosition({ top: event.clientY, left: event.clientX });
-    };
-
-    const handleItemClick = (index: number, event: React.MouseEvent<HTMLElement>) => {
-        event.preventDefault();
-        const idNum = documents[index].idNum;
-
-        // selectedItems이 비어있는 경우 현재 선택된 아이템의 인덱스를 저장
-        if (selectedItems.length === 0) {
-            firstSelectedIndexRef.current = index;
+    // 디렉토리 트리 렌더링
+    const renderTree = (directory: dirResponse) => {
+        if (!directory || directory.idNum === undefined) {
+            console.error('유효하지 않은 디렉토리 객체:', directory);
+            return null; // 무효한 디렉토리 객체를 건너뛰고 다음 요소로 이동합니다.
         }
 
-        if (event.shiftKey) {   // shift key를 누르고 있는 경우
-            if (firstSelectedIndexRef.current !== null) {
-                const start = Math.min(firstSelectedIndexRef.current, index);
-                const end = Math.max(firstSelectedIndexRef.current, index);
-                const selected = documents.slice(start, end + 1).map((doc) => doc.idNum);
-                setSelectedItems(selected);
-            }
-        } else if (event.metaKey) { // Ctrl key를 누르고 있는 경우
-            setSelectedItems((prevSelectedItems) => {
-                if (prevSelectedItems.includes(idNum)) {
-                    return prevSelectedItems.filter((item) => item !== idNum);
-                } else {
-                    return [...prevSelectedItems, idNum];
-                }
-            });
-        } else {    // 일반 클릭의 경우
-            setSelectedItems([idNum]);
-            firstSelectedIndexRef.current = index;
-        }
+        const children = directories.filter(
+            dir => dir.parentDirectoriesIdNum === directory.idNum && dir.idNum !== rootDir.idNum
+        );
+
+        return (
+            <StyledTreeItem key={directory.idNum} nodeId={directory.idNum.toString()} label={directory.dirName} onClick={() => setProjectIdNum(directory.idNum)}>
+                {children.map(childDir => renderTree(childDir))}
+            </StyledTreeItem>
+        );
     };
 
-    const handleNoneItemClick = (event: React.MouseEvent<HTMLElement>) => {
-        event.preventDefault();
-        setSelectedItems([]);
-        firstSelectedIndexRef.current = null;
-    }
-
-    const handleMenuOpen = (
-        event: React.MouseEvent<HTMLButtonElement>,
-        idNum: number
-    ) => {
-        setMenuPosition({ top: event.clientY, left: event.clientX });
-        setAnchorEl(event.currentTarget);
-        setSelectedItems([idNum]);
-    };
-
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-        setMenuPosition(undefined);
-        setSelectedItems([]);
-        firstSelectedIndexRef.current = null;
-    };
-
-
-    const handleMenuItemClick = (action: string) => {
-        handleMenuClose();
-
-        if (!selectedItems) return;
-
-        switch (action) {
-            case "delete":
-                handleFileDelete(selectedItems);
-                break;
-            case "rename":
-                setSelectedDocument(documents.find((doc) => doc.idNum === selectedItems[0])!);
-                setRenameModalOpen(true);
-                break;
-            case "download":
-                handleFileDownload(selectedItems);
-                break;
-            default:
-                break;
-        }
-    };
-
-    const handleRename = (idNum: number, newName: string) => {
-        axios.put(`/api/documents/${idNum}`, { docName: newName })
-            .then((res) => {
-                const updatedDocuments = documents.map((doc) => {
-                    if (doc.idNum === idNum) {
-                        return { ...doc, docName: newName };
-                    } else {
-                        return doc;
-                    }
-                });
-                setDocuments(updatedDocuments);
-            })
-            .catch((err) => {
-                setErrorMessage(err.response.data.message);
-                setErrorModalOpen(true);
-            });
-    };
+    const isEmpty = (obj: any) => Object.keys(obj).length === 0;
 
     return (
-        <Box sx={{ flexGrow: 1, maxWidth: '400px', backgroundColor: '#fff', borderRadius: '15px', p: 2,  }}>
-            {/*icon 추가를 위한 코드*/}
-            <link href="https://cdn.materialdesignicons.com/6.4.95/css/materialdesignicons.min.css" rel="stylesheet" />
+        <Box sx={{ flexGrow: 1, maxWidth: '400px', backgroundColor: '#fff', borderRadius: '15px', p: 2, height: '500px' }}>
+            {loading && <LinearProgress/>}
+                <TreeView
+                    aria-label="customized"
+                    defaultExpanded={['1']}
+                    defaultCollapseIcon={<MinusSquare />}
+                    defaultExpandIcon={<PlusSquare />}
+                    defaultEndIcon={<CloseSquare />}
+                    sx={{ flexGrow: 1, maxWidth: 400, height: '100%' }}
+                >
+                    {/* 샘플 디렉토리 */}
+                    {!isEmpty(rootDir) ? renderTree(rootDir) : null}
 
-            <List sx={{ width: '100%' }} {...rootProps}>
-                <input {...getInputProps()} />
-                <ListItem sx={{ width: '100%', borderBottom: '1px solid var(--dt-outline-variant,#dadce0)' }} onClick={handleNoneItemClick}>
-                    <ListItemText
-                        sx={{ width: '49%'}}
-                        primary="파일명"
-                        primaryTypographyProps={{
-                            sx: fontStyles
-                        }}
+                    {/*에러 발생 Modal*/}
+                    <ErrorModal
+                        open={errorModalOpen}
+                        onClose={() => setErrorModalOpen(false)}
+                        title="요청 실패"
+                        description={errorMessage || ""}
                     />
-                    <ListItemText
-                        sx={{ width: '24%'}}
-                        primary="등록자"
-                        primaryTypographyProps={{
-                            sx: fontStyles
-                        }}
+
+                    {/*성공 확인 Modal*/}
+                    <SuccessModal
+                        open={successModalOpen}
+                        onClose={() => setSuccessModalOpen(false)}
+                        title="요청 성공"
+                        description={successMessage || ""}
                     />
-                    <ListItemText
-                        sx={{ width: '28%'}}
-                        primary="최근 수정일"
-                        primaryTypographyProps={{
-                            sx: fontStyles
-                        }}
-                    />
-                    <ListItemSecondaryAction>
-                    </ListItemSecondaryAction>
-                </ListItem>
-
-                {documents.map((document, index) => {
-                    const { icon, color } = getIconByFileType(document.docName);
-                    return (
-                        <ListItem
-                            key={document.idNum}
-                            sx={{
-                                width: '100%',
-                                borderBottom: selectedItems.includes(document.idNum) ?  'none' : '1px solid var(--dt-outline-variant,#dadce0)',
-                                height: '48px',
-                                backgroundColor: selectedItems.includes(document.idNum) ? 'rgb(178, 228, 253)' : 'white', // 선택되면 배경색을 변경
-                                '&:hover': {
-                                    backgroundColor: selectedItems.includes(document.idNum) ? 'rgb(178, 228, 253)' : 'rgb(240, 240, 240)' // 마우스 호버 시 배경색 변경
-                                }
-                            }}
-                            onClick={(event) => handleItemClick(index, event)} // 클릭 시 선택 상태를 토글
-                            onContextMenu={(event) => handleRightClick(event)}
-                            onMouseDown={(event) => event.preventDefault()} // 추가한 코드
-                        >
-                            <ListItemAvatar sx={{ width: '2%' }}>
-                                <i
-                                    className={icon}
-                                    style={{
-                                        color: color,
-                                        fontSize: '24px'
-                                    }}
-                                />
-                            </ListItemAvatar>
-                            <ListItemText primary={document.docName}
-                                          sx={{width: '40%', overflow: 'auto'}}
-                                          primaryTypographyProps={{
-                                              sx: fontStyles
-                                          }}
-                            />
-                            <ListItemAvatar sx={{
-                                width: '24%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'flex-start',
-                            }}>
-                                <AccountCircleIcon sx={{ color: 'lightgray', marginRight: '8px', backgroundColor: '#fff', borderRadius: '50%' }} />
-                                <span style={{
-                                    font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
-                                    letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)'}}>{document.regUserid}</span>
-                            </ListItemAvatar>
-                            <ListItemText
-                                sx={{ width: '24%'}}
-                                primary={document.regDate}
-                                primaryTypographyProps={{
-                                    sx: {font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
-                                        letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)'}
-                                }}
-                            />
-                            <ListItemSecondaryAction>
-                                {
-                                    selectedItems.length > 1 ?
-                                        // 선택된 아이템이 1개 이상인 경우 disabled 처리
-                                        <IconButton edge="end" aria-label="more" disabled>
-                                            <MoreVert />
-                                        </IconButton>
-                                        :
-                                        <IconButton edge="end" aria-label="more" onClick={(event) => handleMenuOpen(event, document.idNum)}>
-                                            <MoreVert />
-                                        </IconButton>
-                                }
-                                <StyledMenu
-                                    anchorEl={anchorEl}
-                                    anchorReference="anchorPosition" // 메뉴의 위치를 직접 지정
-                                    anchorPosition={menuPosition} // 메뉴의 위치 설정
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleMenuClose}
-                                >
-                                    <MenuItem onClick={() => handleMenuItemClick("download")} sx={{...fontStyles}}>
-                                        <CloudDownloadIcon sx={{marginRight: '8px'}} />
-                                        다운로드
-                                    </MenuItem>
-                                    {
-                                        selectedItems.length > 1 ?
-                                            // 선택된 아이템이 1개 이상인 경우 disabled 처리
-                                            <MenuItem onClick={() => handleMenuItemClick("rename")} disabled sx={{...fontStyles}}>
-                                                <DriveFileRenameOutlineIcon sx={{marginRight: '8px'}} />
-                                                이름변경
-                                            </MenuItem>
-                                            :
-                                            <MenuItem onClick={() => handleMenuItemClick("rename")} sx={{...fontStyles}}>
-                                                <DriveFileRenameOutlineIcon sx={{marginRight: '8px'}} />
-                                                이름변경
-                                            </MenuItem>
-                                    }
-                                    <Divider sx={{ my: 0.5 }} />
-                                    <MenuItem onClick={() => handleMenuItemClick("delete")} sx={{...fontStyles}}>
-                                        <DeleteOutline sx={{marginRight: '8px'}} />
-                                        삭제
-                                    </MenuItem>
-                                </StyledMenu>
-                            </ListItemSecondaryAction>
-                        </ListItem>
-                    );
-                })}
-            </List>
-
-            {/*이름 변경 Modal*/}
-            <RenameModal
-                open={renameModalOpen}
-                handleClose={() => setRenameModalOpen(false)}
-                document={selectedDocument}
-                handleRename={handleRename}
-            />
-
-            {/*에러 발생 Modal*/}
-            <ErrorModal
-                open={errorModalOpen}
-                onClose={() => setErrorModalOpen(false)}
-                title="요청 실패"
-                description={errorMessage || ""}
-            />
-
-            {/*성공 확인 Modal*/}
-            <SuccessModal
-                open={successModalOpen}
-                onClose={() => setSuccessModalOpen(false)}
-                title="요청 성공"
-                description={successMessage || ""}
-            />
+                </TreeView>
         </Box>
     );
-};
-
-export default DriveDirectory;
+}
