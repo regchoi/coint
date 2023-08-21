@@ -51,7 +51,7 @@ const TaskGanttChart = () => {
     const [isExcelModalOpen, setExcelModalOpen] = useState(false);
 
     useEffect(() => {
-        // 프로젝트 목록 불러오기
+        // 프로목록 불러오기
         axios.get('/api/project')
             .then((response) => {
                 setOptions(response.data);
