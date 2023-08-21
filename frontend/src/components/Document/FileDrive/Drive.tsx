@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
 import {
     Box,
     Avatar,
@@ -22,12 +22,19 @@ import ErrorModal from "../../common/ErrorModal";
 import { useDropzone } from 'react-dropzone';
 import SuccessModal from "../../common/SuccessModal";
 import {saveAs} from "file-saver";
+import DriveContext from "./DriveContext";
 
 interface docResponse {
     idNum: number;
     docName: string;
     regUserid: string;
-    regDate: string;
+    modDate: string;
+}
+
+interface dirResponse {
+    idNum: number;
+    dirName: string;
+    parentDirectoriesIdNum: number;
 }
 
 const StyledMenu = styled((props: MenuProps) => (
@@ -74,6 +81,7 @@ const StyledMenu = styled((props: MenuProps) => (
 
 const Drive: React.FC = () => {
     const [documents, setDocuments] = useState<docResponse[]>([]);
+    const [directory, setDirectory] = useState<dirResponse[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [renameModalOpen, setRenameModalOpen] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState({ docName: '', idNum: 0 });
@@ -86,18 +94,25 @@ const Drive: React.FC = () => {
     const [isUploading, setIsUploading] = useState(false);
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const [directoryId, setDirectoryId] = useState(1);
     const [loading, setLoading] = useState(true);
+
+    const context = useContext(DriveContext);
+    if (!context) {
+        throw new Error("Cannot find ProjectProvider");
+    }
+    const { projectIdNum, setProjectIdNum, accessLevel } = context;
 
     // 파일 리스트 조회
     useEffect(() => {
         getFiles();
-    }, []);
+        getDirs();
+    }, [projectIdNum]);
 
     // 파일 리스트 조회
     const getFiles = async () => {
+        setLoading(true);
         try {
-            const response = await axios.get(`/api/document/${directoryId}`);
+            const response = await axios.get(`/api/document/${projectIdNum}`);
             setDocuments(response.data);
             setLoading(false);
         } catch (error) {
@@ -105,6 +120,11 @@ const Drive: React.FC = () => {
             setErrorModalOpen(true);
             return;
         }
+    }
+
+    // 디렉토리 리스트 조회
+    const getDirs = async () => {
+        // TODO: parentIdNum 기준으로 검색가능한 endpoint 필요
     }
 
     // 공용 폰트 스타일
@@ -120,12 +140,16 @@ const Drive: React.FC = () => {
     // files 상태가 변경되면 파일 업로드를 수행
     useEffect(() => {
         const uploadFiles = async () => {
+            setLoading(true)
             if (files.length > 0) {
                 handleFileUpload()
                     .then(() => {
                         setSuccessMessage('파일 업로드 성공');
                         setSuccessModalOpen(true);
                         setIsUploading(false);
+                        // 파일 업로드 후 파일 리스트 조회
+                        getFiles();
+                        setLoading(false);
                         return;
                     })
                     .catch((error) => {
@@ -133,8 +157,10 @@ const Drive: React.FC = () => {
                         setErrorModalOpen(true);
                         setIsUploading(false);
                         return;
+                        setLoading(false);
                     });
             }
+            setLoading(false);
         };
 
         uploadFiles();
@@ -160,7 +186,7 @@ const Drive: React.FC = () => {
         if (files.length > 0) {
             const formData = new FormData();
             formData.append('file', files[0]);
-            const response = await axios.post(`/api/document/upload/${directoryId}`, formData, {
+            const response = await axios.post(`/api/document/upload/${projectIdNum}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -181,8 +207,8 @@ const Drive: React.FC = () => {
             const response = await axios.get(`/api/document/download/${idNum}`, {
                 responseType: 'blob',
             });
+            console.log(response);
             if (response.status === 200) {
-                // 파일 다운로드
                 const blob = new Blob([response.data], { type: 'application/octet-stream' });
                 saveAs(blob, response.headers['filename']);
             } else {
@@ -290,7 +316,7 @@ const Drive: React.FC = () => {
     };
 
     const handleRename = (idNum: number, newName: string) => {
-        axios.put(`/api/documents/${directoryId}/${idNum}`, { docName: newName })
+        axios.put(`/api/documents/${projectIdNum}/${idNum}`, { docName: newName })
             .then((res) => {
                 const updatedDocuments = documents.map((doc) => {
                     if (doc.idNum === idNum) {
@@ -387,7 +413,7 @@ const Drive: React.FC = () => {
                             </ListItemAvatar>
                             <ListItemText
                                 sx={{ width: '24%'}}
-                                primary={document.regDate}
+                                primary={document.modDate.toString().substring(0, 10)}
                                 primaryTypographyProps={{
                                     sx: {font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
                                         letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)'}
@@ -439,6 +465,15 @@ const Drive: React.FC = () => {
                         </ListItem>
                     );
                 })}
+                <ListItem
+                    sx={{
+                        width: '100%',
+                        borderBottom: '1px solid var(--dt-outline-variant,#dadce0)',
+                        height: '48px',
+                        backgroundColor: 'white', // 선택되면 배경색을 변경
+                    }}
+                >
+                </ListItem>
             </List>
 
             {/*이름 변경 Modal*/}
