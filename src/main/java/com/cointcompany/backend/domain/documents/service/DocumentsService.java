@@ -32,22 +32,19 @@ public class DocumentsService {
     private final DocumentsRepository documentsRepository;
     private final FilesRepository filesRepository;
 
-//    @Transactional(readOnly = true)
-//    public List<DocumentsDto.GetDocuments> findAllDocuments() {
-//
-//        List<DocumentsDto.GetDocuments> getDocumentsList = new ArrayList<>();
-//        List<Documents> documentsList = documentsRepository.findAll();
-//
-//        for (Documents documents : documentsList) {
-//            DocumentsDto.GetDocuments getDocuments = new DocumentsDto.GetDocuments(
-//                            documents,
-//                            documents.getFiles().getIdNum(),
-//                            documents.getDirectories().getIdNum());
-//            getDocumentsList.add(getDocuments);
-//        }
-//
-//        return getDocumentsList;
-//    }
+    @Transactional(readOnly = true)
+    public List<DocumentsDto.GetDocuments> findAllDocuments() {
+
+        List<DocumentsDto.GetDocuments> getDocumentsList = new ArrayList<>();
+        List<Documents> documentsList = documentsRepository.findAll();
+
+        for (Documents documents : documentsList) {
+            DocumentsDto.GetDocuments getDocuments = new DocumentsDto.GetDocuments(documents);
+            getDocumentsList.add(getDocuments);
+        }
+
+        return getDocumentsList;
+    }
 
     @Transactional
     public ResponseEntity<String> uploadDocuments(MultipartFile file, Long directoryId) {
@@ -82,7 +79,7 @@ public class DocumentsService {
         if (files.isPresent()) {
             Files downloadFile = files.get();
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadFile.getFileName() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + URLEncoder.encode(downloadFile.getFileName(), StandardCharsets.UTF_8) + "\"")
                     .body(downloadFile.getFileData());
         } else {
             return ResponseEntity.notFound().build();
@@ -91,7 +88,7 @@ public class DocumentsService {
     }
 
     @Transactional(readOnly = true)
-    public List<DocumentsDto.GetDocuments> findAllDocuments(Long directoryId) {
+    public List<DocumentsDto.GetDocuments> findAllDocumentUsers(Long directoryId) {
 
         List<DocumentsDto.GetDocuments> getDocumentsList = new ArrayList<>();
         List<Documents> documentsList = documentsRepository.findByDirectories_IdNum(directoryId);
