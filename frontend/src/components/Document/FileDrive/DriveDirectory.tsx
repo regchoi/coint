@@ -120,6 +120,7 @@ export default function CustomizedTreeView() {
             const rootDir = directories.find(dir => dir.idNum === dir.parentDirectoriesIdNum);
             if (rootDir) {
                 setRootDir(rootDir);
+                setProjectIdNum(rootDir.idNum);
             } else {
                 setErrorMessage('루트 폴더 조회 실패');
                 setErrorModalOpen(true);

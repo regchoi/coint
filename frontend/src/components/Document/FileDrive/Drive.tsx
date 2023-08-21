@@ -8,11 +8,12 @@ import {
     ListItemText,
     ListItemAvatar,
     ListItemSecondaryAction,
-    Grid, Menu, MenuItem, MenuProps, PopoverPosition, Divider, LinearProgress
+    Grid, Menu, MenuItem, MenuProps, PopoverPosition, Divider, LinearProgress, Typography
 } from '@mui/material';
 import {MoreVert, DeleteOutline} from "@mui/icons-material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { getIconByFileType } from "./getIconByFileType";
 import {alpha, styled} from "@mui/material/styles";
@@ -166,7 +167,7 @@ const Drive: React.FC = () => {
         uploadFiles();
     }, [files]);
 
-    const { getRootProps, getInputProps } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         multiple: false,
     });
@@ -209,8 +210,10 @@ const Drive: React.FC = () => {
             });
             console.log(response);
             if (response.status === 200) {
+                const contentDisposition = response.headers['content-disposition'];
+                const fileName = contentDisposition ? contentDisposition.split('filename=')[1].replace(/"/g, '') : 'unknown';
                 const blob = new Blob([response.data], { type: 'application/octet-stream' });
-                saveAs(blob, response.headers['filename']);
+                saveAs(blob, fileName);
             } else {
                 setErrorMessage('파일 다운로드 실패');
                 setErrorModalOpen(true);
@@ -339,142 +342,184 @@ const Drive: React.FC = () => {
             {/*icon 추가를 위한 코드*/}
             <link href="https://cdn.materialdesignicons.com/6.4.95/css/materialdesignicons.min.css" rel="stylesheet" />
 
-            <List sx={{ width: '100%' }} {...rootProps}>
-                <input {...getInputProps()} />
-                <ListItem sx={{ width: '100%', borderBottom: '1px solid var(--dt-outline-variant,#dadce0)' }} onClick={handleNoneItemClick}>
-                    <ListItemText
-                        sx={{ width: '49%'}}
-                        primary="파일명"
-                        primaryTypographyProps={{
-                            sx: fontStyles
-                        }}
-                    />
-                    <ListItemText
-                        sx={{ width: '24%'}}
-                        primary="등록자"
-                        primaryTypographyProps={{
-                            sx: fontStyles
-                        }}
-                    />
-                    <ListItemText
-                        sx={{ width: '28%'}}
-                        primary="최근 수정일"
-                        primaryTypographyProps={{
-                            sx: fontStyles
-                        }}
-                    />
-                    <ListItemSecondaryAction>
-                    </ListItemSecondaryAction>
-                </ListItem>
-
-                {documents.map((document, index) => {
-                    const { icon, color } = getIconByFileType(document.docName);
-                    return (
-                        <ListItem
-                            key={document.idNum}
-                            sx={{
-                                width: '100%',
-                                borderBottom: selectedItems.includes(document.idNum) ?  'none' : '1px solid var(--dt-outline-variant,#dadce0)',
-                                height: '48px',
-                                backgroundColor: selectedItems.includes(document.idNum) ? 'rgb(178, 228, 253)' : 'white', // 선택되면 배경색을 변경
-                                '&:hover': {
-                                    backgroundColor: selectedItems.includes(document.idNum) ? 'rgb(178, 228, 253)' : 'rgb(240, 240, 240)' // 마우스 호버 시 배경색 변경
-                                }
-                            }}
-                            onClick={(event) => handleItemClick(index, event)} // 클릭 시 선택 상태를 토글
-                            onContextMenu={(event) => handleRightClick(event)}
-                            onMouseDown={(event) => event.preventDefault()} // 추가한 코드
-                        >
-                            <ListItemAvatar sx={{ width: '2%' }}>
-                                <i
-                                    className={icon}
-                                    style={{
-                                        color: color,
-                                        fontSize: '24px'
+                    <List sx={{width: '100%'}} {...rootProps}>
+                        <input {...getInputProps()} />
+                        {
+                            isDragActive ? (
+                                <Box sx={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: '100%',
+                                    minHeight: '500px',
+                                    border: '2px dashed var(--dt-primary-color,#2196f3)',
+                                    borderRadius: '15px',
+                                }}>
+                                    <Typography variant="h5" sx={{color: 'var(--dt-primary-color,#2196f3)', display: 'flex', flexDirection: 'column', alignItems: 'center', fontWeight: 'bold'}}>
+                                        <CloudUploadIcon fontSize="large" />
+                                        <span>파일을 끌어다 놓으세요</span>
+                                    </Typography>
+                                </Box>
+                            ) : (
+                                <Box>
+                                    <ListItem sx={{
+                                        width: '100%',
+                                        borderBottom: '1px solid var(--dt-outline-variant,#dadce0)'
                                     }}
-                                />
-                            </ListItemAvatar>
-                            <ListItemText primary={document.docName}
-                                          sx={{width: '40%', overflow: 'auto'}}
-                                          primaryTypographyProps={{
-                                              sx: fontStyles
-                                          }}
-                            />
-                            <ListItemAvatar sx={{
-                                width: '24%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'flex-start',
-                            }}>
-                                <AccountCircleIcon sx={{ color: 'lightgray', marginRight: '8px', backgroundColor: '#fff', borderRadius: '50%' }} />
-                                <span style={{
-                                    font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
-                                    letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)'}}>{document.regUserid}</span>
-                            </ListItemAvatar>
-                            <ListItemText
-                                sx={{ width: '24%'}}
-                                primary={document.modDate.toString().substring(0, 10)}
-                                primaryTypographyProps={{
-                                    sx: {font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
-                                        letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)'}
-                                }}
-                            />
-                            <ListItemSecondaryAction>
-                                {
-                                    selectedItems.length > 1 ?
-                                        // 선택된 아이템이 1개 이상인 경우 disabled 처리
-                                        <IconButton edge="end" aria-label="more" disabled>
-                                            <MoreVert />
-                                        </IconButton>
-                                        :
-                                        <IconButton edge="end" aria-label="more" onClick={(event) => handleMenuOpen(event, document.idNum)}>
-                                            <MoreVert />
-                                        </IconButton>
-                                }
-                                <StyledMenu
-                                    anchorEl={anchorEl}
-                                    anchorReference="anchorPosition" // 메뉴의 위치를 직접 지정
-                                    anchorPosition={menuPosition} // 메뉴의 위치 설정
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleMenuClose}
-                                >
-                                    <MenuItem onClick={() => handleMenuItemClick("download")} sx={{...fontStyles}}>
-                                        <CloudDownloadIcon sx={{marginRight: '8px'}} />
-                                        다운로드
-                                    </MenuItem>
-                                    {
-                                        selectedItems.length > 1 ?
-                                            // 선택된 아이템이 1개 이상인 경우 disabled 처리
-                                            <MenuItem onClick={() => handleMenuItemClick("rename")} disabled sx={{...fontStyles}}>
-                                                <DriveFileRenameOutlineIcon sx={{marginRight: '8px'}} />
-                                                이름변경
-                                            </MenuItem>
-                                            :
-                                            <MenuItem onClick={() => handleMenuItemClick("rename")} sx={{...fontStyles}}>
-                                                <DriveFileRenameOutlineIcon sx={{marginRight: '8px'}} />
-                                                이름변경
-                                            </MenuItem>
-                                    }
-                                    <Divider sx={{ my: 0.5 }} />
-                                    <MenuItem onClick={() => handleMenuItemClick("delete")} sx={{...fontStyles}}>
-                                        <DeleteOutline sx={{marginRight: '8px'}} />
-                                        삭제
-                                    </MenuItem>
-                                </StyledMenu>
-                            </ListItemSecondaryAction>
-                        </ListItem>
-                    );
-                })}
-                <ListItem
-                    sx={{
-                        width: '100%',
-                        borderBottom: '1px solid var(--dt-outline-variant,#dadce0)',
-                        height: '48px',
-                        backgroundColor: 'white', // 선택되면 배경색을 변경
-                    }}
-                >
-                </ListItem>
-            </List>
+                                              onClick={handleNoneItemClick}>
+                                        <ListItemText
+                                            sx={{width: '49%'}}
+                                            primary="파일명"
+                                            primaryTypographyProps={{
+                                                sx: fontStyles
+                                            }}
+                                        />
+                                        <ListItemText
+                                            sx={{width: '24%'}}
+                                            primary="등록자"
+                                            primaryTypographyProps={{
+                                                sx: fontStyles
+                                            }}
+                                        />
+                                        <ListItemText
+                                            sx={{width: '28%'}}
+                                            primary="최근 수정일"
+                                            primaryTypographyProps={{
+                                                sx: fontStyles
+                                            }}
+                                        />
+                                        <ListItemSecondaryAction>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+
+                                    {documents.map((document, index) => {
+                                        const {icon, color} = getIconByFileType(document.docName);
+                                        return (
+                                            <ListItem
+                                                key={document.idNum}
+                                                sx={{
+                                                    width: '100%',
+                                                    borderBottom: selectedItems.includes(document.idNum) ? 'none' : '1px solid var(--dt-outline-variant,#dadce0)',
+                                                    height: '48px',
+                                                    backgroundColor: selectedItems.includes(document.idNum) ? 'rgb(178, 228, 253)' : 'white', // 선택되면 배경색을 변경
+                                                    '&:hover': {
+                                                        backgroundColor: selectedItems.includes(document.idNum) ? 'rgb(178, 228, 253)' : 'rgb(240, 240, 240)' // 마우스 호버 시 배경색 변경
+                                                    }
+                                                }}
+                                                onClick={(event) => handleItemClick(index, event)} // 클릭 시 선택 상태를 토글
+                                                onContextMenu={(event) => handleRightClick(event)}
+                                                onMouseDown={(event) => event.preventDefault()} // 추가한 코드
+                                            >
+                                                <ListItemAvatar sx={{width: '2%'}}>
+                                                    <i
+                                                        className={icon}
+                                                        style={{
+                                                            color: color,
+                                                            fontSize: '24px'
+                                                        }}
+                                                    />
+                                                </ListItemAvatar>
+                                                <ListItemText primary={document.docName}
+                                                              sx={{width: '40%', overflow: 'auto'}}
+                                                              primaryTypographyProps={{
+                                                                  sx: fontStyles
+                                                              }}
+                                                />
+                                                <ListItemAvatar sx={{
+                                                    width: '24%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'flex-start',
+                                                }}>
+                                                    <AccountCircleIcon sx={{
+                                                        color: 'lightgray',
+                                                        marginRight: '8px',
+                                                        backgroundColor: '#fff',
+                                                        borderRadius: '50%'
+                                                    }}/>
+                                                    <span style={{
+                                                        font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
+                                                        letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)'
+                                                    }}>{document.regUserid}</span>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    sx={{width: '24%'}}
+                                                    primary={document.modDate.toString().substring(0, 10)}
+                                                    primaryTypographyProps={{
+                                                        sx: {
+                                                            font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
+                                                            letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)'
+                                                        }
+                                                    }}
+                                                />
+                                                <ListItemSecondaryAction>
+                                                    {
+                                                        selectedItems.length > 1 ?
+                                                            // 선택된 아이템이 1개 이상인 경우 disabled 처리
+                                                            <IconButton edge="end" aria-label="more" disabled>
+                                                                <MoreVert/>
+                                                            </IconButton>
+                                                            :
+                                                            <IconButton edge="end" aria-label="more"
+                                                                        onClick={(event) => handleMenuOpen(event, document.idNum)}>
+                                                                <MoreVert/>
+                                                            </IconButton>
+                                                    }
+                                                    <StyledMenu
+                                                        anchorEl={anchorEl}
+                                                        anchorReference="anchorPosition" // 메뉴의 위치를 직접 지정
+                                                        anchorPosition={menuPosition} // 메뉴의 위치 설정
+                                                        open={Boolean(anchorEl)}
+                                                        onClose={handleMenuClose}
+                                                    >
+                                                        <MenuItem onClick={() => handleMenuItemClick("download")}
+                                                                  sx={{...fontStyles}}>
+                                                            <CloudDownloadIcon sx={{marginRight: '8px'}}/>
+                                                            다운로드
+                                                        </MenuItem>
+                                                        {
+                                                            selectedItems.length > 1 ?
+                                                                // 선택된 아이템이 1개 이상인 경우 disabled 처리
+                                                                <MenuItem onClick={() => handleMenuItemClick("rename")}
+                                                                          disabled
+                                                                          sx={{...fontStyles}}>
+                                                                    <DriveFileRenameOutlineIcon
+                                                                        sx={{marginRight: '8px'}}/>
+                                                                    이름변경
+                                                                </MenuItem>
+                                                                :
+                                                                <MenuItem onClick={() => handleMenuItemClick("rename")}
+                                                                          sx={{...fontStyles}}>
+                                                                    <DriveFileRenameOutlineIcon
+                                                                        sx={{marginRight: '8px'}}/>
+                                                                    이름변경
+                                                                </MenuItem>
+                                                        }
+                                                        <Divider sx={{my: 0.5}}/>
+                                                        <MenuItem onClick={() => handleMenuItemClick("delete")}
+                                                                  sx={{...fontStyles}}>
+                                                            <DeleteOutline sx={{marginRight: '8px'}}/>
+                                                            삭제
+                                                        </MenuItem>
+                                                    </StyledMenu>
+                                                </ListItemSecondaryAction>
+                                            </ListItem>
+                                        );
+                                    })}
+                                    <ListItem
+                                        sx={{
+                                            width: '100%',
+                                            borderBottom: '1px solid var(--dt-outline-variant,#dadce0)',
+                                            height: '48px',
+                                            backgroundColor: 'white', // 선택되면 배경색을 변경
+                                        }}
+                                    >
+                                    </ListItem>
+                                </Box>
+                            )
+                        }
+                    </List>
 
             {/*이름 변경 Modal*/}
             <RenameModal
