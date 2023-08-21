@@ -40,10 +40,10 @@ public class DocumentsController {
     private final TasksRepository tasksRepository;
     private final DocumentsService documentsService;
 
-//    @GetMapping
-//    public List<DocumentsDto.GetDocuments> getDocumentsList() {
-//        return documentsService.findAllDocuments();
-//    }
+    @GetMapping
+    public List<DocumentsDto.GetDocuments> getDocumentsList() {
+        return documentsService.findAllDocuments();
+    }
     @Operation(summary = "파일 업로드")
     @ApiResponse(responseCode = "200", description = "업로드 성공")
     @PostMapping("/upload/{directoryId}")
@@ -153,12 +153,13 @@ public class DocumentsController {
     @GetMapping("/{directoryId}")
     public ResponseEntity<List<DocumentsDto.GetDocuments>> getDocuments (@PathVariable Long directoryId) {
 
-        return new ResponseEntity<>(documentsService.findAllDocuments(directoryId), HttpStatus.OK);
+        return new ResponseEntity<>(documentsService.findAllDocumentUsers(directoryId), HttpStatus.OK);
     }
     @Operation(summary = "파일 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @PutMapping("/{directoryId}/{documentId}")
     public ResponseEntity<String> modifyDocuments (
+            @PathVariable Long directoryId,
             @PathVariable Long documentId,
             @RequestParam DocumentsDto.PostDocuments postDocuments) {
 
