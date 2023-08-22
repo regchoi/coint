@@ -5,6 +5,7 @@ export const getIconByFileType = (fileName: string): { icon: string; color: stri
             return { icon: 'mdi mdi-file-pdf-box', color: 'hsl(0, 80%, 50%)' }; // 빨간색
         case 'jpg':
         case 'jpeg':
+        case 'png':
             return { icon: 'mdi mdi-file-image', color: 'hsl(9, 70%, 50%)' }; // 주황색
         case 'txt':
             return { icon: 'mdi mdi-file-document', color: 'hsl(0, 0%, 40%)' }; // 회색
