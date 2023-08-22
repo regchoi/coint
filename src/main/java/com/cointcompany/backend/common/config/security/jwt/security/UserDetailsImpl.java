@@ -15,10 +15,11 @@ public class UserDetailsImpl implements UserDetails {
         this.users = users;
     }
 
+    //JWT "role" value 값 설정 - 권한 설정
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(() -> "ROLE_ADMIN"); // key: ROLE_권한
+        authorities.add(() -> users.getRole()); // key: ROLE_권한
         return authorities;
     }
 

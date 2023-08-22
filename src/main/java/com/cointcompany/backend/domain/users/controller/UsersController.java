@@ -97,4 +97,47 @@ public class UsersController {
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
+    @Operation(summary = "사용자&사용자그룹 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/usergroup/{userGroupId}")
+    public ResponseEntity<List<UsersDto.GetUserUsergroup>> getUserUserGroups (@PathVariable Long userGroupId) {
+
+        return new ResponseEntity<>(usersService.getUserUserGroups(userGroupId), HttpStatus.OK);
+    }
+
+    @Operation(summary = "사용자&사용자그룹 이동")
+    @ApiResponse(responseCode = "200", description = "이동 성공")
+    @PutMapping("/usergroup/{userGroupId}/{userUserGroupId}")
+    public ResponseEntity<String> shiftUserUserGroups (
+            @PathVariable Long userGroupId,
+            @PathVariable Long userUserGroupId
+    ) {
+
+        usersService.shiftUserUserGroups(userGroupId, userUserGroupId);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "사용자&사용자그룹 추가")
+    @ApiResponse(responseCode = "200", description = "추가 성공")
+    @PostMapping("/usergroup/{userGroupId}/{userId}")
+    public ResponseEntity<String> createUserUserGroups (
+            @PathVariable Long userGroupId,
+            @PathVariable Long userId
+    ) {
+
+        usersService.createUserUserGroups(userGroupId, userId);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "사용자&사용자그룹 삭제")
+    @ApiResponse(responseCode = "200", description = "삭제 성공")
+    @DeleteMapping("/usergroup/{userUserGroupId}")
+    public ResponseEntity<String> deleteUserUserGroups (@PathVariable Long userUserGroupId) {
+
+        usersService.deleteUserUserGroups(userUserGroupId);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
 }
