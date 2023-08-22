@@ -118,5 +118,25 @@ public class DocumentsService {
 
         return "SUCCESS";
     }
+    @Transactional
+    public String shiftDocuments(Long documentId, Long directoryId) {
+
+        Documents documents = documentsRepository.findById(documentId).orElseThrow();
+        documents.setDirectories(directoriesRepository.findById(directoryId).orElseThrow());
+
+        return "SUCCESS";
+    }
+    @Transactional
+    public String copyDocuments(Long documentId, Long directoryId) {
+
+        Documents documents = documentsRepository.findById(documentId).orElseThrow();
+        Directories directories = directoriesRepository.findById(directoryId).orElseThrow();
+        Files files = Files.of(documents.getFiles().getFileName(), documents.getFiles().getFileData());
+        filesRepository.save(files);
+        Documents copyDocuments = Documents.of(documents.getDocName(), directories, files);
+        documentsRepository.save(copyDocuments);
+
+        return "SUCCESS";
+    }
 
 }

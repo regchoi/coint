@@ -57,12 +57,13 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/table/**").permitAll()
-                        .requestMatchers("/api/project/**").permitAll()
-                        .requestMatchers("/api/task/**").permitAll()
-                        .requestMatchers("/api/document/**").permitAll()
-                        .requestMatchers("/swagger-ui/index.html").permitAll()
+//                        .requestMatchers("/api/table/**").permitAll()
+//                        .requestMatchers("/api/project/**").permitAll()
+//                        .requestMatchers("/api/task/**").permitAll()
+//                        .requestMatchers("/api/document/**").permitAll()
+//                        .requestMatchers("/swagger-ui/index.html").permitAll()
                         .anyRequest().permitAll())
+//                        .anyRequest().authenticated())
 
                 .headers(headers -> headers
                         .frameOptions(

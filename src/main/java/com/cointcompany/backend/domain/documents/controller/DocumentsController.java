@@ -159,9 +159,8 @@ public class DocumentsController {
     }
     @Operation(summary = "파일 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
-    @PutMapping("/{directoryId}/{documentId}")
+    @PutMapping("/{documentId}")
     public ResponseEntity<String> modifyDocuments (
-            @PathVariable("directoryId") Long directoryId,
             @PathVariable("documentId") Long documentId,
             @RequestBody DocumentsDto.PostDocuments postDocuments
     ) {
@@ -174,5 +173,23 @@ public class DocumentsController {
             @PathVariable Long documentId) {
 
         return new ResponseEntity<>(documentsService.removeDocuments(documentId), HttpStatus.OK);
+    }
+    @Operation(summary = "파일 이동")
+    @ApiResponse(responseCode = "200", description = "이동 성공")
+    @PutMapping("/{documentId}/{directoryId}")
+    public ResponseEntity<String> shiftDocuments (
+            @PathVariable Long documentId,
+            @PathVariable Long directoryId) {
+
+        return new ResponseEntity<>(documentsService.shiftDocuments(documentId, directoryId), HttpStatus.OK);
+    }
+    @Operation(summary = "파일 복사")
+    @ApiResponse(responseCode = "200", description = "복사 성공")
+    @PostMapping("/{documentId}/{directoryId}")
+    public ResponseEntity<String> copyDocuments (
+            @PathVariable Long documentId,
+            @PathVariable Long directoryId) {
+
+        return new ResponseEntity<>(documentsService.copyDocuments(documentId, directoryId), HttpStatus.OK);
     }
 }
