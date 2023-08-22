@@ -54,38 +54,30 @@ public class UsersDto {
             this.getUserUserGroupsResList = getUserUserGroupsResList;
         }
     }
-//    @NoArgsConstructor
-//    @Data
-//    public static class putUsersReq {
-//        private Long idNum;
-//
-//        private String loginId;
-//
-//        private String name;
-//
-//        private String position;
-//
-//        private String phone;
-//
-//        private String email;
-//
-//        private List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList;
-//
-//        private List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList;
-//
-//        public putUsersReq (Users users, List<DepartmentsDto.GetUserDepartmentRes> getUserDepartmentResList,
-//                            List<UserGroupsDto.GetUserUserGroupsRes> getUserUserGroupsResList) {
-//
-//            this.idNum = users.getIdNum();
-//            this.loginId = users.getLoginId();
-//            this.name = users.getName();
-//            this.position = users.getPosition();
-//            this.phone = users.getPhone();
-//            this.email = users.getEmail();
-//            this.getUserDepartmentResList = getUserDepartmentResList;
-//            this.getUserUserGroupsResList = getUserUserGroupsResList;
-//        }
-//    }
+    @NoArgsConstructor
+    @Data
+    public static class GetUsersReq {
+        private Long idNum;
+
+        private String name;
+
+        private String position;
+
+        private String phone;
+
+        private String email;
+
+
+        public GetUsersReq (Users users) {
+
+            this.idNum = users.getIdNum();
+            this.name = users.getName();
+            this.position = users.getPosition();
+            this.phone = users.getPhone();
+            this.email = users.getEmail();
+        }
+    }
+
     @NoArgsConstructor
     @Data
     public static class SaveUsers {
@@ -135,6 +127,21 @@ public class UsersDto {
             this.phone = users.getPhone();
             this.email = users.getEmail();
 
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class GetUserUsergroup {
+
+        private Long idNum;
+
+        private GetUsersReq users;
+
+        public GetUserUsergroup(Long userUserGroupId, GetUsersReq users) {
+
+            this.idNum = userUserGroupId;
+            this.users = users;
         }
     }
 

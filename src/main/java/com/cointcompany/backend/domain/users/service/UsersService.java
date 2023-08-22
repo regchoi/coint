@@ -156,4 +156,44 @@ public class UsersService {
                 .map(UserDepartment::getUsers)
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public List<UsersDto.GetUserUsergroup> getUserUserGroups(Long userGroupId) {
+
+        List<UserUsergroup> userUsergroupList = userUsergroupRepository.findByUsergroupsWithUsers(userGroupId);
+        List<UsersDto.GetUserUsergroup> getUserUsergroupList = new ArrayList<>();
+
+        for (UserUsergroup userUsergroup : userUsergroupList) {
+            UsersDto.GetUsersReq getUsersReq = new UsersDto.GetUsersReq(userUsergroup.getUsers());
+            UsersDto.GetUserUsergroup getUserUsergroup =
+                    new UsersDto.GetUserUsergroup(userUsergroup.getIdNum(), getUsersReq);
+
+            getUserUsergroupList.add(getUserUsergroup);
+        }
+
+        return getUserUsergroupList;
+    }
+    @Transactional
+    public void shiftUserUserGroups(Long userGroupId, Long userUserGroupId) {
+
+        UserUsergroup userUsergroup = userUsergroupRepository.findById(userUserGroupId).orElseThrow();
+        userUsergroup.setUsergroups(userGroupsRepository.findById(userGroupId).orElseThrow());
+    }
+
+    @Transactional
+    public void createUserUserGroups(Long userGroupId, Long userId) {
+        UserUsergroup userUsergroup = UserUsergroup.of(
+                usersRepository.findById(userId).orElseThrow(),
+                userGroupsRepository.findById(userGroupId).orElseThrow()
+        );
+        userUsergroupRepository.save(userUsergroup);
+    }
+
+    @Transactional
+    public void deleteUserUserGroups(Long userUserGroupId) {
+        userUsergroupRepository.delete(
+                userUsergroupRepository.findById(userUserGroupId).orElseThrow()
+        );
+
+    }
 }

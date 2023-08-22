@@ -29,6 +29,8 @@ public class Users extends BaseEntity {
 
     private String loginPw;
 
+    private String role;
+
     private String name;
 
     private String position;
@@ -80,6 +82,7 @@ public class Users extends BaseEntity {
     ) {
         this.loginId = loginId;
         this.loginPw = "0000";
+        this.role = "ROLE_USER";
         this.name = name;
         this.position = position;
         this.phone = phone;
