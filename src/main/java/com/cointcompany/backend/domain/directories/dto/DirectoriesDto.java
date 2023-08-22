@@ -54,4 +54,25 @@ public class DirectoriesDto {
 
         }
     }
+
+    @NoArgsConstructor
+    @Data
+    public static class GetParentDirectories {
+        private Long idNum;
+
+        private String dirName;
+
+        private Long parentDirectoriesIdNum;
+
+        private Long regUserId;
+
+        public GetParentDirectories (Directories directories) {
+
+            this.idNum = directories.getIdNum();
+            this.dirName = directories.getDirName();
+            this.parentDirectoriesIdNum = directories.getParentDirectories().getIdNum();
+            this.regUserId = directories.getRegUserid();
+
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.cointcompany.backend.domain.directories.controller;
 
 import com.cointcompany.backend.domain.directories.dto.DirectoriesDto;
+import com.cointcompany.backend.domain.directories.entity.Directories;
 import com.cointcompany.backend.domain.directories.service.DirectoriesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -76,6 +77,15 @@ public class DirectoriesController {
         List<DirectoriesDto.GetDirectoryUsers> directoryUsersList = directoriesService.findDirectoryUsers();
 
         return new ResponseEntity<>(directoryUsersList, HttpStatus.OK);
+    }
+    @Operation(summary = "부모 디렉토리 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/sub/{parentDirectoryId}")
+    public ResponseEntity<List<DirectoriesDto.GetParentDirectories>> getParentDirectory (
+            @PathVariable Long parentDirectoryId
+    ) {
+
+        return new ResponseEntity<>(directoriesService.findParentDirectory(parentDirectoryId), HttpStatus.OK);
     }
 
 

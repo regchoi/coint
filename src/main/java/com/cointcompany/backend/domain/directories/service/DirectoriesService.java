@@ -79,6 +79,20 @@ public class DirectoriesService {
 
         return getDirectoryUsersList;
     }
+
+    @Transactional(readOnly = true)
+    public List<DirectoriesDto.GetParentDirectories> findParentDirectory (Long parentDirectoryId) {
+
+        List<DirectoriesDto.GetParentDirectories> getDirectoriesList = new ArrayList<>();
+        List<Directories> directoriesList = directoriesRepository.findByParentDirectoriesIdNum(parentDirectoryId);
+        for (Directories directories : directoriesList) {
+            DirectoriesDto.GetParentDirectories getDirectories = new DirectoriesDto.GetParentDirectories(directories);
+            getDirectoriesList.add(getDirectories);
+        }
+
+        return getDirectoriesList;
+    }
+
 //    @Transactional(readOnly = true)
 //    public List<DirectoriesDto.GetDirectoryUsers> findDirectoryUsers(Long userId) {
 //

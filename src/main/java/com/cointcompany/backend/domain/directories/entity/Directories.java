@@ -2,6 +2,7 @@ package com.cointcompany.backend.domain.directories.entity;
 
 import com.cointcompany.backend.domain.common.BaseEntity;
 import com.cointcompany.backend.domain.documents.entity.Documents;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
