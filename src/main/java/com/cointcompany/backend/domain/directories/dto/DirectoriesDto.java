@@ -64,14 +64,24 @@ public class DirectoriesDto {
 
         private Long parentDirectoriesIdNum;
 
-        private Long regUserId;
+        private Long regUserid;
+
+        private String regDate;
+
+        private Long modUserid;
+
+        private String modDate;
+
 
         public GetParentDirectories (Directories directories) {
 
             this.idNum = directories.getIdNum();
             this.dirName = directories.getDirName();
             this.parentDirectoriesIdNum = directories.getParentDirectories().getIdNum();
-            this.regUserId = directories.getRegUserid();
+            this.regUserid = directories.getRegUserid();
+            this.regDate = String.valueOf(directories.getRegDate());
+            this.modUserid = directories.getModUserid();
+            this.modDate = String.valueOf(directories.getModDate());
 
         }
     }
