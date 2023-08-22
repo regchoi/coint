@@ -16,7 +16,7 @@ import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutli
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { getIconByFileType } from "./getIconByFileType";
 import {alpha, styled} from "@mui/material/styles";
 import RenameModal from "./RenameModal";
@@ -26,6 +26,7 @@ import { useDropzone } from 'react-dropzone';
 import SuccessModal from "../../common/SuccessModal";
 import {saveAs} from "file-saver";
 import DriveContext from "./DriveContext";
+import MoveModal from "./MoveModal";
 
 interface docResponse {
     idNum: number;
@@ -87,6 +88,7 @@ const Drive: React.FC = () => {
     const [directory, setDirectory] = useState<dirResponse[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [renameModalOpen, setRenameModalOpen] = useState(false);
+    const [moveModalOpen, setMoveModalOpen] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState({ docName: '', idNum: 0 });
     const firstSelectedIndexRef = useRef<number | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -224,12 +226,14 @@ const Drive: React.FC = () => {
         }
     };
 
+    // TODO 삭제 Modal
     const handleFileDelete = async (idNumList: number[]) => {
         for (const idNum of idNumList) {
-            const response = await axios.delete(`/api/document/${idNum}`);
+            const response = await axios.delete(`/api/document/${projectIdNum}/${idNum}`);
             if (response.status === 200) {
                 // 파일 삭제
                 setDocuments(documents.filter((document) => document.idNum !== idNum));
+                getFiles();
                 setSuccessMessage('파일 삭제 성공');
                 setSuccessModalOpen(true);
             } else {
@@ -315,13 +319,16 @@ const Drive: React.FC = () => {
             case "download":
                 handleFileDownload(selectedItems);
                 break;
+            case "move":
+                setMoveModalOpen(true);
+                break;
             default:
                 break;
         }
     };
 
     const handleRename = async (idNum: number, newName: string) => {
-        await axios.put(`/api/document/${projectIdNum}/${idNum}`, { docName: newName })
+        await axios.put(`/api/document/${idNum}`, { docName: newName })
             .then((res) => {
                 const updatedDocuments = documents.map((doc) => {
                     if (doc.idNum === idNum) {
@@ -337,6 +344,22 @@ const Drive: React.FC = () => {
                 setErrorModalOpen(true);
             });
     };
+
+    const handleMove = async (idNumList: number[], targetFolderIdNum: number) => {
+        for (const idNum of idNumList) {
+            await axios.put(`/api/document/${projectIdNum}/${idNum}`)
+                .then((res) => {
+                    // 파일은 이동했으니 현재 폴더에서 삭제
+                    // documents에서 제외
+                    const updatedDocuments = documents.filter((doc) => doc.idNum !== idNum);
+                    setDocuments(updatedDocuments);
+                })
+                .catch((err) => {
+                    setErrorMessage(err.response.data.message);
+                    setErrorModalOpen(true);
+                });
+        }
+    }
 
     return (
         <Box sx={{ flexGrow: 1, maxWidth: '1200px', backgroundColor: '#fff', borderRadius: '15px', p: 2,  }}>
@@ -510,13 +533,13 @@ const Drive: React.FC = () => {
                                                         <Divider sx={{my: 0.5}}/>
                                                         <MenuItem onClick={() => handleMenuItemClick("move")}
                                                                   sx={{...fontStyles}}>
-                                                            <DriveFileRenameOutlineIcon
+                                                            <DriveFileMoveIcon
                                                                 sx={{marginRight: '8px'}}/>
                                                             이동
                                                         </MenuItem>
                                                         <MenuItem onClick={() => handleMenuItemClick("copy")}
                                                                   sx={{...fontStyles}}>
-                                                            <DriveFileRenameOutlineIcon
+                                                            <FileCopyIcon
                                                                 sx={{marginRight: '8px'}}/>
                                                             복사
                                                         </MenuItem>
@@ -551,6 +574,14 @@ const Drive: React.FC = () => {
                 handleClose={() => setRenameModalOpen(false)}
                 document={selectedDocument}
                 handleRename={handleRename}
+            />
+
+            {/*이동 Modal*/}
+            <MoveModal
+                open={moveModalOpen}
+                handleClose={() => setMoveModalOpen(false)}
+                idNumList={selectedItems}
+                handleMove={handleMove}
             />
 
             {/*에러 발생 Modal*/}

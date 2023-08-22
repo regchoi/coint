@@ -25,6 +25,7 @@ const RenameModal: React.FC<RenameModalProps> = ({ open, handleClose, document, 
 
     const handleSave = () => {
         handleRename(document.idNum, newName);
+        setNewName('');
         handleClose();
     };
 
