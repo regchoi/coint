@@ -254,6 +254,7 @@ const TaskGanttChart = () => {
         console.log("On expander click Id:" + task.id);
     };
 
+    {/* TODO 데이터 표현 형식 변경 필요 */}
     return (
         <Grid container>
             <Grid item xs={12} md={12}>

@@ -27,6 +27,7 @@ import SuccessModal from "../../common/SuccessModal";
 import {saveAs} from "file-saver";
 import DriveContext from "./DriveContext";
 import MoveModal from "./MoveModal";
+import CopyModal from "./CopyModal";
 
 interface docResponse {
     idNum: number;
@@ -39,6 +40,9 @@ interface dirResponse {
     idNum: number;
     dirName: string;
     parentDirectoriesIdNum: number;
+    regUserid: string;
+    modDate: string;
+    regDate: string;
 }
 
 const StyledMenu = styled((props: MenuProps) => (
@@ -87,8 +91,11 @@ const Drive: React.FC = () => {
     const [documents, setDocuments] = useState<docResponse[]>([]);
     const [directory, setDirectory] = useState<dirResponse[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
+    const [moveItems, setMoveItems] = useState<number[]>([]);
+    const [copyItems, setCopyItems] = useState<number[]>([]);
     const [renameModalOpen, setRenameModalOpen] = useState(false);
     const [moveModalOpen, setMoveModalOpen] = useState(false);
+    const [copyModalOpen, setCopyModalOpen] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState({ docName: '', idNum: 0 });
     const firstSelectedIndexRef = useRef<number | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -129,7 +136,15 @@ const Drive: React.FC = () => {
 
     // 디렉토리 리스트 조회
     const getDirs = async () => {
-        // TODO: parentIdNum 기준으로 검색가능한 endpoint 필요
+        // TODO
+        try {
+            const response = await axios.get(`/api/directory/sub/${projectIdNum}`);
+            setDirectory(response.data);
+        } catch (error) {
+            setErrorMessage('디렉토리 리스트 조회 실패');
+            setErrorModalOpen(true);
+            return;
+        }
     }
 
     // 공용 폰트 스타일
@@ -286,6 +301,10 @@ const Drive: React.FC = () => {
         firstSelectedIndexRef.current = null;
     }
 
+    const handleDirChange = (idNum: number) => {
+        setProjectIdNum(idNum);
+    };
+
     const handleMenuOpen = (
         event: React.MouseEvent<HTMLButtonElement>,
         idNum: number
@@ -320,7 +339,12 @@ const Drive: React.FC = () => {
                 handleFileDownload(selectedItems);
                 break;
             case "move":
+                setMoveItems(selectedItems)
                 setMoveModalOpen(true);
+                break;
+            case "copy":
+                setCopyItems(selectedItems);
+                setCopyModalOpen(true);
                 break;
             default:
                 break;
@@ -346,13 +370,35 @@ const Drive: React.FC = () => {
     };
 
     const handleMove = async (idNumList: number[], targetFolderIdNum: number) => {
-        for (const idNum of idNumList) {
-            await axios.put(`/api/document/${projectIdNum}/${idNum}`)
+        const promises = idNumList.map((idNum) => {
+            return axios.put(`/api/document/${idNum}/${targetFolderIdNum}`)
                 .then((res) => {
-                    // 파일은 이동했으니 현재 폴더에서 삭제
-                    // documents에서 제외
-                    const updatedDocuments = documents.filter((doc) => doc.idNum !== idNum);
-                    setDocuments(updatedDocuments);
+                    return idNum;
+                });
+        });
+
+        try {
+            // 모든 요청이 완료될 때까지 기다린다.
+            const movedIds = await Promise.all(promises);
+
+            // 이동에 성공한 문서만 제외하고 나머지를 유지한다.
+            const updatedDocuments = documents.filter((doc) => !movedIds.includes(doc.idNum));
+            setDocuments(updatedDocuments);
+            setSuccessMessage('파일 이동이 완료되었습니다');
+            setSuccessModalOpen(true);
+        } catch (err: any) {
+            setErrorMessage(err.response.data.message);
+            setErrorModalOpen(true);
+        }
+    }
+
+    const handleCopy = async (idNumList: number[], targetFolderIdNum: number) => {
+        for(const idNum of idNumList) {
+            await axios.post(`/api/document/${idNum}/${targetFolderIdNum}`)
+                .then((res) => {
+                    setSuccessMessage('파일 복사가 완료되었습니다');
+                    setSuccessModalOpen(true);
+                    return idNum;
                 })
                 .catch((err) => {
                     setErrorMessage(err.response.data.message);
@@ -426,6 +472,76 @@ const Drive: React.FC = () => {
                                         </ListItemSecondaryAction>
                                     </ListItem>
 
+                                    {directory.map((dir, index) => {
+                                        // 본인의 idNum과 parentIdNum이 같은 폴더는 제외
+                                        if (dir.idNum === dir.parentDirectoriesIdNum) return null;
+                                        return (
+                                            <ListItem
+                                                key={dir.idNum}
+                                                sx={{
+                                                    width: '100%',
+                                                    borderBottom: '1px solid var(--dt-outline-variant,#dadce0)',
+                                                    height: '48px',
+                                                    backgroundColor: 'white',
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgb(240, 240, 240)' // 마우스 호버 시 배경색 변경
+                                                    }
+                                                }}
+                                                // 더블 클릭 시 폴더로 이동
+                                                onDoubleClick={() => handleDirChange(dir.idNum)}
+                                                onMouseDown={(event) => event.preventDefault()}
+                                                >
+                                                <ListItemAvatar sx={{width: '2%'}}>
+                                                    <i
+                                                        className={"mdi mdi-folder"}
+                                                        style={{
+                                                            color: 'hsl(0, 0%, 40%)',
+                                                            fontSize: '24px'
+                                                        }}
+                                                    />
+                                                </ListItemAvatar>
+                                                <ListItemText primary={dir.dirName}
+                                                              sx={{width: '40%', overflow: 'auto'}}
+                                                              primaryTypographyProps={{
+                                                                  sx: fontStyles
+                                                              }}
+                                                />
+                                                <ListItemAvatar sx={{
+                                                    width: '24%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'flex-start',
+                                                }}>
+                                                    <AccountCircleIcon sx={{
+                                                        color: 'lightgray',
+                                                        marginRight: '8px',
+                                                        backgroundColor: '#fff',
+                                                        borderRadius: '50%'
+                                                    }}/>
+                                                    <span style={{
+                                                        font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
+                                                        letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)'
+                                                    }}>{dir.regUserid}</span>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    sx={{width: '24%'}}
+                                                    primary={dir.modDate && dir.regDate.toString().substring(0, 10)}
+                                                    primaryTypographyProps={{
+                                                        sx: {
+                                                            font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
+                                                            letterSpacing: 'var(--dt-title-small-spacing,0.0178571429em)'
+                                                        }
+                                                    }}
+                                                />
+                                                <ListItemSecondaryAction>
+                                                    <StyledMenu>
+                                                        &nbsp;
+                                                    </StyledMenu>
+                                                </ListItemSecondaryAction>
+                                            </ListItem>
+                                        )
+                                    })}
+
                                     {documents.map((document, index) => {
                                         const {icon, color} = getIconByFileType(document.docName);
                                         return (
@@ -442,7 +558,7 @@ const Drive: React.FC = () => {
                                                 }}
                                                 onClick={(event) => handleItemClick(index, event)} // 클릭 시 선택 상태를 토글
                                                 onContextMenu={(event) => handleRightClick(event)}
-                                                onMouseDown={(event) => event.preventDefault()} // 추가한 코드
+                                                onMouseDown={(event) => event.preventDefault()}
                                             >
                                                 <ListItemAvatar sx={{width: '2%'}}>
                                                     <i
@@ -478,7 +594,7 @@ const Drive: React.FC = () => {
                                                 </ListItemAvatar>
                                                 <ListItemText
                                                     sx={{width: '24%'}}
-                                                    primary={document.modDate.toString().substring(0, 10)}
+                                                    primary={document.modDate && document.modDate.toString().substring(0, 10)}
                                                     primaryTypographyProps={{
                                                         sx: {
                                                             font: 'var(--dt-title-small-font,400 .775rem/1.25rem "Google Sans"),"Google Sans",Roboto,Arial,sans-serif',
@@ -580,8 +696,16 @@ const Drive: React.FC = () => {
             <MoveModal
                 open={moveModalOpen}
                 handleClose={() => setMoveModalOpen(false)}
-                idNumList={selectedItems}
+                idNumList={moveItems}
                 handleMove={handleMove}
+            />
+
+            {/*복사 Modal*/}
+            <CopyModal
+                open={copyModalOpen}
+                handleClose={() => setCopyModalOpen(false)}
+                idNumList={copyItems}
+                handleCopy={handleCopy}
             />
 
             {/*에러 발생 Modal*/}

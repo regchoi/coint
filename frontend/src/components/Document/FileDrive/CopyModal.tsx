@@ -27,10 +27,10 @@ interface RenameModalProps {
     open: boolean;
     handleClose: () => void;
     idNumList: number[];
-    handleMove: (idNumList: number[], folderId: number) => void;
+    handleCopy: (idNumList: number[], folderId: number) => void;
 }
 
-const RenameModal: React.FC<RenameModalProps> = ({ open, handleClose, idNumList, handleMove }) => {
+const CopyModal: React.FC<RenameModalProps> = ({ open, handleClose, idNumList, handleCopy }) => {
     const [directories, setDirectories] = useState<dirResponse[]>([]);
     const [rootDir, setRootDir] = useState<dirResponse>({} as dirResponse);
     const [loading, setLoading] = useState(true);
@@ -93,7 +93,7 @@ const RenameModal: React.FC<RenameModalProps> = ({ open, handleClose, idNumList,
     const isEmpty = (obj: any) => Object.keys(obj).length === 0;
 
     const handleSave = () => {
-        handleMove(idNumList, selectDir.idNum);
+        handleCopy(idNumList, selectDir.idNum);
         setSelectDir({} as selectDir)
         handleClose();
     };
@@ -106,7 +106,7 @@ const RenameModal: React.FC<RenameModalProps> = ({ open, handleClose, idNumList,
                         minHeight: '500px',
                     },
                 }}>
-            <DialogTitle>문서 이동</DialogTitle>
+            <DialogTitle>문서 복사</DialogTitle>
             <DialogContent>
                 <Box sx={{ flexGrow: 1, width: '100%', backgroundColor: '#fff', borderRadius: '15px', p: 2, height: '400px' }}>
                     {loading && <LinearProgress/>}
@@ -147,11 +147,11 @@ const RenameModal: React.FC<RenameModalProps> = ({ open, handleClose, idNumList,
                     취소
                 </Button>
                 <Button onClick={handleSave} color="primary">
-                    이동
+                    복사
                 </Button>
             </DialogActions>
         </Dialog>
     );
 };
 
-export default RenameModal;
+export default CopyModal;

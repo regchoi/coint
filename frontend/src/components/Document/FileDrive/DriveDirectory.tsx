@@ -89,6 +89,8 @@ export default function CustomizedTreeView() {
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    // expanded 배열을 관리하는 상태 변수 추가
+    const [expanded, setExpanded] = useState<string[]>([]);
 
     const context = useContext(DriveContext);
     if (!context) {
@@ -128,6 +130,33 @@ export default function CustomizedTreeView() {
         }
     }, [directories]);
 
+    useEffect(() => {
+        // 현재 활성화된 디렉토리와 그 상위 디렉토리들의 ID 목록을 구하고, expanded 배열에 추가
+        const ancestorIds = getAncestorIds(projectIdNum, directories);
+        setExpanded(prevExpanded => {
+            // 중복된 ID를 제거하고 새 배열을 반환
+            const newExpanded = [...new Set([...prevExpanded, ...ancestorIds])];
+            return newExpanded;
+        });
+    }, [projectIdNum]);
+
+    // 트리 노드 펼침/접힘 이벤트 핸들러
+    const handleNodeToggle = (
+        event: React.ChangeEvent<{}>,
+        nodeIds: string[]
+    ) => {
+        setExpanded(nodeIds); // 펼쳐진 노드 ID 목록 업데이트
+    };
+
+    const getAncestorIds = (dirId: number, directories: dirResponse[]): string[] => {
+        const dir = directories.find(d => d.idNum === dirId);
+        if (!dir || dir.parentDirectoriesIdNum === dir.idNum) {
+            return [dirId.toString()];
+        } else {
+            return [...getAncestorIds(dir.parentDirectoriesIdNum, directories), dirId.toString()];
+        }
+    };
+
     // 디렉토리 트리 렌더링
     const renderTree = (directory: dirResponse) => {
         if (!directory || directory.idNum === undefined) {
@@ -153,7 +182,8 @@ export default function CustomizedTreeView() {
             {loading && <LinearProgress/>}
                 <TreeView
                     aria-label="customized"
-                    defaultExpanded={['1']}
+                    expanded={expanded}
+                    onNodeToggle={handleNodeToggle}
                     defaultCollapseIcon={<MinusSquare />}
                     defaultExpandIcon={<PlusSquare />}
                     defaultEndIcon={<CloseSquare />}

@@ -25,6 +25,9 @@ export const getIconByFileType = (fileName: string): { icon: string; color: stri
         case 'mp3':
         case 'wav':
             return { icon: 'mdi mdi-music', color: 'hsl(0, 0%, 40%)' }; // 회색
+        // 폴더인 경우
+        case 'folder':
+            return { icon: 'mdi mdi-folder', color: 'hsl(0, 0%, 40%)' }; // 회색
         default:
             return { icon: 'mdi mdi-file', color: 'hsl(0, 0%, 40%)' }; // 회색
     }

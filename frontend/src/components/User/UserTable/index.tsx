@@ -59,7 +59,7 @@ export default function UserTable() {
 
     // added data를 추가하는 함수
     const handleAdd = () => {
-        const newData: Data = createData(addId, '', '', '', [], '', [], '', '', '');
+        const newData: Data = createData(addId, '', '', '', [], '', [], '', '', '', '');
         setAdded([...added, newData]);
         setAddId(addId + 1);
     }

@@ -30,38 +30,6 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
     const [departments, setDepartments] = useState<Department[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
 
-
-    // department, usergroup redux로 값 받아오기
-    useEffect(() => {
-        // department
-        axios.get('/api/user/department')
-            .then((response) => {
-                const deptData = response.data.map((dept: any) => ({
-                    idNum: dept.idNum,
-                    departmentName: dept.departmentName
-                }));
-                setDepartments(deptData);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-
-        // usergroup
-        axios.get('/api/user/usergroup')
-            .then((response) => {
-                const usergroupData = response.data.map((usergroup: any) => ({
-                    idNum: usergroup.idNum,
-                    usergroupName: usergroup.usergroupName
-                }));
-                setUserGroups(usergroupData);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }, []);
-
-
-
     const handleRowChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLOptionElement>, key: keyof Data) => {
         const updatedRow = {...editedRow, [key]: event.target.value};
         setEditedRow(updatedRow);
@@ -76,6 +44,7 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
             role="checkbox"
             tabIndex={row.idNum}
             key={row.idNum}
+            sx={{backgroundColor: 'rgba(224, 255, 224, 0.4)'}}
         >
             <TableCell padding="checkbox" sx={{
                 width: '30px', height: '30px',
@@ -97,66 +66,27 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
             {(Object.keys(editedRow) as Array<keyof Data>).map(key => {
                 // TODO: add user_id, 권한 동적 할당
                 if (key === 'idNum') {
-                    return (
-                        <TableCell align="center" key={key} sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "5px",
-                            fontSize: "12px",
-                            height: "45px"
-                        }}>
-                        </TableCell>
-                    );
+                    return null;
                 }
 
                 if (key === 'getUserDepartmentResList') {
                     return (
-                        <TableCell align="center" key={1} sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "5px",
-                            fontSize: "12px",
-                            height: "45px"
-                        }}>
+                        <TableCell
+                            sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "0px 10px",
+                                fontSize: "12px",
+                            }}
+                            align="center"
+                            key={key}
+                        >
                             {
-                                editedRow[key].map((dept: any, index: number) => (
-                                    <Select
-                                        key={index}
-                                        value={dept.idNum}
-                                        onChange={(event) => {
-                                            const selectedDeptId = event.target.value;
-                                            const updatedDepartments = [...editedRow[key]];
-                                            updatedDepartments[index] = {
-                                                ...dept,
-                                                departmentIdNum: selectedDeptId,
-                                                departmentName: departments.find(d => d.idNum === selectedDeptId)?.departmentName || ''
-                                            };
-
-                                            const updatedRow = {...editedRow, getUserDepartmentResList: updatedDepartments};
-                                            setEditedRow(updatedRow);
-                                            onRowChange(updatedRow);
-                                        }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                                                borderColor: '#409aff',
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                padding: 0,
-                                                fontSize: '12px',
-                                                height: '25px',
-                                                paddingLeft: '10px',
-                                                backgroundColor: '#fff',
-                                                minWidth: '50px'
-                                            }
-                                        }}
-                                    >
-                                        {
-                                            departments.map(deptOption => (
-                                                <MenuItem key={deptOption.idNum} value={deptOption.idNum}>
-                                                    {deptOption.departmentName}
-                                                </MenuItem>
-                                            ))
-                                        }
-                                    </Select>
-                                ))
+                                // row[key]가 빈배열일 수 있음
+                                // row[key]가 빈배열이 아닐 경우, map을 통해 각 요소를 출력함
+                                // row[key]가 빈배열일 경우, 빈 문자열을 출력함
+                                    row[key] !== undefined
+                                        ? row[key].map((item, index) => (<div key={index}>{item.departmentName}</div>))
+                                        : ''
                             }
                         </TableCell>
                     )
@@ -164,53 +94,22 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
 
                 if (key === 'getUserUserGroupsResList') {
                     return (
-                        <TableCell align="center" key={1} sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "5px",
-                            fontSize: "12px",
-                            height: "45px"
-                        }}>
+                        <TableCell
+                            sx={{
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "0px 10px",
+                                fontSize: "12px",
+                            }}
+                            align="center"
+                            key={key}
+                        >
                             {
-                                editedRow[key].map((dept: any, index: number) => (
-                                    <Select
-                                        key={index}
-                                        value={dept.idNum}
-                                        onChange={(event) => {
-                                            const selectedDeptId = event.target.value;
-                                            const updatedUserGroups = [...editedRow[key]];
-                                            updatedUserGroups[index] = {
-                                                ...dept,
-                                                userIdNum:selectedDeptId,
-                                                usergroupName: userGroups.find(d => d.idNum === selectedDeptId)?.usergroupName || ''
-                                            };
-
-                                            const updatedRow = {...editedRow, getUserUserGroupsResList: updatedUserGroups};
-                                            setEditedRow(updatedRow);
-                                            onRowChange(updatedRow);
-                                        }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                                                borderColor: '#409aff',
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                padding: 0,
-                                                fontSize: '12px',
-                                                height: '25px',
-                                                paddingLeft: '10px',
-                                                backgroundColor: '#fff',
-                                                minWidth: '50px'
-                                            }
-                                        }}
-                                    >
-                                        {
-                                            userGroups.map(userOption => (
-                                                <MenuItem key={userOption.idNum} value={userOption.idNum}>
-                                                    {userOption.usergroupName}
-                                                </MenuItem>
-                                            ))
-                                        }
-                                    </Select>
-                                ))
+                                // row[key]가 빈배열일 수 있음
+                                // row[key]가 빈배열이 아닐 경우, map을 통해 각 요소를 출력함
+                                // row[key]가 빈배열일 경우, 빈 문자열을 출력함
+                                row[key] !== undefined
+                                    ? row[key].map((item, index) => (<div key={index}>{item.usergroupName}</div>))
+                                    : ''
                             }
                         </TableCell>
                     )
@@ -239,6 +138,18 @@ const EditableRow: React.FC<EditableRowProps> = ({row, labelId, onRowChange, onS
                             height: "45px"
                         }}>
                             {getName()}
+                        </TableCell>
+                    );
+                }
+
+                if (key === 'detail') {
+                    return  (
+                        <TableCell align="center" key={key} sx={{
+                            border: "1px solid rgba(0, 0, 0, 0.12)",
+                            padding: "5px",
+                            fontSize: "12px",
+                            height: "45px"
+                        }}>
                         </TableCell>
                     );
                 }
