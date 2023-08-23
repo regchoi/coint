@@ -1,5 +1,6 @@
 package com.cointcompany.backend.domain.documents.dto;
 
+import com.cointcompany.backend.domain.documents.entity.DocumentUsers;
 import com.cointcompany.backend.domain.documents.entity.Documents;
 import lombok.*;
 
@@ -52,5 +53,21 @@ public class DocumentsDto {
         }
     }
 
+    @NoArgsConstructor
+    @Data
+    public static class DocumentUser {
+        private Long idNum;
+        private int level;
+        private boolean star;
+        private Long documentsIdNum;
+
+        public DocumentUser(DocumentUsers documentUsers) {
+            this.idNum = documentUsers.getIdNum();
+            this.level = documentUsers.getLevel();
+            this.star = documentUsers.isStar();
+            this.documentsIdNum = documentUsers.getDocumentsIdNum();
+        }
+    }
 
 }
+

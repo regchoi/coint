@@ -12,7 +12,7 @@ function b64DecodeUnicode(str: string) {
 
 function getUserId() {
     const tokenInfo = getTokenInfo();
-    return tokenInfo ? tokenInfo.user_id : null;
+    return tokenInfo ? tokenInfo.idNum : null;
 }
 
 function getName() {

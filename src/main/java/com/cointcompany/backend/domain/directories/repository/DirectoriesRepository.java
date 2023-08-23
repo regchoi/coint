@@ -1,5 +1,6 @@
 package com.cointcompany.backend.domain.directories.repository;
 
+import com.cointcompany.backend.domain.directories.dto.DirectoriesDto;
 import com.cointcompany.backend.domain.directories.entity.Directories;
 import org.springframework.data.jpa.repository.JpaRepository;
 

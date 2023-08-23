@@ -8,7 +8,7 @@ import {
     ListItemText,
     ListItemAvatar,
     ListItemSecondaryAction,
-    Grid, Menu, MenuItem, MenuProps, PopoverPosition, Divider, LinearProgress, Typography
+    Grid, Menu, MenuItem, MenuProps, PopoverPosition, Divider, LinearProgress, Typography, Tooltip
 } from '@mui/material';
 import {MoreVert, DeleteOutline} from "@mui/icons-material";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -98,7 +98,7 @@ const Drive: React.FC = () => {
     const [copyModalOpen, setCopyModalOpen] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState({ docName: '', idNum: 0 });
     const firstSelectedIndexRef = useRef<number | null>(null);
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>({});
     const [menuPosition, setMenuPosition] = useState<PopoverPosition | undefined>(undefined);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -112,7 +112,7 @@ const Drive: React.FC = () => {
     if (!context) {
         throw new Error("Cannot find ProjectProvider");
     }
-    const { projectIdNum, setProjectIdNum, accessLevel } = context;
+    const { projectIdNum, setProjectIdNum, documentAuthorities, directoryAuthorities } = context;
 
     // 파일 리스트 조회
     useEffect(() => {
@@ -136,10 +136,17 @@ const Drive: React.FC = () => {
 
     // 디렉토리 리스트 조회
     const getDirs = async () => {
-        // TODO
+        // TODO 권한 설정 고민
         try {
             const response = await axios.get(`/api/directory/sub/${projectIdNum}`);
-            setDirectory(response.data);
+
+            // 권한 없으면 안보이는 방식으로 처리
+            const filteredResponse = response.data.filter((dir: dirResponse) => {
+                const authority = directoryAuthorities.find(auth => auth.directoriesIdNum === dir.idNum);
+                return !(!authority || authority.level > 1);
+            });
+
+            setDirectory(filteredResponse);
         } catch (error) {
             setErrorMessage('디렉토리 리스트 조회 실패');
             setErrorModalOpen(true);
@@ -221,7 +228,6 @@ const Drive: React.FC = () => {
         }
     };
 
-
     const handleFileDownload = async (idNumList: number[]) => {
         for (const idNum of idNumList) {
             const response = await axios.get(`/api/document/download/${idNum}`, {
@@ -230,6 +236,7 @@ const Drive: React.FC = () => {
             console.log(response);
             if (response.status === 200) {
                 const contentDisposition = response.headers['content-disposition'];
+                // TODO: 파일 디코딩
                 const fileName = contentDisposition ? contentDisposition.split('filename=')[1].replace(/"/g, '') : 'unknown';
                 const blob = new Blob([response.data], { type: 'application/octet-stream' });
                 saveAs(blob, fileName);
@@ -407,6 +414,150 @@ const Drive: React.FC = () => {
         }
     }
 
+    // Menu를 별도의 컴포넌트로 정의
+    const Menu = () => {
+        <StyledMenu
+            anchorEl={anchorEl}
+            anchorReference="anchorPosition" // 메뉴의 위치를 직접 지정
+            anchorPosition={menuPosition} // 메뉴의 위치 설정
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+        >
+            {/* TODO 공유 기능 추가 */}
+            {
+                // 접근 권한 별 메뉴 아이템 표시
+                currentDocumentAuthorityLevel && currentDocumentAuthorityLevel > 1 ?
+                    <Tooltip title="권한이 없습니다." placement="top">
+                        <Box sx={{
+                            opacity: 0.7,
+                            filter: 'grayscale(1)',
+                            cursor: 'not-allowed'
+                        }}>
+                            <MenuItem onClick={() => handleMenuItemClick("download")}
+                                      disabled
+                                      sx={{...fontStyles}}>
+                                <CloudDownloadIcon sx={{marginRight: '8px'}}/>
+                                다운로드
+                            </MenuItem>
+                        </Box>
+                    </Tooltip>
+                    :
+                    <MenuItem onClick={() => handleMenuItemClick("download")}
+                              sx={{...fontStyles}}>
+                        <CloudDownloadIcon sx={{marginRight: '8px'}}/>
+                        다운로드
+                    </MenuItem>
+            }
+            {
+                // 선택된 아이템이 1개 이상이거나 level이 2보다 크면 disabled
+                selectedItems.length > 1 || currentDocumentAuthorityLevel && currentDocumentAuthorityLevel > 2 ?
+                    <Tooltip title="권한이 없습니다." placement="top">
+                        <Box sx={{
+                            opacity: 0.7,
+                            filter: 'grayscale(1)',
+                            cursor: 'not-allowed'
+                        }}>
+                            <MenuItem onClick={() => handleMenuItemClick("rename")}
+                                      disabled
+                                      sx={{...fontStyles}}>
+                                <DriveFileRenameOutlineIcon
+                                    sx={{marginRight: '8px'}}/>
+                                이름변경
+                            </MenuItem>
+                        </Box>
+                    </Tooltip>
+                    :
+                    <MenuItem onClick={() => handleMenuItemClick("rename")}
+                              sx={{...fontStyles}}>
+                        <DriveFileRenameOutlineIcon
+                            sx={{marginRight: '8px'}}/>
+                        이름변경
+                    </MenuItem>
+            }
+            <Divider sx={{my: 0.5}}/>
+            {
+                // level이 3보다 크면 disabled
+                currentDocumentAuthorityLevel && currentDocumentAuthorityLevel > 3 ?
+                    <Tooltip title="권한이 없습니다." placement="top">
+                        <Box sx={{
+                            opacity: 0.7,
+                            filter: 'grayscale(1)',
+                            cursor: 'not-allowed'
+                        }}>
+                            <MenuItem
+                                onClick={() => handleMenuItemClick("move")}
+                                disabled
+                                sx={{...fontStyles}}>
+                                <DriveFileMoveIcon
+                                    sx={{marginRight: '8px'}}/>
+                                이동
+                            </MenuItem>
+                        </Box>
+                    </Tooltip>
+                    :
+                    <MenuItem onClick={() => handleMenuItemClick("move")}
+                              sx={{...fontStyles}}>
+                        <DriveFileMoveIcon
+                            sx={{marginRight: '8px'}}/>
+                        이동
+                    </MenuItem>
+            }
+            {
+                // level이 2보다 크면 disabled
+                currentDocumentAuthorityLevel && currentDocumentAuthorityLevel > 2 ?
+                    <Tooltip title="권한이 없습니다." placement="top">
+                        <Box sx={{
+                            opacity: 0.7,
+                            filter: 'grayscale(1)',
+                            cursor: 'not-allowed'
+                        }}>
+                            <MenuItem
+                                onClick={() => handleMenuItemClick("copy")}
+                                disabled
+                                sx={{...fontStyles}}>
+                                <FileCopyIcon
+                                    sx={{marginRight: '8px'}}/>
+                                복사
+                            </MenuItem>
+                        </Box>
+                    </Tooltip>
+                    :
+                    <MenuItem onClick={() => handleMenuItemClick("copy")}
+                              sx={{...fontStyles}}>
+                        <FileCopyIcon
+                            sx={{marginRight: '8px'}}/>
+                        복사
+                    </MenuItem>
+            }
+            <Divider sx={{my: 0.5}}/>
+            {
+                // level이 1보다 크면 disabled
+                currentDocumentAuthorityLevel && currentDocumentAuthorityLevel > 1 ?
+                    <Tooltip title="권한이 없습니다." placement="top">
+                        <Box sx={{
+                            opacity: 0.7,
+                            filter: 'grayscale(1)',
+                            cursor: 'not-allowed'
+                        }}>
+                            <MenuItem
+                                onClick={() => handleMenuItemClick("delete")}
+                                disabled
+                                sx={{...fontStyles}}>
+                                <DeleteOutline sx={{marginRight: '8px'}}/>
+                                삭제
+                            </MenuItem>
+                        </Box>
+                    </Tooltip>
+                    :
+                    <MenuItem onClick={() => handleMenuItemClick("delete")}
+                              sx={{...fontStyles}}>
+                        <DeleteOutline sx={{marginRight: '8px'}}/>
+                        삭제
+                    </MenuItem>
+            }
+        </StyledMenu>
+    }
+
     return (
         <Box sx={{ flexGrow: 1, maxWidth: '1200px', backgroundColor: '#fff', borderRadius: '15px', p: 2,  }}>
             {loading && <LinearProgress/>}
@@ -544,7 +695,21 @@ const Drive: React.FC = () => {
 
                                     {documents.map((document, index) => {
                                         const {icon, color} = getIconByFileType(document.docName);
-                                        return (
+
+                                        /**
+                                         기능별 권한 제한
+                                         level 1 - 모든 기능 사용 가능
+                                         level 2 - 이름변경, 복사, 이동 가능
+                                         level 3 - 이동 가능
+                                         level 4 - disabled
+                                         */
+                                        const currentDocumentAuthority = documentAuthorities.find(auth => auth.documentsIdNum === document.idNum);
+                                        const currentDocumentAuthorityLevel = currentDocumentAuthority && currentDocumentAuthority.level;
+
+                                        // currentDocumentAuthorityLevel이 4이상이거나 undefined이면 isDisabled를 true로 설정
+                                        const isDisabled = currentDocumentAuthorityLevel && currentDocumentAuthorityLevel >= 4 || !currentDocumentAuthorityLevel;
+
+                                        const DisListItem = (
                                             <ListItem
                                                 key={document.idNum}
                                                 sx={{
@@ -556,9 +721,13 @@ const Drive: React.FC = () => {
                                                         backgroundColor: selectedItems.includes(document.idNum) ? 'rgb(178, 228, 253)' : 'rgb(240, 240, 240)' // 마우스 호버 시 배경색 변경
                                                     }
                                                 }}
-                                                onClick={(event) => handleItemClick(index, event)} // 클릭 시 선택 상태를 토글
-                                                onContextMenu={(event) => handleRightClick(event)}
-                                                onMouseDown={(event) => event.preventDefault()}
+                                                {
+                                                    ...(currentDocumentAuthorityLevel && currentDocumentAuthorityLevel < 4) && {
+                                                        onClick: (event) => handleItemClick(index, event), // 클릭 시 선택 상태를 토글
+                                                        onContextMenu: (event) => handleRightClick(event),
+                                                        onMouseDown: (event) => event.preventDefault()
+                                                    } || {}
+                                                }
                                             >
                                                 <ListItemAvatar sx={{width: '2%'}}>
                                                     <i
@@ -604,71 +773,32 @@ const Drive: React.FC = () => {
                                                 />
                                                 <ListItemSecondaryAction>
                                                     {
-                                                        selectedItems.length > 1 ?
-                                                            // 선택된 아이템이 1개 이상인 경우 disabled 처리
+                                                        // 선택된 아이템이 1개 이상이거나 isDisabled가 true이면 disabled
+                                                        selectedItems.length > 1 || isDisabled ?
                                                             <IconButton edge="end" aria-label="more" disabled>
-                                                                <MoreVert/>
+                                                                <MoreVert/> {document.idNum}
                                                             </IconButton>
                                                             :
                                                             <IconButton edge="end" aria-label="more"
                                                                         onClick={(event) => handleMenuOpen(event, document.idNum)}>
-                                                                <MoreVert/>
+                                                                <MoreVert/> {document.idNum}
                                                             </IconButton>
                                                     }
-                                                    <StyledMenu
-                                                        anchorEl={anchorEl}
-                                                        anchorReference="anchorPosition" // 메뉴의 위치를 직접 지정
-                                                        anchorPosition={menuPosition} // 메뉴의 위치 설정
-                                                        open={Boolean(anchorEl)}
-                                                        onClose={handleMenuClose}
-                                                    >
-                                                        {/* TODO 공유 기능 추가 */}
-                                                        <MenuItem onClick={() => handleMenuItemClick("download")}
-                                                                  sx={{...fontStyles}}>
-                                                            <CloudDownloadIcon sx={{marginRight: '8px'}}/>
-                                                            다운로드
-                                                        </MenuItem>
-                                                        {
-                                                            selectedItems.length > 1 ?
-                                                                // 선택된 아이템이 1개 이상인 경우 disabled 처리
-                                                                <MenuItem onClick={() => handleMenuItemClick("rename")}
-                                                                          disabled
-                                                                          sx={{...fontStyles}}>
-                                                                    <DriveFileRenameOutlineIcon
-                                                                        sx={{marginRight: '8px'}}/>
-                                                                    이름변경
-                                                                </MenuItem>
-                                                                :
-                                                                <MenuItem onClick={() => handleMenuItemClick("rename")}
-                                                                          sx={{...fontStyles}}>
-                                                                    <DriveFileRenameOutlineIcon
-                                                                        sx={{marginRight: '8px'}}/>
-                                                                    이름변경
-                                                                </MenuItem>
-                                                        }
-                                                        <Divider sx={{my: 0.5}}/>
-                                                        <MenuItem onClick={() => handleMenuItemClick("move")}
-                                                                  sx={{...fontStyles}}>
-                                                            <DriveFileMoveIcon
-                                                                sx={{marginRight: '8px'}}/>
-                                                            이동
-                                                        </MenuItem>
-                                                        <MenuItem onClick={() => handleMenuItemClick("copy")}
-                                                                  sx={{...fontStyles}}>
-                                                            <FileCopyIcon
-                                                                sx={{marginRight: '8px'}}/>
-                                                            복사
-                                                        </MenuItem>
-                                                        <Divider sx={{my: 0.5}}/>
-                                                        <MenuItem onClick={() => handleMenuItemClick("delete")}
-                                                                  sx={{...fontStyles}}>
-                                                            <DeleteOutline sx={{marginRight: '8px'}}/>
-                                                            삭제
-                                                        </MenuItem>
-                                                    </StyledMenu>
                                                 </ListItemSecondaryAction>
                                             </ListItem>
                                         );
+
+                                        return isDisabled ? (
+                                            <Tooltip title="권한이 없습니다." placement="top">
+                                                <Box sx={{
+                                                    opacity: 0.7,
+                                                    filter: 'grayscale(1)',
+                                                    cursor: 'not-allowed'
+                                                }}>
+                                                    {DisListItem}
+                                                </Box>
+                                            </Tooltip>
+                                        ) : DisListItem;
                                     })}
                                     <ListItem
                                         sx={{

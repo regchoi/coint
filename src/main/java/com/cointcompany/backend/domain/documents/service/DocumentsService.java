@@ -3,7 +3,9 @@ package com.cointcompany.backend.domain.documents.service;
 import com.cointcompany.backend.domain.directories.entity.Directories;
 import com.cointcompany.backend.domain.directories.repository.DirectoriesRepository;
 import com.cointcompany.backend.domain.documents.dto.DocumentsDto;
+import com.cointcompany.backend.domain.documents.entity.DocumentUsers;
 import com.cointcompany.backend.domain.documents.entity.Documents;
+import com.cointcompany.backend.domain.documents.repository.DocumentUsersRepository;
 import com.cointcompany.backend.domain.documents.repository.DocumentsRepository;
 import com.cointcompany.backend.domain.file.entity.Files;
 import com.cointcompany.backend.domain.file.repository.FilesRepository;
@@ -22,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,6 +34,8 @@ public class DocumentsService {
     private final DirectoriesRepository directoriesRepository;
     private final DocumentsRepository documentsRepository;
     private final FilesRepository filesRepository;
+
+    private final DocumentUsersRepository documentUsersRepository;
 
     @Transactional(readOnly = true)
     public List<DocumentsDto.GetDocuments> findAllDocuments() {
@@ -139,4 +144,11 @@ public class DocumentsService {
         return "SUCCESS";
     }
 
+    @Transactional(readOnly = true)
+    public List<DocumentsDto.DocumentUser> findAuthorityDocumentsByUserId(Long userId) {
+        return documentUsersRepository.findAllByUsersIdNum(userId)
+                .stream()
+                .map(docUser -> new DocumentsDto.DocumentUser(docUser))
+                .collect(Collectors.toList());
+    }
 }

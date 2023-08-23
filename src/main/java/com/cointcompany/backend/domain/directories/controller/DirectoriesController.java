@@ -57,6 +57,8 @@ public class DirectoriesController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    // TODO: delete 처리하면 휴지통 디렉토리로 이동하도록 처리 필요
+    // TODO: 휴지통 디렉토리에서 삭제 처리하면 아래의 코드 처리 필요
     @Operation(summary = "디렉토리 삭제")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
     @DeleteMapping("/{directoryId}")
@@ -88,6 +90,14 @@ public class DirectoriesController {
         return new ResponseEntity<>(directoriesService.findParentDirectory(parentDirectoryId), HttpStatus.OK);
     }
 
+    @Operation(summary = "디렉토리 권한 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/authority/{userId}")
+    public ResponseEntity<List<DirectoriesDto.DirectoryUser>> getDirectoryAuthority (
+            @PathVariable Long userId
+    ) {
 
+        return new ResponseEntity<>(directoriesService.findAuthorityDirectoriesByUserId(userId), HttpStatus.OK);
+    }
 
 }

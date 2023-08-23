@@ -23,6 +23,10 @@ public class DocumentUsers extends BaseEntity {
 
     private boolean del = Boolean.FALSE;
 
+    @Column(name = "level", nullable = false)
+    private int level;
+
+
     @ManyToOne
     @JoinColumn(name = "usersIdNum")
     private Users users;
@@ -30,6 +34,10 @@ public class DocumentUsers extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "documentsIdNum")
     private Documents documents;
+
+    public Long getDocumentsIdNum() {
+        return (documents != null) ? documents.getIdNum() : null;
+    }
 
     public static DocumentUsers of(Users users, Documents documents) {
         return DocumentUsers.builder()
@@ -48,5 +56,6 @@ public class DocumentUsers extends BaseEntity {
         this.del = del;
         this.users = users;
         this.documents = documents;
+        this.level = 1;
     }
 }

@@ -22,6 +22,9 @@ public class DirectoryUsers extends BaseEntity {
 
     private boolean del = Boolean.FALSE;
 
+    @Column(name = "level", nullable = false)
+    private int level;
+
     @ManyToOne
     @JoinColumn(name = "usersIdNum")
     private Users users;
@@ -30,6 +33,10 @@ public class DirectoryUsers extends BaseEntity {
     @JoinColumn(name = "directoriesIdNum")
     private Directories directories;
 
+    public Long getDirectoriesIdNum() {
+        return (directories != null) ? directories.getIdNum() : null;
+    }
+
     public static DirectoryUsers of(Users users, Directories directories) {
         return DirectoryUsers.builder()
                 .del(false)
@@ -37,6 +44,7 @@ public class DirectoryUsers extends BaseEntity {
                 .directories(directories)
                 .build();
     }
+
     @Builder
     public DirectoryUsers(
             Boolean del, Users users, Directories directories
@@ -44,5 +52,6 @@ public class DirectoryUsers extends BaseEntity {
         this.del = del;
         this.users = users;
         this.directories = directories;
+        this.level = 1; // TODO: 권한 레벨 설정
     }
 }

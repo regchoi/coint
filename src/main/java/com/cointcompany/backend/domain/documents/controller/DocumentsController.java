@@ -2,6 +2,7 @@ package com.cointcompany.backend.domain.documents.controller;
 
 import com.cointcompany.backend.domain.directories.repository.DirectoriesRepository;
 import com.cointcompany.backend.domain.documents.dto.DocumentsDto;
+import com.cointcompany.backend.domain.documents.entity.DocumentUsers;
 import com.cointcompany.backend.domain.documents.repository.DocumentsRepository;
 import com.cointcompany.backend.domain.documents.service.DocumentsService;
 import com.cointcompany.backend.domain.file.repository.FilesRepository;
@@ -25,7 +26,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
-
 @Tag(name = "파일", description = "파일 API 명세서")
 @RestController
 @RequiredArgsConstructor
@@ -56,6 +56,7 @@ public class DocumentsController {
         return documentsService.uploadDocuments(file, directoryId);
     }
 
+    @CrossOrigin(exposedHeaders = "Content-Disposition")
     @Operation(summary = "파일 다운로드")
     @ApiResponse(responseCode = "200", description = "다운로드 성공")
     @GetMapping("/download/{documentId}")
@@ -97,6 +98,7 @@ public class DocumentsController {
         }
     }
 
+    @CrossOrigin(exposedHeaders = "Content-Disposition")
     @Operation(summary = "엑셀 다운로드")
     @ApiResponse(responseCode = "200", description = "다운로드 성공")
     @GetMapping("/download/excel/{projectId}")
@@ -192,4 +194,15 @@ public class DocumentsController {
 
         return new ResponseEntity<>(documentsService.copyDocuments(documentId, directoryId), HttpStatus.OK);
     }
+
+    @Operation(summary = "파일 권한 조회")
+    @ApiResponse(responseCode = "200", description = "권한 조회 성공")
+    @GetMapping("/authority/{userId}")
+    public ResponseEntity<List<DocumentsDto.DocumentUser>> getAuthorityDocuments (
+            @PathVariable Long userId) {
+
+        return new ResponseEntity<>(documentsService.findAuthorityDocumentsByUserId(userId), HttpStatus.OK);
+    }
+
+
 }

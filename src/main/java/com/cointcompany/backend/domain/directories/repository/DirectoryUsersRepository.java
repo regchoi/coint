@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface DirectoryUsersRepository extends JpaRepository<DirectoryUsers, Long> {
 
-    List<DirectoryUsers> findByUsers_IdNum(Long usersIdNum);
+    List<DirectoryUsers> findAllByUsersIdNum(Long userId);
 }

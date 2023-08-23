@@ -12,7 +12,7 @@ import {useContext, useEffect, useState} from "react";
 import axios from "../../../redux/axiosConfig";
 import ErrorModal from "../../common/ErrorModal";
 import SuccessModal from "../../common/SuccessModal";
-import {Box, LinearProgress} from "@mui/material";
+import {Box, LinearProgress, Tooltip} from "@mui/material";
 import DriveContext from "./DriveContext";
 
 type dirResponse = {
@@ -96,7 +96,12 @@ export default function CustomizedTreeView() {
     if (!context) {
         throw new Error("Cannot find ProjectProvider");
     }
-    const { projectIdNum, setProjectIdNum, accessLevel } = context;
+    const {
+        projectIdNum,
+        setProjectIdNum,
+        directoryAuthorities,
+        documentAuthorities,
+    } = context;
 
     // 폴더 조회
     useEffect(() => {
@@ -164,15 +169,36 @@ export default function CustomizedTreeView() {
             return null; // 무효한 디렉토리 객체를 건너뛰고 다음 요소로 이동합니다.
         }
 
+        // 해당 directory.idNum에 대응되는 DirectoryAuthority를 찾습니다.
+        const authority = directoryAuthorities.find(da => da.directoriesIdNum === directory.idNum);
+
+        // authority가 없거나, 해당 DirectoryAuthority의 level이 1보다 큰 경우 disabled를 false로 설정합니다.
+        const isDisabled = !authority || authority.level > 1;
+
         const children = directories.filter(
             dir => dir.parentDirectoriesIdNum === directory.idNum && dir.idNum !== rootDir.idNum
         );
 
-        return (
-            <StyledTreeItem key={directory.idNum} nodeId={directory.idNum.toString()} label={directory.dirName} onClick={() => setProjectIdNum(directory.idNum)}>
+        const treeItem = (
+            <StyledTreeItem
+                key={directory.idNum}
+                nodeId={directory.idNum.toString()}
+                label={directory.dirName}
+                onClick={() => isDisabled ? null : setProjectIdNum(directory.idNum)}
+                disabled={isDisabled}
+            >
                 {children.map(childDir => renderTree(childDir))}
             </StyledTreeItem>
         );
+
+        // isDisabled인 경우 Tooltip으로 감싸서 반환
+        return isDisabled ? (
+            <Tooltip title="접근권한이 없습니다." arrow>
+                <Box sx={{cursor: 'not-allowed'}}>
+                    {treeItem}
+                </Box>
+            </Tooltip>
+        ) : treeItem;
     };
 
     const isEmpty = (obj: any) => Object.keys(obj).length === 0;

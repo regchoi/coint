@@ -85,4 +85,18 @@ public class DirectoriesDto {
 
         }
     }
+
+    @NoArgsConstructor
+    @Data
+    public static class DirectoryUser {
+        private Long idNum;
+        private int level;
+        private Long directoriesIdNum;
+
+        public DirectoryUser (DirectoryUsers directoryUsers) {
+            this.idNum = directoryUsers.getUsers().getIdNum();
+            this.level = directoryUsers.getLevel();
+            this.directoriesIdNum = directoryUsers.getDirectoriesIdNum();
+        }
+    }
 }
