@@ -16,12 +16,11 @@ type RowProps = {
 // 각 key는 Data의 key type인 keyof Data로 정의함
 const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) => {
     const [userinfoModalOpen, setUserinfoModalOpen] = useState(false);
-    const [infoUserIdNum, setInfoUserIdNum] = useState<number>(0);
 
     const handleUserModalClick = (event: React.MouseEvent<unknown>, id_num: number) => {
         event.stopPropagation();  // 이벤트 전파 중단
         setUserinfoModalOpen(true);
-    }
+    };
 
     return (
         <TableRow
@@ -55,11 +54,12 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
             {/* key값을 기준으로 TableCell을 유동적으로 구성함*/}
             {(Object.keys(row) as Array<keyof Data>).map(key => {
                 if (key === 'idNum') {
-                    return <TableCell sx={{
-                        border: "1px solid rgba(0, 0, 0, 0.12)",
-                        padding: "0px 10px",
-                        fontSize: "12px",
-                    }} align="center" key={key}></TableCell>;
+                    // return <TableCell sx={{
+                    //     border: "1px solid rgba(0, 0, 0, 0.12)",
+                    //     padding: "0px 10px",
+                    //     fontSize: "12px",
+                    // }} align="center" key={key}></TableCell>;
+                    return null;
                 }
                 {
                     if (key === 'getUserDepartmentResList' || key === 'getUserUserGroupsResList') {
@@ -95,7 +95,6 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                     }} align="center" key={key}>{row[key] && (row[key]).toString().substring(0, 10)}</TableCell>;
                 }
                 if (key === 'detail') {
-                    console.log(row);
                     return (
                         <TableCell
                             sx={{
@@ -119,7 +118,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                     fontSize: "12px",
                 }} align="center" key={key}>{row[key]}</TableCell>;
             })}
-            <UserInfoModal open={userinfoModalOpen} onClose={() => setUserinfoModalOpen(false)} />
+            <UserInfoModal open={userinfoModalOpen} onClose={() => setUserinfoModalOpen(false)} userInfo={row} />
         </TableRow>
     );
 };

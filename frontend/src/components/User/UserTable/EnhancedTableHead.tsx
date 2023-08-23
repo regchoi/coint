@@ -56,36 +56,42 @@ export default function EnhancedTableHead(props: EnhancedTableProps) {
 
 
                 {/* 정의해둔 headCells로 테이블 헤더를 생성 */}
-                {headCells.map((headCell) => (
-                    <TableCell
-                        key={headCell.id}
-                        align={'center'}
-                        sortDirection={orderBy === headCell.id ? order : false}
-                        sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "0px 10px",
-                            fontWeight: "bold",
-                            fontSize: "12px",
-                            backgroundColor: "hsl(210, 7%, 89%)"
-                    }}
-                    >
-                        <TableSortLabel
-                            active={orderBy === headCell.id}
-                            direction={orderBy === headCell.id ? order : 'asc'}
-                            onClick={createSortHandler(headCell.id)}
+                {headCells.map((headCell) => {
+                    // user id는 숨김
+                    if (headCell.id === 'idNum') {
+                        return null;
+                    }
+
+                    return (<TableCell
+                            key={headCell.id}
+                            align={'center'}
+                            sortDirection={orderBy === headCell.id ? order : false}
                             sx={{
-                                paddingLeft: '18px'
+                                border: "1px solid rgba(0, 0, 0, 0.12)",
+                                padding: "0px 10px",
+                                fontWeight: "bold",
+                                fontSize: "12px",
+                                backgroundColor: "hsl(210, 7%, 89%)"
                             }}
                         >
-                            {headCell.label}
-                            {orderBy === headCell.id ? (
-                                <Box component="span" sx={visuallyHidden}>
-                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                                </Box>
-                            ) : null}
-                        </TableSortLabel>
-                    </TableCell>
-                ))}
+                            <TableSortLabel
+                                active={orderBy === headCell.id}
+                                direction={orderBy === headCell.id ? order : 'asc'}
+                                onClick={createSortHandler(headCell.id)}
+                                sx={{
+                                    paddingLeft: '18px'
+                                }}
+                            >
+                                {headCell.label}
+                                {orderBy === headCell.id ? (
+                                    <Box component="span" sx={visuallyHidden}>
+                                        {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                    </Box>
+                                ) : null}
+                            </TableSortLabel>
+                        </TableCell>
+                    );
+                })}
             </TableRow>
         </TableHead>
     );

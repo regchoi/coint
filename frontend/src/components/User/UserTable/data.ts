@@ -75,6 +75,7 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
+    {id: 'idNum', numeric: true, disablePadding: false, label: '번호'},
     {id: 'loginId', numeric: false, disablePadding: false, label: '아이디'},
     {id: 'name', numeric: false, disablePadding: false, label: '이름'},
     {id: 'position', numeric: false, disablePadding: false, label: '직급'},

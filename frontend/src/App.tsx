@@ -29,6 +29,7 @@ import FileDrive from "./components/Document/FileDrive";
 // import TaskList from "./components/common/TaskList";
 
 import "./assets/css/common/chart.css";
+import {getRole} from "./components/common/tokenUtils";
 
 const ROUTES = {
     LOGIN: '/login',
@@ -59,6 +60,14 @@ const ROUTES = {
 
 const App: React.FC = () => {
 
+    const adminRoutes = getRole() === "ROLE_ADMIN" ? (
+        <>
+            <Route path={ROUTES.USERTABLE} element={<UserTable/>}/>
+            <Route path={ROUTES.USERGROUPTABLE} element={<UserGroupTable/>}/>
+            <Route path={ROUTES.DEPARTMENTTABLE} element={<DepartmentTable/>}/>
+        </>
+    ) : null;
+
     return (
         <BrowserRouter>
             <Routes>
@@ -71,10 +80,7 @@ const App: React.FC = () => {
                     <Route element={<Layout/>}>
 
                         <Route path="/" element={<div></div>}/>
-                        <Route path={ROUTES.USERTABLE} element={<UserTable/>}/>
-                        <Route path={ROUTES.USERGROUPTABLE} element={<UserGroupTable/>}/>
-                        <Route path={ROUTES.DEPARTMENTTABLE} element={<DepartmentTable/>}/>
-
+                        {adminRoutes}
                         <Route path={ROUTES.PROJECTPLAN} element={<ProjectPlan/>}/>
                         <Route path={ROUTES.PROJECTTASKTABLE} element={<ProjectTaskTable/>}/>
                         <Route path={ROUTES.TASKGANTTCHART} element={<TaskGanttChart/>}/>

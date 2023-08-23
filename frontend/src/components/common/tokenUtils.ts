@@ -20,4 +20,9 @@ function getName() {
     return tokenInfo ? tokenInfo.name : null;
 }
 
-export {getUserId, getName};
+function getRole() {
+    const tokenInfo = getTokenInfo();
+    return tokenInfo ? tokenInfo.role : null;
+}
+
+export {getUserId, getName, getRole};

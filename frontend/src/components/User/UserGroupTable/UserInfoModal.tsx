@@ -60,7 +60,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ open, onClose, userIn
         <Dialog open={open} onClose={onClose} onClick={(event) => event.stopPropagation()} fullWidth maxWidth="sm">
             <DialogTitle sx={{pb: 1}}>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6" sx={{fontSize: '16px', fontWeight: 'bold'}}>사용자 상세정보</Typography>
+                    <Typography variant="h6" sx={{fontSize: '16px', fontWeight: 'bold'}}>부서 상세정보</Typography>
                     <IconButton onClick={onClose} size="small" sx={{ padding: '0' }}>
                         <CloseIcon />
                     </IconButton>
@@ -79,27 +79,6 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ open, onClose, userIn
                                     />
                                 </Grid>
                                 <Grid item xs={9} sm={9} md={9} lg={9}>
-                                    <Typography variant="h6" sx={{ fontSize: '0.9em' }}>{userInfo.name}</Typography>
-                                    <Typography color="textSecondary" sx={{ fontSize: '0.8em' }}>{userInfo.position}</Typography>
-                                    <Divider variant="middle" sx={{ margin: '1rem 0' }} />
-                                    <ListItem disablePadding>
-                                        <ListItemText
-                                            primary={<Typography sx={{ fontSize: '0.8em' }}>이메일</Typography>}
-                                            secondary={<Typography sx={{ fontSize: '0.8em' }}>{userInfo.email}</Typography>}
-                                        />
-                                    </ListItem>
-                                    <ListItem disablePadding>
-                                        <ListItemText
-                                            primary={<Typography sx={{ fontSize: '0.8em' }}>전화번호</Typography>}
-                                            secondary={<Typography sx={{ fontSize: '0.8em' }}>{userInfo.phone}</Typography>}
-                                        />
-                                    </ListItem>
-                                    <ListItem disablePadding>
-                                        <ListItemText
-                                            primary={<Typography sx={{ fontSize: '0.8em' }}>가입일</Typography>}
-                                            secondary={<Typography sx={{ fontSize: '0.8em' }}>{userInfo.regDate && userInfo.regDate.toString().substring(0, 10)}</Typography>}
-                                        />
-                                    </ListItem>
                                 </Grid>
                             </Grid>
                         </Paper>
