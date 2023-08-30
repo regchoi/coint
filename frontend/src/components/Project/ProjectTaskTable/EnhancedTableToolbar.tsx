@@ -75,19 +75,19 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 >
                     신규등록
                 </Button>
-                <Button variant="contained"
-                        startIcon={<EditIcon style={{ color: 'gray', marginRight: '2px', fontSize: '15px' }} />}
-                        sx={{ ...commonButtonStyles }}
-                        onClick={onUpdate}
-                >
-                    수정
-                </Button>
-                <Button variant="contained"
-                        startIcon={<RemoveIcon style={{ color: 'red', marginRight: '2px', fontSize: '15px' }} />}
-                        sx={{ ...commonButtonStyles }}
-                        onClick={onDelete}>
-                    삭제
-                </Button>
+                {/*<Button variant="contained"*/}
+                {/*        startIcon={<EditIcon style={{ color: 'gray', marginRight: '2px', fontSize: '15px' }} />}*/}
+                {/*        sx={{ ...commonButtonStyles }}*/}
+                {/*        onClick={onUpdate}*/}
+                {/*>*/}
+                {/*    수정*/}
+                {/*</Button>*/}
+                {/*<Button variant="contained"*/}
+                {/*        startIcon={<RemoveIcon style={{ color: 'red', marginRight: '2px', fontSize: '15px' }} />}*/}
+                {/*        sx={{ ...commonButtonStyles }}*/}
+                {/*        onClick={onDelete}>*/}
+                {/*    삭제*/}
+                {/*</Button>*/}
             </Stack>
         </Toolbar>
     );

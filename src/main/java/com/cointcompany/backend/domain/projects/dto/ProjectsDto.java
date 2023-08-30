@@ -23,19 +23,38 @@ public class ProjectsDto {
             this.role = role;
         }
     }
+
     @NoArgsConstructor
     @Data
     public static class ProjectUserDto {
         private Long projectId;
         private Long userId;
-        private String role;
+        private Long projectRoleId;
 
-        public ProjectUserDto (Long projectId, Long userId, String role) {
+        public ProjectUserDto(Long projectId, Long userId, Long projectRoleId) {
             this.projectId = projectId;
             this.userId = userId;
-            this.role = role;
+            this.projectRoleId = projectRoleId;
         }
     }
+
+    @NoArgsConstructor
+    @Data
+    public class ProjectRolesDto {
+        private Long id;
+        private Long projectId;
+        private String roleName;
+        private Integer roleLevel;
+        private String description;
+
+        public ProjectRolesDto (Long projectId, String roleName, Integer roleLevel, String description) {
+            this.projectId = projectId;
+            this.roleName = roleName;
+            this.roleLevel = roleLevel;
+            this.description = description;
+        }
+    }
+
 
     @NoArgsConstructor
     @Data

@@ -23,7 +23,9 @@ public class ProjectUser extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long idNum;
 
-    private String role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "projectRoleId")
+    private ProjectRoles projectRole;
 
     private boolean del = Boolean.FALSE;
 
@@ -35,17 +37,17 @@ public class ProjectUser extends BaseEntity {
     @JoinColumn(name = "userIdNum")
     private Users users;
 
-    public static ProjectUser of(String role, Projects projects, Users users) {
+    public static ProjectUser of(ProjectRoles projectRole, Projects projects, Users users) {
         return ProjectUser.builder()
-                .role(role)
+                .projectRole(projectRole)
                 .projects(projects)
                 .users(users)
                 .del(false)
                 .build();
     }
     @Builder
-    public ProjectUser(String role, Projects projects, Users users, Boolean del) {
-        this.role = role;
+    public ProjectUser(ProjectRoles projectRole, Projects projects, Users users, Boolean del) {
+        this.projectRole = projectRole;
         this.projects = projects;
         this.users = users;
         this.del = del;

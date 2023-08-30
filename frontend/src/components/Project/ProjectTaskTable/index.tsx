@@ -150,7 +150,7 @@ export default function ProjectTaskTable() {
     } = useTable({
         initialOrderBy: 'idNum',
         initialOrder: 'asc',
-        initialRowsPerPage: 5,
+        initialRowsPerPage: 10,
         rowsData: data,
     });
 

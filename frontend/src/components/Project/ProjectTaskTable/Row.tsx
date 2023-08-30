@@ -56,6 +56,39 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                         fontSize: "12px",
                     }} align="center" key={key}></TableCell>;
                 }
+
+                if (key === 'description') {
+                    if(row[key] === null) return (
+                        <TableCell sx={{
+                            border: "1px solid rgba(0, 0, 0, 0.12)",
+                            padding: "0px 10px",
+                            fontSize: "12px",
+                            width: "250px"
+                        }}
+                                      align="center" key={key}>
+                        </TableCell>
+                    );
+
+                    let description = row[key].substring(0, 25);
+                    const breakIndex = description.indexOf('\n'); // 첫 번째 줄바꿈 위치 찾기
+
+                    // 줄바꿈이 있을 경우에만 텍스트 잘라내기
+                    if (breakIndex !== -1) {
+                        description.substring(0, breakIndex);
+                    }
+                    return (
+                        <TableCell sx={{
+                            border: "1px solid rgba(0, 0, 0, 0.12)",
+                            padding: "0px 10px",
+                            fontSize: "12px",
+                            width: "250px",
+                            overflow: "hidden",
+                        }} align="center" key={key}>
+                            {description+'...'}
+                        </TableCell>
+                    );
+                }
+
                 if (key === 'startDate' || key === 'endDate' || key === 'regDate') {
                     return <TableCell sx={{
                         border: "1px solid rgba(0, 0, 0, 0.12)",
