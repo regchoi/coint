@@ -80,7 +80,7 @@ public class TasksService {
 
         for (TasksDto.TaskUserDto taskUserDto : taskUserDtoList) {
             TaskUser taskUser = TaskUser.of(
-                    taskUserDto.getRole(),
+                    taskUserDto.getTaskRoleId(),
                     tasksRepository.findById(taskUserDto.getTaskId()).orElseThrow(),
                     usersRepository.findById(taskUserDto.getUserId()).orElseThrow()
             );

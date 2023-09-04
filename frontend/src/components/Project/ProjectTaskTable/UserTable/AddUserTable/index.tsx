@@ -24,12 +24,25 @@ import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrow
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import ProjectContext from "../../ProjectContext";
 
+type Role = {
+    projectId: number;
+    roleName: string;
+    roleLevel: number;
+    description: string;
+}
+
 interface User {
     idNum: number;
     name: string;
     department: string;
     email: string;
-    role: string;
+    role: number;
+}
+
+interface ProjectUser {
+    projectIdNum: number;
+    userId: number;
+    roleId: number;
 }
 
 type Department = {
@@ -64,7 +77,8 @@ function intersection(a: readonly number[], b: readonly number[]) {
 export default function AddUserTable(props: AddUserTableProps) {
     const [users, setUsers] = React.useState<User[]>([]);
     const [departments, setDepartments] = React.useState<Department[]>([]);
-    const [projectUsers, setProjectUsers] = React.useState<User[]>([]);
+    const [projectUsers, setProjectUsers] = React.useState<ProjectUser[]>([]);
+    const [rolesList, setRolesList] = React.useState<Role[]>([]);
     const [checked, setChecked] = React.useState<readonly number[]>([]);
     const [filter, setFilter] = React.useState<string>('');
     const [selectedDepartment, setSelectedDepartment] = React.useState<string>('');
@@ -75,7 +89,7 @@ export default function AddUserTable(props: AddUserTableProps) {
     if (!context) {
         throw new Error("Cannot find ProjectProvider");
     }
-    const { usersList, setUsersList } = context;
+    const { selectProject, usersList, setUsersList } = context;
 
     // Table Cell 공통 스타일
     const tableCellStyle = {
@@ -116,6 +130,11 @@ export default function AddUserTable(props: AddUserTableProps) {
                     department: userData.getUserDepartmentResList.length > 0 ? userData.getUserDepartmentResList[0].departmentName : 'N/A',
                     email: userData.email || '',  // handle the potential null value
                 }));
+                // usersList에 있는 사용자는 제외하고 setUsers 구성
+                usersList.forEach(user => {
+                    userData.splice(userData.findIndex(userData => userData.idNum === user.idNum), 1);
+                });
+
                 setUsers(userData);
             })
             .catch((error) => {
@@ -134,6 +153,35 @@ export default function AddUserTable(props: AddUserTableProps) {
             .catch((error) => {
                 console.log(error);
             });
+
+        // 역할 목록 불러오기
+        axios.get(`/api/project/role/${selectProject.idNum}`)
+            .then((response) => {
+                const roleData = response.data.map((role: any) => ({
+                    projectId: role.projectIdNum,
+                    roleName: role.roleName,
+                    roleLevel: role.roleLevel,
+                    description: role.description
+                }));
+                setRolesList(roleData);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+        // 프로젝트 참여 인원 조회
+        axios.get(`/api/project/user/${selectProject.idNum}`)
+            .then((response) => {
+                const projectUserData = response.data.map((projectUser: any) => ({
+                    projectIdNum: projectUser.projectIdNum,
+                    userId: projectUser.userId,
+                    roleId: projectUser.roleId
+                }));
+                setProjectUsers(projectUserData);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     }, []);
 
     const filteredUsers = users.filter(
@@ -147,7 +195,7 @@ export default function AddUserTable(props: AddUserTableProps) {
     const handleMoveToProjectUsers = () => {
         const newUsersList = usersList.concat(users.filter(user => leftChecked.includes(user.idNum)).map(user => ({
             ...user,
-            role: ''
+            role: 1
         })));
         const newUsers = users.filter(user => !leftChecked.includes(user.idNum));
         setUsersList(newUsersList);
@@ -159,6 +207,10 @@ export default function AddUserTable(props: AddUserTableProps) {
         const newUsers = users.concat(usersList.filter(user => rightChecked.includes(user.idNum)));
         const newUsersList = usersList.filter(user => !rightChecked.includes(user.idNum));
         setUsers(newUsers);
+        // 기본 role이 설정되어 있도록 수정
+        newUsersList.forEach(user => {
+            user.role = rolesList[0].roleLevel;
+        });
         setUsersList(newUsersList);
         setChecked(not(checked, rightChecked));
     };
@@ -230,47 +282,49 @@ export default function AddUserTable(props: AddUserTableProps) {
 
                         }
                         {users.map((user) => (
-                            <TableRow
-                                key={user.idNum}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                                <TableCell padding="checkbox" align="center" >
-                                    <Checkbox
-                                        onClick={handleToggle(user.idNum)}
-                                        checked={checked.indexOf(user.idNum) !== -1}
-                                        inputProps={{ 'aria-labelledby': `user-${user.idNum}` }}
-                                    />
-                                </TableCell>
-                                <TableCell component="th" id={`user-${user.idNum}`} scope="row" align="center" >
-                                    {user.name}
-                                </TableCell>
-                                <TableCell align="center" >{user.department}</TableCell>
-                                {title === 'Chosen' && (
-                                    <TableCell align="center" >
-                                        <TextField
-                                            fullWidth
-                                            variant="outlined"
-                                            value={user.role}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: '#409aff',
-                                                },
-                                                '& .MuiInputBase-input': {
-                                                    padding: 0,
-                                                    fontSize: '14px',
-                                                    height: '30px',
-                                                    paddingLeft: '10px',
-                                                    width: '50px',
-                                                    backgroundColor: '#fff'
-                                                }
-                                            }}
-                                            onChange={(event) => handleRoleChange(event, user.idNum)}
+                            // 기존 프로젝트 참여 인원 목록에 존재하는 사용자만 출력
+                            projectUsers.some(projectUser => projectUser.userId === user.idNum) &&
+                            (
+                                <TableRow
+                                    key={user.idNum}
+                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                >
+                                    <TableCell padding="checkbox" align="center" >
+                                        <Checkbox
+                                            onClick={handleToggle(user.idNum)}
+                                            checked={checked.indexOf(user.idNum) !== -1}
+                                            inputProps={{ 'aria-labelledby': `user-${user.idNum}` }}
                                         />
                                     </TableCell>
-                                )}
-                                <TableCell align="center" >{user.email}</TableCell>
-                            </TableRow>
-                        ))}
+                                    <TableCell component="th" id={`user-${user.idNum}`} scope="row" align="center" >
+                                        {user.name}
+                                    </TableCell>
+                                    <TableCell align="center" >{user.department}</TableCell>
+                                    {title === 'Chosen' && (
+                                        <TableCell align="center" >
+                                            {/* rolesList에서 Select를 통해 Role을 선택하는 방식으로 변경 */}
+                                            <Select
+                                                fullWidth
+                                                variant="outlined"
+                                                value={user.role}
+                                                onChange={(event) => handleRoleChange(event, user.idNum)}
+                                                sx={{
+                                                    width: '100%',
+                                                    height: '30px',
+                                                    fontSize: '14px',
+                                                }}
+                                            >
+                                                {rolesList.map((role) => (
+                                                    <MenuItem key={role.roleLevel} value={role.roleLevel}>
+                                                        {role.roleName}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </TableCell>
+                                    )}
+                                    <TableCell align="center" >{user.email}</TableCell>
+                                </TableRow>
+                            )))}
                     </TableBody>
                 </Table>
             </TableContainer>

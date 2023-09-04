@@ -54,6 +54,43 @@ public class ProjectsController {
         return new ResponseEntity<>(projectsService.saveProjects(project).getIdNum(), HttpStatus.OK);
     }
 
+    @Operation(summary = "프로젝트 권한 신규 등록")
+    @ApiResponse(responseCode = "200", description = "등록 성공")
+    @PostMapping("/role/{projectId}")
+    public ResponseEntity<String> postProjectsRole (
+            @RequestBody List<ProjectsDto.ProjectRolesDto> projectRolesDtoList
+    ) {
+
+        projectsService.saveProjectRoles(projectRolesDtoList);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "프로젝트 권한 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/role/{projectId}")
+    public ResponseEntity<List<ProjectsDto.ProjectRolesDto>> getProjectsRole (
+            @PathVariable Long projectId
+    ) {
+
+        List<ProjectsDto.ProjectRolesDto> projectRolesDtoList = projectsService.getProjectRoles(projectId);
+
+        return new ResponseEntity<>(projectRolesDtoList, HttpStatus.OK);
+    }
+
+    @Operation(summary = "프로젝트 태그 신규 등록")
+    @ApiResponse(responseCode = "200", description = "등록 성공")
+    @PostMapping("/tag/{projectId}")
+    public ResponseEntity<String> postProjectsTag (
+            @PathVariable Long projectId,
+            @RequestBody List<ProjectsDto.ProjectTagDto> projectTagDtoList
+    ) {
+
+        projectsService.saveProjectTag(projectTagDtoList, projectId);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
     @Operation(summary = "프로젝트 사용자 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/user/{projectId}")
@@ -64,6 +101,18 @@ public class ProjectsController {
         projectsService.saveProjectUser(projectUserDtoList);
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "프로젝트 사용자 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/user/{projectId}")
+    public ResponseEntity<List<ProjectsDto.ProjectUserDto>> getProjectsUser (
+            @PathVariable Long projectId
+    ) {
+
+        List<ProjectsDto.ProjectUserDto> projectUserDtoList = projectsService.getProjectUser(projectId);
+
+        return new ResponseEntity<>(projectUserDtoList, HttpStatus.OK);
     }
 
     @Operation(summary = "프로젝트 부서 신규 등록")

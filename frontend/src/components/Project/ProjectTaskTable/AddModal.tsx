@@ -130,11 +130,10 @@ export default function AddModal({ open, onClose }: ModalProps) {
                 }
             }
         } else if (page === 2) {
-            console.log(projectIdNum);
             try {
                 await axios.post(`/api/task/user/${projectIdNum}`, usersList.map((user) => {
                     // usersList에서 idNum과 role만 전송
-                    return { userId: user.idNum, taskId: projectIdNum, role: user.role };
+                    return { userId: user.idNum, taskId: projectIdNum, taskRoleId: user.role };
                 }));
                 setPage(page+1);
             } catch (error) {
@@ -167,6 +166,8 @@ export default function AddModal({ open, onClose }: ModalProps) {
 
     return (
         <ProjectContext.Provider value={{
+            selectProject,
+            setSelectProject,
             usersList,
             setUsersList,
             departmentsList,

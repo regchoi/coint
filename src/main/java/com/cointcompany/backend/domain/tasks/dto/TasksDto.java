@@ -32,12 +32,12 @@ public class TasksDto {
     public static class TaskUserDto {
         private Long taskId;
         private Long userId;
-        private String role;
+        private Integer taskRoleId;
 
-        public TaskUserDto (Long taskId, Long userId, String role) {
+        public TaskUserDto (Long taskId, Long userId, Integer taskRoleId) {
             this.taskId = taskId;
             this.userId = userId;
-            this.role = role;
+            this.taskRoleId = taskRoleId;
         }
     }
 

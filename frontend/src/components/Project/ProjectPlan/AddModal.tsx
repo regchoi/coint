@@ -22,6 +22,19 @@ import ProjectContext from './ProjectContext';
 import {fetchTableData} from "../../../redux/tableSlice";
 import {API_LINK} from "./data";
 import {AppDispatch, useAppDispatch, useAppSelector} from "../../../redux/store";
+import RoleTable from "./RoleTable";
+
+type Tag = {
+    projectId: number;
+    tagName: string;
+}
+
+type Role = {
+    projectId: number;
+    roleName: string;
+    roleLevel: number;
+    description: string;
+}
 
 type Data = {
     projectName: string;
@@ -35,7 +48,7 @@ type User = {
     name: string;
     email: string;
     department: string;
-    role: string;
+    role: number;
 }
 
 type Department = {
@@ -59,6 +72,7 @@ export default function AddModal({ open, onClose }: ModalProps) {
     const [isErrorModalOpen, setErrorModalOpen] = useState<boolean>(false);
     const [isSuccessModalOpen, setSuccessModalOpen] = useState<boolean>(false);
     const [projectIdNum, setProjectIdNum] = useState<number>(0);
+    const [rolesList, setRolesList] = React.useState<Role[]>([]);
     const [usersList, setUsersList] = React.useState<User[]>([]);
     const [departmentsList, setDepartmentsList] = React.useState<Department[]>([]);
 
@@ -81,13 +95,38 @@ export default function AddModal({ open, onClose }: ModalProps) {
                     startDate: data.startDate,
                     endDate: data.endDate,
                 });
-                if(response.data) {
+                if (response.data) {
+                    // response.data에는 projectIdNum이 담겨있음
+                    // 해당 API 요청을 통해 Tag를 등록
+                    // Tag는 projectName과 description에 대한 키워드를 공백 기준으로 나누어 모두 등록
+                    // type Tag의 배열을 통해 각 키워드를 TagName에 담아서 전송
+                    // 스프링에서 에러 발생 문제는 요청 본문(JSON)을 파싱하는 과정에서 발생하는 것 같습니다. 에러 메시지를 보면 Cannot deserialize value of type java.util.ArrayList라는 내용을 확인할 수 있는데, 이는 서버가 리스트 형태의 JSON 배열을 기대하고 있지만, 실제로는 JSON 오브젝트 형식이 넘어왔기 때문에 발생한 문제로 보입니다.
+                    //
+                    // 해결 방법:
+                    //
+                    // 요청 본문 확인: 프론트엔드에서 서버로 보내는 JSON 요청 본문을 확인하세요. 이 데이터가 배열 형태인지, 오브젝트 형태인지 확인해야 합니다.
+                    // 예:
+                    //
+                    // 배열 형태: [{"tagName": "tag1", ...}, {"tagName": "tag2", ...}]
+                    // 오브젝트 형태: {"tagName": "tag1", ...}
+
+                    // 아래는 오브젝트 형태인가? -> 배열 형태로 바꿔야 함
+                    const tags: Tag[] = [];
+                    const tagNames = data.projectName.split(' ').concat(data.description.split(' '));
+                    tagNames.forEach((tagName) => {
+                        tags.push({
+                            projectId: response.data,
+                            tagName,
+                        });
+                    });
+                    await axios.post(`/api/project/tag/${response.data}`, tags);
+
                     setProjectIdNum(response.data);
                 } else {
                     setErrorModalOpen(true);
                     setErrorMessage('성공적으로 프로젝트를 등록하지 못했습니다.');
                 }
-                setPage(page+1);
+                setPage(page + 1);
             } catch (error) {
                 setErrorModalOpen(true);
                 if (error instanceof Error) {
@@ -96,12 +135,25 @@ export default function AddModal({ open, onClose }: ModalProps) {
                     setErrorMessage('성공적으로 프로젝트를 등록하지 못했습니다.');
                 }
             }
-        } else if (page === 2) {
-            console.log(projectIdNum);
+        }
+        // page 2 (프로젝트 권한 설정) 로직
+        else if (page === 2) {
+            try {
+                await axios.post(`/api/project/role/${projectIdNum}`, rolesList);
+                setPage(page + 1);
+            } catch (error) {
+                setErrorModalOpen(true);
+                if (error instanceof Error) {
+                    setErrorMessage(error.message);
+                } else {
+                    setErrorMessage('프로젝트 권한 설정에 실패했습니다.');
+                }
+            }
+        } else if (page === 3) {
             try {
                 await axios.post(`/api/project/user/${projectIdNum}`, usersList.map((user) => {
                     // usersList에서 idNum과 role만 전송
-                    return { userId: user.idNum, projectId: projectIdNum, role: user.role };
+                    return { userId: user.idNum, projectId: projectIdNum, projectRoleId: user.role };
                 }));
                 setPage(page+1);
             } catch (error) {
@@ -109,10 +161,10 @@ export default function AddModal({ open, onClose }: ModalProps) {
                 if (error instanceof Error) {
                     setErrorMessage(error.message);
                 } else {
-                    setErrorMessage('An unexpected error occurred');
+                    setErrorMessage('프로젝트에 사용자를 추가하는데 실패했습니다.');
                 }
             }
-        } else if (page === 3) {
+        } else if (page === 4) {
             try {
                 await axios.post(`/api/project/department/${projectIdNum}`, departmentsList.map((department) => {
                     // departmentsList에서 idNum과 role만 전송
@@ -120,13 +172,15 @@ export default function AddModal({ open, onClose }: ModalProps) {
                 }));
 
                 // 프로젝트 등록 성공 시, 성공 Modal 띄우고 모든 Modal 닫기
+                // 페이지 초기화
+                setPage(1);
                 setSuccessModalOpen(true);
             } catch (error) {
                 setErrorModalOpen(true);
                 if (error instanceof Error) {
                     setErrorMessage(error.message);
                 } else {
-                    setErrorMessage('An unexpected error occurred');
+                    setErrorMessage('프로젝트에 부서를 추가하는데 실패했습니다.');
                 }
             }
         }
@@ -134,6 +188,8 @@ export default function AddModal({ open, onClose }: ModalProps) {
 
     return (
         <ProjectContext.Provider value={{
+            rolesList,
+            setRolesList,
             usersList,
             setUsersList,
             departmentsList,
@@ -250,12 +306,18 @@ export default function AddModal({ open, onClose }: ModalProps) {
                         </Box>
                     )}
                     {page === 2 && (
+                        // 프로젝트 권한 부여 컴포넌트
+                        <Box sx={{mb: 7}}>
+                            <RoleTable projectId={projectIdNum} />
+                        </Box>
+                    )}
+                    {page === 3 && (
                         // 프로젝트 참여자 컴포넌트
                         <Box sx={{mb: 7}}>
                             <UserTable />
                         </Box>
                         )}
-                    {page === 3 && (
+                    {page === 4 && (
                         // 프로젝트 참여부서 컴포넌트
                         <Box sx={{mb: 7}}>
                             <DepartmentTable />
@@ -282,7 +344,7 @@ export default function AddModal({ open, onClose }: ModalProps) {
                             }}
                             onClick={handleProjectSave}
                         >
-                            저장 ( {page} / 3 )
+                            저장 ( {page} / 4 )
                         </Button>
                     </Box>
 

@@ -2,14 +2,8 @@ package com.cointcompany.backend.domain.projects.service;
 
 import com.cointcompany.backend.domain.departments.repository.DepartmentsRepository;
 import com.cointcompany.backend.domain.projects.dto.ProjectsDto;
-import com.cointcompany.backend.domain.projects.entity.ProjectDepartment;
-import com.cointcompany.backend.domain.projects.entity.ProjectRoles;
-import com.cointcompany.backend.domain.projects.entity.ProjectUser;
-import com.cointcompany.backend.domain.projects.entity.Projects;
-import com.cointcompany.backend.domain.projects.repository.ProjectDepartmentRepository;
-import com.cointcompany.backend.domain.projects.repository.ProjectRolesRepository;
-import com.cointcompany.backend.domain.projects.repository.ProjectUserRepository;
-import com.cointcompany.backend.domain.projects.repository.ProjectsRepository;
+import com.cointcompany.backend.domain.projects.entity.*;
+import com.cointcompany.backend.domain.projects.repository.*;
 import com.cointcompany.backend.domain.usergroups.dto.UserGroupsDto;
 import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import com.cointcompany.backend.domain.users.entity.Users;
@@ -31,6 +25,7 @@ public class ProjectsService {
     private final ProjectDepartmentRepository projectDepartmentRepository;
     private final ProjectUserRepository projectUserRepository;
     private final ProjectRolesRepository projectRolesRepository;
+    private final ProjectTagRepository projectTagRepository;
     private final DepartmentsRepository departmentsRepository;
     private final UsersRepository usersRepository;
 
@@ -54,6 +49,40 @@ public class ProjectsService {
 
         return projectsRepository.save(projects);
     }
+    @Transactional
+    public String saveProjectRoles(List<ProjectsDto.ProjectRolesDto> projectRolesDtoList) {
+
+        for (ProjectsDto.ProjectRolesDto projectRolesDto : projectRolesDtoList) {
+            ProjectRoles projectRoles = ProjectRoles.of(
+                    projectsRepository.findById(projectRolesDto.getProjectId()).orElseThrow(),
+                    projectRolesDto.getRoleName(),
+                    projectRolesDto.getRoleLevel(),
+                    projectRolesDto.getDescription()
+            );
+            projectRolesRepository.save(projectRoles);
+        }
+
+        return "SUCCESS";
+    }
+    @Transactional
+    public List<ProjectsDto.ProjectRolesDto> getProjectRoles(Long projectId) {
+
+        List<ProjectRoles> projectRolesList = projectRolesRepository.findProjectRolesByProject_IdNum(projectId);
+        List<ProjectsDto.ProjectRolesDto> projectRolesDtoList = new ArrayList<>();
+
+        for (ProjectRoles projectRoles : projectRolesList) {
+            ProjectsDto.ProjectRolesDto projectRolesDto = new ProjectsDto.ProjectRolesDto(
+                    projectRoles.getIdNum(),
+                    projectRoles.getRoleName(),
+                    projectRoles.getRoleLevel(),
+                    projectRoles.getDescription()
+            );
+            projectRolesDtoList.add(projectRolesDto);
+        }
+
+        return projectRolesDtoList;
+    }
+
     @Transactional
     public String saveProjectDepartment (List<ProjectsDto.ProjectDepartmentDto> projectDepartmentDtoList) {
 
@@ -82,7 +111,7 @@ public class ProjectsService {
             Users user = usersRepository.findById(userDto.getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + userDto.getUserId()));
 
-            ProjectRoles projectRole = projectRolesRepository.findById(userDto.getProjectRoleId())
+            ProjectRoles projectRole = projectRolesRepository.findById(Long.valueOf(userDto.getProjectRoleId()))
                     .orElseThrow(() -> new IllegalArgumentException("Role not found for id: " + userDto.getProjectRoleId()));
 
             ProjectUser projectUser = ProjectUser.of(projectRole, project, user);
@@ -94,7 +123,50 @@ public class ProjectsService {
         return "SUCCESS";
     }
 
+    @Transactional
+    public List<ProjectsDto.ProjectTagDto> saveProjectTag(List<ProjectsDto.ProjectTagDto> projectTagDtoList, Long projectIdNum) {
 
+        // 트랜잭션을 이용해 JPA의 변경감지를 통해 자동으로 업데이트를 수행합니다.
+        List<ProjectTag> existingTags = projectTagRepository.findProjectTagByProject_IdNum(projectIdNum);
+
+        // 새로운 태그 추가
+        for (ProjectsDto.ProjectTagDto projectTagDto : projectTagDtoList) {
+            if (existingTags.stream().noneMatch(tag -> tag.getTagName().equals(projectTagDto.getTagName()))) {
+                ProjectTag projectTag = ProjectTag.of(
+                        projectsRepository.findById(projectIdNum).orElseThrow(),
+                        projectTagDto.getTagName()
+                );
+                projectTagRepository.save(projectTag);
+            }
+        }
+
+        // 더이상 존재하지 않는 태그 삭제
+        for (ProjectTag existingTag : existingTags) {
+            if (projectTagDtoList.stream().noneMatch(tag -> tag.getTagName().equals(existingTag.getTagName()))) {
+                projectTagRepository.delete(existingTag);
+            }
+        }
+
+        return projectTagDtoList;
+    }
+
+    @Transactional
+    public List<ProjectsDto.ProjectUserDto> getProjectUser(Long projectId) {
+
+        List<ProjectUser> projectUserList = projectUserRepository.findProjectUserByProjects_IdNum(projectId);
+        List<ProjectsDto.ProjectUserDto> projectUserDtoList = new ArrayList<>();
+
+        for (ProjectUser projectUser : projectUserList) {
+            ProjectsDto.ProjectUserDto projectUserDto = new ProjectsDto.ProjectUserDto(
+                    projectUser.getProjects().getIdNum(),
+                    projectUser.getUsers().getIdNum(),
+                    projectUser.getProjectRole().getRoleLevel()
+            );
+            projectUserDtoList.add(projectUserDto);
+        }
+
+        return projectUserDtoList;
+    }
 
     @Transactional
     public void modifyProjects (Projects getProjectRes) {

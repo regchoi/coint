@@ -2,6 +2,7 @@ import React from 'react';
 import {TableRow, TableCell, Checkbox, IconButton} from '@mui/material';
 import {Data} from "./data";
 import { useNavigate } from 'react-router-dom';
+import ProjectContext from "../ProjectContext";
 
 type RowProps = {
     row: Data,
@@ -14,6 +15,12 @@ type RowProps = {
 // row의 각 key를 기준으로 TableCell을 구성함
 // 각 key는 Data의 key type인 keyof Data로 정의함
 const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) => {
+
+    const context = React.useContext(ProjectContext);
+    if (!context) {
+        throw new Error("Cannot find ProjectProvider");
+    }
+    const { rolesList } = context;
 
     const navigate = useNavigate();
 
@@ -54,6 +61,19 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                         padding: "0px 10px",
                         fontSize: "12px",
                     }} align="center" key={key}></TableCell>;
+                }
+                if (key === 'role') {
+                    return <TableCell sx={{
+                        border: "1px solid rgba(0, 0, 0, 0.12)",
+                        padding: "0px 10px",
+                        fontSize: "12px",
+                    }} align="center" key={key}>{
+                        rolesList.map((role) => {
+                            if (role.roleLevel === Number(row[key])) {
+                                return role.roleName;
+                            }
+                        })
+                    }</TableCell>;
                 }
                 return <TableCell sx={{
                     border: "1px solid rgba(0, 0, 0, 0.12)",

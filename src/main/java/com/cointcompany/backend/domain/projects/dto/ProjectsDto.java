@@ -29,9 +29,9 @@ public class ProjectsDto {
     public static class ProjectUserDto {
         private Long projectId;
         private Long userId;
-        private Long projectRoleId;
+        private Integer projectRoleId;
 
-        public ProjectUserDto(Long projectId, Long userId, Long projectRoleId) {
+        public ProjectUserDto(Long projectId, Long userId, Integer projectRoleId) {
             this.projectId = projectId;
             this.userId = userId;
             this.projectRoleId = projectRoleId;
@@ -40,8 +40,7 @@ public class ProjectsDto {
 
     @NoArgsConstructor
     @Data
-    public class ProjectRolesDto {
-        private Long id;
+    public static class ProjectRolesDto {
         private Long projectId;
         private String roleName;
         private Integer roleLevel;
@@ -55,6 +54,17 @@ public class ProjectsDto {
         }
     }
 
+    @NoArgsConstructor
+    @Data
+    public static class ProjectTagDto {
+        private Long projectId;
+        private String tagName;
+
+        public ProjectTagDto (Long projectId, String tagName) {
+            this.projectId = projectId;
+            this.tagName = tagName;
+        }
+    }
 
     @NoArgsConstructor
     @Data
