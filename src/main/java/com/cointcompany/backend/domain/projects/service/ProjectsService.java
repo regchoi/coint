@@ -126,7 +126,6 @@ public class ProjectsService {
     @Transactional
     public List<ProjectsDto.ProjectTagDto> saveProjectTag(List<ProjectsDto.ProjectTagDto> projectTagDtoList, Long projectIdNum) {
 
-        // 트랜잭션을 이용해 JPA의 변경감지를 통해 자동으로 업데이트를 수행합니다.
         List<ProjectTag> existingTags = projectTagRepository.findProjectTagByProject_IdNum(projectIdNum);
 
         // 새로운 태그 추가

@@ -10,9 +10,11 @@ import com.cointcompany.backend.domain.projects.repository.ProjectUserRepository
 import com.cointcompany.backend.domain.projects.repository.ProjectsRepository;
 import com.cointcompany.backend.domain.tasks.dto.TasksDto;
 import com.cointcompany.backend.domain.tasks.entity.TaskDepartment;
+import com.cointcompany.backend.domain.tasks.entity.TaskTag;
 import com.cointcompany.backend.domain.tasks.entity.TaskUser;
 import com.cointcompany.backend.domain.tasks.entity.Tasks;
 import com.cointcompany.backend.domain.tasks.repository.TaskDepartmentRepository;
+import com.cointcompany.backend.domain.tasks.repository.TaskTagRepository;
 import com.cointcompany.backend.domain.tasks.repository.TaskUserRepository;
 import com.cointcompany.backend.domain.tasks.repository.TasksRepository;
 import com.cointcompany.backend.domain.users.repository.UsersRepository;
@@ -34,9 +36,9 @@ public class TasksService {
 
     private final TasksRepository tasksRepository;
     private final ProjectsRepository projectsRepository;
-    private final ProjectDepartmentRepository projectDepartmentRepository;
     private final TaskUserRepository taskUserRepository;
     private final TaskDepartmentRepository taskDepartmentRepository;
+    private final TaskTagRepository taskTagRepository;
     private final DepartmentsRepository departmentsRepository;
     private final UsersRepository usersRepository;
     private final ModelMapper modelMapper;
@@ -88,6 +90,30 @@ public class TasksService {
         }
 
         return "SUCCESS";
+    }
+    @Transactional
+    public List<TasksDto.TaskTagDto> saveTaskTag(List<TasksDto.TaskTagDto> taskTagDtoList, Long taskId) {
+
+        // Project의 태그 관리 기능과 동일
+        List<TaskTag> existTaskTagList = taskTagRepository.findTaskTagByTask_IdNum(taskId);
+
+        for (TasksDto.TaskTagDto taskTagDto : taskTagDtoList) {
+            if (existTaskTagList.stream().noneMatch(taskTag -> taskTag.getTagName().equals(taskTagDto.getTagName()))) {
+                TaskTag taskTag = TaskTag.of(
+                        tasksRepository.findById(taskId).orElseThrow(),
+                        taskTagDto.getTagName()
+                );
+                taskTagRepository.save(taskTag);
+            }
+        }
+
+        for (TaskTag taskTag : existTaskTagList) {
+            if (taskTagDtoList.stream().noneMatch(taskTagDto -> taskTagDto.getTagName().equals(taskTag.getTagName()))) {
+                taskTagRepository.delete(taskTag);
+            }
+        }
+
+        return taskTagDtoList;
     }
     @Transactional
     public String saveTaskDepartment (List<TasksDto.TasksDepartmentDto> tasksDepartmentDtoList) {

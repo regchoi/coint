@@ -59,6 +59,19 @@ public class TasksController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    @Operation(summary = "업무 태그 신규 등록")
+    @ApiResponse(responseCode = "200", description = "등록 성공")
+    @PostMapping("/tag/{projectId}")
+    public ResponseEntity<String> postTasksTag (
+            @PathVariable Long projectId,
+            @RequestBody List<TasksDto.TaskTagDto> taskTagDtoList
+    ) {
+
+        tasksService.saveTaskTag(taskTagDtoList, projectId);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
     @Operation(summary = "업무 부서 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/department/{projectId}")

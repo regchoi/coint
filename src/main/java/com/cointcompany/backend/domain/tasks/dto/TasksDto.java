@@ -43,6 +43,18 @@ public class TasksDto {
 
     @NoArgsConstructor
     @Data
+    public static class TaskTagDto {
+        private Long taskId;
+        private String tagName;
+
+        public TaskTagDto (Long taskId, String tagName) {
+            this.taskId = taskId;
+            this.tagName = tagName;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
     public static class GetTaskRes {
         private Long idNum;
 
