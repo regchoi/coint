@@ -1,8 +1,6 @@
 package com.cointcompany.backend.domain.tasks.entity;
 
 import com.cointcompany.backend.domain.common.BaseEntity;
-import com.cointcompany.backend.domain.projects.entity.ProjectDepartment;
-import com.cointcompany.backend.domain.projects.entity.ProjectUser;
 import com.cointcompany.backend.domain.projects.entity.Projects;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,6 +35,10 @@ public class Tasks extends BaseEntity {
 
     private boolean del = Boolean.FALSE;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "taskGroupIdNum", nullable = true)
+    private TaskGroup taskGroup;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "projectsIdNum")
     private Projects projects;
@@ -47,9 +49,9 @@ public class Tasks extends BaseEntity {
     @OneToMany(mappedBy = "tasks", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<TaskUser> taskUsers = new ArrayList<>();
 
+
     public static Tasks of (
-            String taskName, String description, LocalDate startDate,
-            LocalDate endDate, String status, Projects projects
+            String taskName, String description, LocalDate startDate, LocalDate endDate, String status, TaskGroup taskGroup, Projects projects
     ) {
         return Tasks.builder()
                 .taskName(taskName)
@@ -57,24 +59,23 @@ public class Tasks extends BaseEntity {
                 .startDate(startDate)
                 .endDate(endDate)
                 .status(status)
-                .del(false)
+                .taskGroup(taskGroup)
                 .projects(projects)
+                .del(false)
                 .build();
     }
 
     @Builder
     public Tasks(
-            String taskName, String description, LocalDate startDate,
-            LocalDate endDate, String status, Boolean del, Projects projects
+            String taskName, String description, LocalDate startDate, LocalDate endDate, String status, TaskGroup taskGroup, Projects projects, boolean del
     ) {
         this.taskName = taskName;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;
-        this.del = del;
+        this.taskGroup = taskGroup;
         this.projects = projects;
+        this.del = del;
     }
-
-
 }

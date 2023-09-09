@@ -90,6 +90,16 @@ public class ProjectsController {
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
+    @Operation(summary = "프로젝트 태그 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/tag")
+    public ResponseEntity<List<Long>> getProjectsTag(
+            @RequestParam List<String> tags
+    ) {
+        List<Long> projectIds = projectsService.getProjectTag(tags);
+        return new ResponseEntity<>(projectIds, HttpStatus.OK);
+    }
+
 
     @Operation(summary = "프로젝트 사용자 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")

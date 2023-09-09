@@ -261,8 +261,8 @@ const TaskGanttChart = () => {
                 <Box
                     component="div"
                     sx={{
-                        overflowX: "auto",
-                        maxWidth: "1600px",
+                        // 부모컴포넌트의 width를 넘지 않는 선에서 최대길이
+                        maxWidth: "1450px",
                         width: "100%",
                         height: "100%",
                         display: "flex",

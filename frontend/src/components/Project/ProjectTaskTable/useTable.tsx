@@ -7,9 +7,12 @@ type UseTableProps = {
     initialOrder: Order;
     initialRowsPerPage: number;
     rowsData?: Data[];
+    tags: string[];
+    tagSearchId: number[];
 };
 
-const useTable = ({initialOrderBy, initialOrder, initialRowsPerPage, rowsData}: UseTableProps) => {
+
+const useTable = ({initialOrderBy, initialOrder, initialRowsPerPage, rowsData, tags, tagSearchId}: UseTableProps) => {
     const [order, setOrder] = useState<Order>(initialOrder);
     const [orderBy, setOrderBy] = useState<keyof Data>(initialOrderBy);
     const [selected, setSelected] = useState<readonly number[]>([]);
@@ -82,8 +85,14 @@ const useTable = ({initialOrderBy, initialOrder, initialRowsPerPage, rowsData}: 
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - (rowsData?.length || 0)) : 0; // rowsData가 undefined일 때 길이 0을 사용합니다.
 
     const filteredData = useMemo(() => {
-        return rowsData ? filterDataByHeadCells(rowsData, headCells) : [];
-    }, [rowsData]);
+        if (!rowsData) return [];
+        if (tagSearchId.length === 0 && tags.length > 0) return [];  // 태그는 있지만 해당 태그에 맞는 데이터가 없는 경우
+        if (tagSearchId.length === 0) return filterDataByHeadCells(rowsData, headCells); // 태그가 없는 경우
+
+        // 태그에 맞는 데이터만 필터링
+        const dataByTag = rowsData.filter(row => tagSearchId.includes(row.idNum));
+        return filterDataByHeadCells(dataByTag, headCells);
+    }, [rowsData, tagSearchId, tags]);
 
     const visibleRows = useMemo(
         () =>

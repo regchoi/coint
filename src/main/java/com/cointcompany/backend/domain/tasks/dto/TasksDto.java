@@ -2,6 +2,7 @@ package com.cointcompany.backend.domain.tasks.dto;
 
 import com.cointcompany.backend.domain.projects.dto.ProjectsDto;
 import com.cointcompany.backend.domain.projects.entity.Projects;
+import com.cointcompany.backend.domain.tasks.entity.TaskGroup;
 import com.cointcompany.backend.domain.tasks.entity.Tasks;
 import lombok.*;
 
@@ -50,6 +51,48 @@ public class TasksDto {
         public TaskTagDto (Long taskId, String tagName) {
             this.taskId = taskId;
             this.tagName = tagName;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class TaskGroupPostDto {
+        private String taskGroupName;
+        private String description;
+        private Long projectsIdNum;
+
+        public TaskGroupPostDto (String taskGroupName, String description, Long projectsIdNum) {
+            this.taskGroupName = taskGroupName;
+            this.description = description;
+            this.projectsIdNum = projectsIdNum;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class TaskGroupDto {
+        private Long idNum;
+        private String taskGroupName;
+        private String description;
+        private Long projectsIdNum;
+
+        public TaskGroupDto (TaskGroup taskGroup) {
+            this.idNum = taskGroup.getIdNum();
+            this.taskGroupName = taskGroup.getTaskGroupName();
+            this.description = taskGroup.getDescription();
+            this.projectsIdNum = taskGroup.getProjects().getIdNum();
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class TaskGrouping {
+        private Long idNum;
+        private Long taskGroupIdNum;
+
+        public TaskGrouping (Long idNum, Long taskGroupIdNum) {
+            this.idNum = idNum;
+            this.taskGroupIdNum = taskGroupIdNum;
         }
     }
 

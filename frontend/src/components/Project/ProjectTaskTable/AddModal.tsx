@@ -23,6 +23,11 @@ import {fetchTableData} from "../../../redux/tableSlice";
 import {API_LINK} from "./data";
 import {AppDispatch, useAppDispatch, useAppSelector} from "../../../redux/store";
 
+type Tag = {
+    taskId: number;
+    tagName: string;
+}
+
 type ProjectResponse = {
     idNum: number;
     projectName: string;
@@ -114,10 +119,24 @@ export default function AddModal({ open, onClose }: ModalProps) {
                     });
 
                     if(response.data) {
+                        // response.data에는 taskIdNum 담겨있음
+                        // 해당 API 요청을 통해 Tag를 등록
+                        const tags: Tag[] = [];
+                        const tagNames = data.taskName.split(' ').concat(data.description.split(' '));
+                        // 중복 제거
+                        const uniqueTagNames = [...new Set(tagNames)];
+                        uniqueTagNames.forEach((tagName) => {
+                            tags.push({
+                                taskId: response.data,
+                                tagName,
+                            });
+                        });
+                        await axios.post(`/api/task/tag/${response.data}`, tags);
+
                         setProjectIdNum(response.data);
                     } else {
                         setErrorModalOpen(true);
-                        setErrorMessage('성공적으로 프로젝트를 등록하지 못했습니다.');
+                        setErrorMessage('성공적으로 업무를 등록하지 못했습니다.');
                     }
                     setPage(page+1);
                 }
