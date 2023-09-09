@@ -4,6 +4,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import {Button, Stack} from "@mui/material";
 import SaveIcon from '@mui/icons-material/Save';
+import TaskIcon from '@mui/icons-material/Task';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import EditIcon from '@mui/icons-material/Edit';
@@ -11,13 +12,14 @@ import EditIcon from '@mui/icons-material/Edit';
 interface EnhancedTableToolbarProps {
     numSelected: number;
     tableName: string;  // tableName을 DB에서 가져올 수 있음
+    onGroup: () => void;
     onAdd: () => void;
     onUpdate: () => void;
     onDelete: () => void;
 }
 
 export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-    const {numSelected, tableName, onAdd, onUpdate, onDelete} = props;
+    const {numSelected, tableName, onGroup, onAdd, onUpdate, onDelete} = props;
 
     // 버튼 공통 스타일
     const commonButtonStyles = {
@@ -68,6 +70,13 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 </Typography>
             )}
             <Stack direction="row" spacing={1}>
+                <Button variant="contained"
+                        startIcon={<TaskIcon style={{ color: 'rgb(70, 130, 180)', marginRight: '2px', fontSize: '15px' }} />}
+                        sx={{ ...commonButtonStyles, width: '120px' }}
+                        onClick={onGroup}
+                >
+                    업무그룹관리
+                </Button>
                 <Button variant="contained"
                         startIcon={<AddIcon style={{ color: 'rgb(23, 210, 23)', marginRight: '2px', fontSize: '15px' }} />}
                         sx={{ ...commonButtonStyles, width: '100px' }}

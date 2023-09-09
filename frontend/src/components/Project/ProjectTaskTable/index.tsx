@@ -46,7 +46,7 @@ export default function ProjectTaskTable() {
     // 에러 확인 Modal 상태 관리
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
     // 업무 그룹 Modal 상태 관리
-    const [isGroupModalOpen, setGroupModalOpen] = useState(true);
+    const [isGroupModalOpen, setGroupModalOpen] = useState(false);
     // Tag 관리
     const [tags, setTags] = useState<string[]>([]);
     const [tagSearchId, setTagSearchId] = useState<number[]>([]);
@@ -68,7 +68,6 @@ export default function ProjectTaskTable() {
 
     // useState의 Tags를 감지하여 변경마다 axios로 데이터를 요청합니다.
     useEffect(() => {
-        console.log(tags);
         // 태그를 포함하는 ProjectIdNums를 가져옵니다.
         axios.get(`/api/task/tag?tags=${tags.join(',')}`)
             .then(res => {
@@ -212,6 +211,7 @@ export default function ProjectTaskTable() {
                 <EnhancedTableToolbar
                     numSelected={selected.length}
                     tableName={tableName}
+                    onGroup={() => setGroupModalOpen(true)}
                     onAdd={handleAdd}
                     onUpdate={handleUpdate}
                     onDelete={handleOpenDeleteModal}    // 삭제 버튼 클릭 시, 삭제 확인 Modal 열기

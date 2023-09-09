@@ -97,10 +97,15 @@ public class TasksController {
 
     @Operation(summary = "업무 그룹 업무 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
-    @PutMapping("/group/task")
+    @PutMapping("/group/{taskGroupIdNum}")
     public ResponseEntity<String> putTasksGroupTask (
-            @RequestBody TasksDto.TaskGrouping taskGrouping
+            @PathVariable Long taskGroupIdNum,
+            @RequestBody Long taskIdNum
     ) {
+
+            TasksDto.TaskGrouping taskGrouping = new TasksDto.TaskGrouping();
+            taskGrouping.setIdNum(taskIdNum);
+            taskGrouping.setTaskGroupIdNum(taskGroupIdNum);
 
             tasksService.modifyTaskGroupTask(taskGrouping);
 

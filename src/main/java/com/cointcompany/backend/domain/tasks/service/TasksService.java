@@ -1,12 +1,6 @@
 package com.cointcompany.backend.domain.tasks.service;
 
 import com.cointcompany.backend.domain.departments.repository.DepartmentsRepository;
-import com.cointcompany.backend.domain.projects.dto.ProjectsDto;
-import com.cointcompany.backend.domain.projects.entity.ProjectDepartment;
-import com.cointcompany.backend.domain.projects.entity.ProjectUser;
-import com.cointcompany.backend.domain.projects.entity.Projects;
-import com.cointcompany.backend.domain.projects.repository.ProjectDepartmentRepository;
-import com.cointcompany.backend.domain.projects.repository.ProjectUserRepository;
 import com.cointcompany.backend.domain.projects.repository.ProjectsRepository;
 import com.cointcompany.backend.domain.tasks.dto.TasksDto;
 import com.cointcompany.backend.domain.tasks.entity.*;
@@ -127,7 +121,13 @@ public class TasksService {
         return "SUCCESS";
     }
     @Transactional
-    public
+    public String modifyTaskGroupTask(TasksDto.TaskGrouping taskGrouping) {
+
+        Tasks task = tasksRepository.findById(taskGrouping.getIdNum()).orElseThrow();
+        task.setTaskGroup(taskGroupRepository.findById(taskGrouping.getTaskGroupIdNum()).orElseThrow());
+
+        return "SUCCESS";
+    }
     @Transactional
     public List<TasksDto.TaskGroupDto> getTaskGroup (Long projectId) {
         List<TaskGroup> taskGroupList = taskGroupRepository.findTaskGroupByProjects_IdNum(projectId);
