@@ -57,9 +57,6 @@ export function convertToGanttTasks(
                 project: "Project" + project.idNum,
                 displayOrder: displayOrderCounter++,
             };
-            if (i > 0) {
-                taskItem.dependencies = ["Task" + tasksForProject[i - 1].idNum];
-            }
             combinedTasks.push(taskItem);
         });
     });

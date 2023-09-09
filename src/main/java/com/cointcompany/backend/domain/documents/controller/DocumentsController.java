@@ -8,10 +8,12 @@ import com.cointcompany.backend.domain.documents.service.DocumentsService;
 import com.cointcompany.backend.domain.file.repository.FilesRepository;
 import com.cointcompany.backend.domain.projects.repository.ProjectsRepository;
 import com.cointcompany.backend.domain.tasks.entity.Tasks;
+import com.cointcompany.backend.domain.tasks.repository.TaskGroupRepository;
 import com.cointcompany.backend.domain.tasks.repository.TasksRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +35,9 @@ import java.util.List;
 @Slf4j
 public class DocumentsController {
 
-    private final FilesRepository filesRepository;
-    private final DocumentsRepository documentsRepository;
-    private final DirectoriesRepository directoriesRepository;
     private final ProjectsRepository projectsRepository;
     private final TasksRepository tasksRepository;
+    private final TaskGroupRepository taskGroupRepository;
     private final DocumentsService documentsService;
 
     @Operation(summary = "파일 전체 조회")
@@ -88,8 +88,8 @@ public class DocumentsController {
                         row.getCell(2).getLocalDateTimeCellValue().toLocalDate(),
                         row.getCell(3).getLocalDateTimeCellValue().toLocalDate(),
                         row.getCell(4).getStringCellValue(),
+                        taskGroupRepository.findById((long) row.getCell(5).getNumericCellValue()).orElseThrow(),
                         projectsRepository.findById((long) row.getCell(5).getNumericCellValue()).orElseThrow()
-
                 );
                 tasksRepository.save(tasks);
             }

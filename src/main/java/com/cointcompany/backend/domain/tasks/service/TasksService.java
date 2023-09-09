@@ -9,14 +9,8 @@ import com.cointcompany.backend.domain.projects.repository.ProjectDepartmentRepo
 import com.cointcompany.backend.domain.projects.repository.ProjectUserRepository;
 import com.cointcompany.backend.domain.projects.repository.ProjectsRepository;
 import com.cointcompany.backend.domain.tasks.dto.TasksDto;
-import com.cointcompany.backend.domain.tasks.entity.TaskDepartment;
-import com.cointcompany.backend.domain.tasks.entity.TaskTag;
-import com.cointcompany.backend.domain.tasks.entity.TaskUser;
-import com.cointcompany.backend.domain.tasks.entity.Tasks;
-import com.cointcompany.backend.domain.tasks.repository.TaskDepartmentRepository;
-import com.cointcompany.backend.domain.tasks.repository.TaskTagRepository;
-import com.cointcompany.backend.domain.tasks.repository.TaskUserRepository;
-import com.cointcompany.backend.domain.tasks.repository.TasksRepository;
+import com.cointcompany.backend.domain.tasks.entity.*;
+import com.cointcompany.backend.domain.tasks.repository.*;
 import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +33,7 @@ public class TasksService {
     private final TaskUserRepository taskUserRepository;
     private final TaskDepartmentRepository taskDepartmentRepository;
     private final TaskTagRepository taskTagRepository;
+    private final TaskGroupRepository taskGroupRepository;
     private final DepartmentsRepository departmentsRepository;
     private final UsersRepository usersRepository;
     private final ModelMapper modelMapper;
@@ -114,6 +109,46 @@ public class TasksService {
         }
 
         return taskTagDtoList;
+    }
+    @Transactional
+    public List<Long> getTaskTag (List<String> tags) {
+        return taskTagRepository.findTaskIdsByTags(tags, (long) tags.size());
+    }
+    @Transactional
+    public String saveTaskGroup(TasksDto.TaskGroupPostDto taskGroupDto) {
+
+        TaskGroup taskGroup = TaskGroup.of(
+                taskGroupDto.getTaskGroupName(),
+                taskGroupDto.getDescription(),
+                projectsRepository.findById(taskGroupDto.getProjectsIdNum()).orElseThrow()
+        );
+        taskGroupRepository.save(taskGroup);
+
+        return "SUCCESS";
+    }
+    @Transactional
+    public
+    @Transactional
+    public List<TasksDto.TaskGroupDto> getTaskGroup (Long projectId) {
+        List<TaskGroup> taskGroupList = taskGroupRepository.findTaskGroupByProjects_IdNum(projectId);
+        List<TasksDto.TaskGroupDto> taskGroupDtoList = new ArrayList<>();
+
+        for (TaskGroup taskGroup : taskGroupList) {
+            TasksDto.TaskGroupDto taskGroupDto = new TasksDto.TaskGroupDto(taskGroup);
+            taskGroupDtoList.add(taskGroupDto);
+        }
+
+        return taskGroupDtoList;
+    }
+    @Transactional
+    public String modifyTaskGroup (TasksDto.TaskGroupDto taskGroupPutDtoList) {
+
+        TaskGroup taskGroup = taskGroupRepository.findById(taskGroupPutDtoList.getIdNum()).orElseThrow();
+        taskGroup.setTaskGroupName(taskGroupPutDtoList.getTaskGroupName());
+        taskGroup.setDescription(taskGroupPutDtoList.getDescription());
+        taskGroupRepository.save(taskGroup);
+
+        return "SUCCESS";
     }
     @Transactional
     public String saveTaskDepartment (List<TasksDto.TasksDepartmentDto> tasksDepartmentDtoList) {

@@ -150,6 +150,11 @@ public class ProjectsService {
     }
 
     @Transactional
+    public List<Long> getProjectTag(List<String> tags) {
+            return projectTagRepository.findProjectIdsByTags(tags, (long) tags.size());
+    }
+
+    @Transactional
     public List<ProjectsDto.ProjectUserDto> getProjectUser(Long projectId) {
 
         List<ProjectUser> projectUserList = projectUserRepository.findProjectUserByProjects_IdNum(projectId);

@@ -72,6 +72,65 @@ public class TasksController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    @Operation(summary = "업무 태그 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/tag")
+    public ResponseEntity<List<Long>> getTasksTag (
+            @RequestParam List<String> tags
+    ) {
+        List<Long> taskIds = tasksService.getTaskTag(tags);
+
+        return new ResponseEntity<>(taskIds, HttpStatus.OK);
+    }
+
+    @Operation(summary = "업무 그룹 신규 등록")
+    @ApiResponse(responseCode = "200", description = "등록 성공")
+    @PostMapping("/group")
+    public ResponseEntity<String> postTasksGroup (
+            @RequestBody TasksDto.TaskGroupPostDto taskGroupDto
+            ) {
+
+        tasksService.saveTaskGroup(taskGroupDto);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "업무 그룹 업무 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/group/task")
+    public ResponseEntity<String> putTasksGroupTask (
+            @RequestBody TasksDto.TaskGrouping taskGrouping
+    ) {
+
+            tasksService.modifyTaskGroupTask(taskGrouping);
+
+            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+
+    @Operation(summary = "업무 그룹 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/group")
+    public ResponseEntity<String> putTasksGroup (
+            @RequestBody TasksDto.TaskGroupDto taskGroupPutDto
+    ) {
+
+        tasksService.modifyTaskGroup(taskGroupPutDto);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "업무 그룹 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/group/{projectId}")
+    public ResponseEntity<List<TasksDto.TaskGroupDto>> getTasksGroup (
+            @PathVariable Long projectId
+    ) {
+        List<TasksDto.TaskGroupDto> taskGroupDtoList = tasksService.getTaskGroup(projectId);
+
+        return new ResponseEntity<>(taskGroupDtoList, HttpStatus.OK);
+    }
+
     @Operation(summary = "업무 부서 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/department/{projectId}")

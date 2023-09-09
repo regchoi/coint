@@ -98,22 +98,11 @@ export default function AddModal({ open, onClose }: ModalProps) {
                 if (response.data) {
                     // response.data에는 projectIdNum이 담겨있음
                     // 해당 API 요청을 통해 Tag를 등록
-                    // Tag는 projectName과 description에 대한 키워드를 공백 기준으로 나누어 모두 등록
-                    // type Tag의 배열을 통해 각 키워드를 TagName에 담아서 전송
-                    // 스프링에서 에러 발생 문제는 요청 본문(JSON)을 파싱하는 과정에서 발생하는 것 같습니다. 에러 메시지를 보면 Cannot deserialize value of type java.util.ArrayList라는 내용을 확인할 수 있는데, 이는 서버가 리스트 형태의 JSON 배열을 기대하고 있지만, 실제로는 JSON 오브젝트 형식이 넘어왔기 때문에 발생한 문제로 보입니다.
-                    //
-                    // 해결 방법:
-                    //
-                    // 요청 본문 확인: 프론트엔드에서 서버로 보내는 JSON 요청 본문을 확인하세요. 이 데이터가 배열 형태인지, 오브젝트 형태인지 확인해야 합니다.
-                    // 예:
-                    //
-                    // 배열 형태: [{"tagName": "tag1", ...}, {"tagName": "tag2", ...}]
-                    // 오브젝트 형태: {"tagName": "tag1", ...}
-
-                    // 아래는 오브젝트 형태인가? -> 배열 형태로 바꿔야 함
                     const tags: Tag[] = [];
                     const tagNames = data.projectName.split(' ').concat(data.description.split(' '));
-                    tagNames.forEach((tagName) => {
+                    // 중복되는 키워드는 제거
+                    const uniqueTagNames = [...new Set(tagNames)];
+                    uniqueTagNames.forEach((tagName) => {
                         tags.push({
                             projectId: response.data,
                             tagName,
