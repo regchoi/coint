@@ -52,6 +52,34 @@ public class TasksService {
 
         return getTaskResList;
     }
+    @Transactional(readOnly = true)
+    public List<TasksDto.GetGroupTask> getTask(Long projectId) {
+
+        List<TasksDto.GetGroupTask> getTaskResList = new ArrayList<>();
+
+        List<Tasks> tasksList = tasksRepository.findByProjectsIdNum(projectId);
+
+        for (Tasks tasks : tasksList) {
+            TasksDto.GetGroupTask getTaskRes = new TasksDto.GetGroupTask(tasks);
+            getTaskResList.add(getTaskRes);
+        }
+
+        return getTaskResList;
+    }
+    @Transactional(readOnly = true)
+    public List<TasksDto.GetGroupTask> getGroupTask(Long taskGroupId) {
+
+        List<TasksDto.GetGroupTask> getTaskResList = new ArrayList<>();
+
+        List<Tasks> tasksList = tasksRepository.findByTaskGroup_IdNum(taskGroupId);
+
+        for (Tasks tasks : tasksList) {
+            TasksDto.GetGroupTask getTaskRes = new TasksDto.GetGroupTask(tasks);
+            getTaskResList.add(getTaskRes);
+        }
+
+        return getTaskResList;
+    }
     @Transactional
     public Tasks saveTasks(TasksDto.PostTaskReq postTaskReq, Long projectId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -104,7 +132,7 @@ public class TasksService {
 
         return taskTagDtoList;
     }
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Long> getTaskTag (List<String> tags) {
         return taskTagRepository.findTaskIdsByTags(tags, (long) tags.size());
     }
@@ -128,7 +156,7 @@ public class TasksService {
 
         return "SUCCESS";
     }
-    @Transactional
+    @Transactional(readOnly = true)
     public List<TasksDto.TaskGroupDto> getTaskGroup (Long projectId) {
         List<TaskGroup> taskGroupList = taskGroupRepository.findTaskGroupByProjects_IdNum(projectId);
         List<TasksDto.TaskGroupDto> taskGroupDtoList = new ArrayList<>();

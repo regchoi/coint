@@ -133,6 +133,31 @@ public class TasksDto {
     }
     @NoArgsConstructor
     @Data
+    public static class GetGroupTask {
+        private Long idNum;
+
+        private String taskName;
+
+        private Long projectsIdNum;
+
+        private Long taskGroupIdNum;
+
+        public GetGroupTask (Tasks tasks) {
+
+            this.idNum = tasks.getIdNum();
+            this.taskName = tasks.getTaskName();
+            this.projectsIdNum = tasks.getProjects().getIdNum();
+            if (tasks.getTaskGroup() != null) {
+                this.taskGroupIdNum = tasks.getTaskGroup().getIdNum();
+            } else {
+                this.taskGroupIdNum = null;
+            }
+
+        }
+
+    }
+    @NoArgsConstructor
+    @Data
     public static class PostTaskReq {
 
         private String taskName;

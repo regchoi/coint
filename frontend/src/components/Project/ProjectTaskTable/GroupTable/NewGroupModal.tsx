@@ -48,7 +48,6 @@ const NewGroupModal: React.FC<RenameModalProps> = ({ open, handleClose, projects
     }, [projectsIdNum]);
 
     const handleSave = () => {
-        console.log(newGroup);
         // axios를 통해 DB에 저장
         axios.post('/api/task/group', newGroup)
             .then(res => {

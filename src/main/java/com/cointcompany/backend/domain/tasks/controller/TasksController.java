@@ -37,6 +37,28 @@ public class TasksController {
         return new ResponseEntity<>(taskResList, HttpStatus.OK);
     }
 
+    @Operation(summary = "프로젝트 단위 업무 상세 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/{projectId}")
+    public ResponseEntity<List<TasksDto.GetGroupTask>> getProject (
+            @PathVariable Long projectId
+    ) {
+        List<TasksDto.GetGroupTask> taskRes = tasksService.getTask(projectId);
+
+        return new ResponseEntity<>(taskRes, HttpStatus.OK);
+    }
+
+    @Operation(summary = "그룹 단위 업무 상세 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/taskgroup/{taskGroupId}")
+    public ResponseEntity<List<TasksDto.GetGroupTask>> getTaskGroup (
+            @PathVariable Long taskGroupId
+    ) {
+        List<TasksDto.GetGroupTask> taskRes = tasksService.getGroupTask(taskGroupId);
+
+        return new ResponseEntity<>(taskRes, HttpStatus.OK);
+    }
+
     @Operation(summary = "업무 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/{projectId}")
@@ -97,6 +119,22 @@ public class TasksController {
 
     @Operation(summary = "업무 그룹 업무 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/group")
+    public ResponseEntity<String> putTasksGroupTask (
+            @RequestBody Long taskIdNum
+    ) {
+
+        TasksDto.TaskGrouping taskGrouping = new TasksDto.TaskGrouping();
+        taskGrouping.setIdNum(taskIdNum);
+        taskGrouping.setTaskGroupIdNum(null);
+
+        tasksService.modifyTaskGroupTask(taskGrouping);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "업무 그룹 업무 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
     @PutMapping("/group/{taskGroupIdNum}")
     public ResponseEntity<String> putTasksGroupTask (
             @PathVariable Long taskGroupIdNum,
@@ -111,7 +149,6 @@ public class TasksController {
 
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
-
 
     @Operation(summary = "업무 그룹 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")

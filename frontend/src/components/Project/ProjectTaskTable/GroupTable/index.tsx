@@ -28,6 +28,11 @@ import SuccessModal from "../../../common/SuccessModal";
 import NewGroupModal from "./NewGroupModal";
 
 // props
+interface TransferListProps {
+    projectsIdNum: number;
+    taskGroupIdNum: number;
+}
+
 interface GroupTableProps {
     open: boolean;
     onClose: () => void;
@@ -36,6 +41,13 @@ interface GroupTableProps {
 type projectResponse = {
     idNum: number;
     projectName: string;
+}
+
+type projectTaskResponse = {
+    idNum: number;
+    taskName: string;
+    projectsIdNum: number;
+    taskGroupIdNum: number;
 }
 
 type taskGroupResponse = {
@@ -104,20 +116,20 @@ const StyledTreeItem = styled((props: TreeItemProps) => (
     },
 }));
 
-function intersection(a: number[], b: number[]): number[] {
-    return a.filter(value => b.includes(value));
+function intersection(a: projectTaskResponse[], b: projectTaskResponse[]): projectTaskResponse[] {
+    return a.filter(valueA => b.some(valueB => valueB.idNum === valueA.idNum));
 }
 
-function SelectAllTransferList() {
-    const [checked, setChecked] = useState<number[]>([]);
-    const [left, setLeft] = useState([0, 1, 2, 3]);
-    const [right, setRight] = useState([4, 5, 6, 7]);
+function SelectAllTransferList({projectsIdNum, taskGroupIdNum}: TransferListProps) {
+    const [checked, setChecked] = useState<projectTaskResponse[]>([]);
+    const [left, setLeft] = useState<projectTaskResponse[]>([]);
+    const [right, setRight] = useState<projectTaskResponse[]>([]);
 
     const leftChecked = intersection(checked, left);
     const rightChecked = intersection(checked, right);
 
-    const handleToggle = (value: number) => () => {
-        const currentIndex = checked.indexOf(value);
+    const handleToggle = (value: projectTaskResponse) => () => {
+        const currentIndex = checked.findIndex(item => item.idNum === value.idNum);
         const newChecked = [...checked];
 
         if (currentIndex === -1) {
@@ -129,16 +141,67 @@ function SelectAllTransferList() {
         setChecked(newChecked);
     };
 
+    useEffect(() => {
+        const taskbyProjectIdNum = async () => {
+            try {
+                const projectResponse = await axios.get(`/api/task/${projectsIdNum}`);
+                const projectTaskResponse = projectResponse.data.filter((task: projectTaskResponse) => task.taskGroupIdNum === null);
+                setRight(projectTaskResponse);
+            } catch (error) {
+                console.log(error);
+                return;
+            }
+        };
+        taskbyProjectIdNum();
+    }, [projectsIdNum]);
+
+
+    useEffect(() => {
+        const taskbyTaskGroupIdNum = async () => {
+            try {
+                const taskGroupResponse = await axios.get(`/api/task/taskgroup/${taskGroupIdNum}`);
+                const taskGroupTaskResponse = taskGroupResponse.data;
+                setLeft(taskGroupTaskResponse);
+            } catch (error) {
+                console.log(error);
+                return;
+            }
+        }
+        taskbyTaskGroupIdNum();
+    }, [taskGroupIdNum]);
+
     const handleCheckedRight = () => {
-        setRight(right.concat(leftChecked));
-        setLeft(left.filter(value => !leftChecked.includes(value)));
-        setChecked(checked.filter(value => !leftChecked.includes(value)));
+        // left에 선택된 항목들을 전부 반복문을 통해 axios 요청
+        // 요청이 성공하면 left, right state를 갱신
+        leftChecked.forEach(async (task) => {
+            try {
+                await axios.put(`/api/task/group`, task.idNum);
+
+                setRight(right.concat(leftChecked));
+                setLeft(left.filter(value => !leftChecked.some(item => item.idNum === value.idNum)));
+                setChecked(checked.filter(value => !leftChecked.some(item => item.idNum === value.idNum)));
+            } catch (error) {
+                console.log(error);
+                return;
+            }
+        });
     };
 
     const handleCheckedLeft = () => {
-        setLeft(left.concat(rightChecked));
-        setRight(right.filter(value => !rightChecked.includes(value)));
-        setChecked(checked.filter(value => !rightChecked.includes(value)));
+        // right에 선택된 항목들을 전부 반복문을 통해 axios 요청
+        // 요청이 성공하면 left, right state를 갱신
+        rightChecked.forEach(async (task) => {
+            try {
+                await axios.put(`/api/task/group/${taskGroupIdNum}`, task.idNum);
+
+                setLeft(left.concat(rightChecked));
+                setRight(right.filter(value => !rightChecked.some(item => item.idNum === value.idNum)));
+                setChecked(checked.filter(value => !rightChecked.some(item => item.idNum === value.idNum)));
+            } catch (error) {
+                console.log(error);
+                return;
+            }
+        });
     };
 
     return (
@@ -147,30 +210,38 @@ function SelectAllTransferList() {
                 <Card>
                     <CardHeader
                         avatar={<Checkbox checked={leftChecked.length === left.length && left.length !== 0} />}
-                        title="Choices"
+                        title={`그룹 내 업무`}
                         subheader={`${leftChecked.length}/${left.length} selected`}
                     />
                     <Divider />
-                    <List dense component="div" role="list">
-                        {left.map((value) => (
-                            <ListItem key={value} role="listitem" button onClick={handleToggle(value)}>
-                                <ListItemIcon>
-                                    <Checkbox checked={checked.indexOf(value) !== -1} />
-                                </ListItemIcon>
-                                <ListItemText id={value} primary={`List item ${value + 1}`} />
-                            </ListItem>
-                        ))}
+                    <List dense component="div" role="list" sx={{
+                        height: '300px',
+                        overflowY: 'auto'
+                    }}>
+                        {
+                            left.length ?
+                                left.map((value) => (
+                                    <ListItem key={value.idNum} role="listitem" button onClick={handleToggle(value)}>
+                                        <ListItemIcon>
+                                            <Checkbox checked={checked.some(item => item.idNum === value.idNum)} />
+                                        </ListItemIcon>
+                                        <ListItemText id={value.idNum.toString()} primary={value.taskName} />
+                                    </ListItem>
+                                ))
+                                : <ListItem><ListItemText primary="정보가 존재하지 않습니다" /></ListItem>
+                        }
                         <ListItem />
                     </List>
                 </Card>
             </Grid>
             <Grid item>
                 <Grid container direction="column" alignItems="center">
-                    <Button variant="outlined" size="small" onClick={handleCheckedRight} disabled={leftChecked.length === 0}>
-                        &gt;
-                    </Button>
                     <Button variant="outlined" size="small" onClick={handleCheckedLeft} disabled={rightChecked.length === 0}>
                         &lt;
+                    </Button>
+                    <br/>
+                    <Button variant="outlined" size="small" onClick={handleCheckedRight} disabled={leftChecked.length === 0}>
+                        &gt;
                     </Button>
                 </Grid>
             </Grid>
@@ -178,19 +249,26 @@ function SelectAllTransferList() {
                 <Card>
                     <CardHeader
                         avatar={<Checkbox checked={rightChecked.length === right.length && right.length !== 0} />}
-                        title="Chosen"
+                        title="업무"
                         subheader={`${rightChecked.length}/${right.length} selected`}
                     />
                     <Divider />
-                    <List dense component="div" role="list">
-                        {right.map((value) => (
-                            <ListItem key={value} role="listitem" button onClick={handleToggle(value)}>
-                                <ListItemIcon>
-                                    <Checkbox checked={checked.indexOf(value) !== -1} />
-                                </ListItemIcon>
-                                <ListItemText id={value} primary={`List item ${value + 1}`} />
-                            </ListItem>
-                        ))}
+                    <List dense component="div" role="list" sx={{
+                        height: '300px',
+                        overflowY: 'auto'
+                    }}>
+                        {
+                            right.length ?
+                                right.map((value) => (
+                                    <ListItem key={value.idNum} role="listitem" button onClick={handleToggle(value)}>
+                                        <ListItemIcon>
+                                            <Checkbox checked={checked.some(item => item.idNum === value.idNum)} />
+                                        </ListItemIcon>
+                                        <ListItemText id={value.idNum} primary={`${value.taskName}`} />
+                                    </ListItem>
+                                ))
+                                : <ListItem><ListItemText primary="정보가 존재하지 않습니다" /></ListItem>
+                        }
                         <ListItem />
                     </List>
                 </Card>
@@ -202,6 +280,8 @@ function SelectAllTransferList() {
 function GroupTable({open, onClose}: GroupTableProps) {
     const [project, setProject] = useState<projectResponse[]>([]);
     const [taskGroups, setTaskGroups] = useState<taskGroupResponse[]>([]);
+    const [projectsIdNum, setProjectsIdNum] = useState<number>(0);
+    const [taskGroupIdNum, setTaskGroupIdNum] = useState<number>(0);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [errorModalOpen, setErrorModalOpen] = useState<boolean>(false);
     const [successMessage, setSuccessMessage] = useState<string>('');
@@ -261,7 +341,8 @@ function GroupTable({open, onClose}: GroupTableProps) {
                     <TreeItem
                         key={taskGroup.idNum}
                         nodeId={taskGroup.idNum.toString()}
-                        label={<Typography style={{fontSize: '14px'}}>{taskGroup.taskGroupName}</Typography>}
+                        label={<Typography style={{fontSize: '14px'}}
+                        onClick={() => {setTaskGroupIdNum(taskGroup.idNum)}}>{taskGroup.taskGroupName}</Typography>}
                     />
                 ))}
                 <Button
@@ -342,6 +423,7 @@ function GroupTable({open, onClose}: GroupTableProps) {
                                         key={proj.idNum}
                                         nodeId={proj.idNum.toString()}
                                         label={<Typography style={{ fontSize: '14px' }}>{proj.projectName}</Typography>}
+                                        onClick={() => setProjectsIdNum(proj.idNum)}
                                     >
                                         {renderTaskGroupsForProject(proj.idNum)}
                                     </StyledTreeItem>
@@ -350,7 +432,10 @@ function GroupTable({open, onClose}: GroupTableProps) {
                         </TreeView>
                     </Grid>
                     <Grid item xs={8}>
-                        <SelectAllTransferList />
+                        <SelectAllTransferList
+                        projectsIdNum={projectsIdNum}
+                        taskGroupIdNum={taskGroupIdNum}
+                        />
                     </Grid>
                 </Grid>
 
