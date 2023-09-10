@@ -205,16 +205,17 @@ function SelectAllTransferList({projectsIdNum, taskGroupIdNum}: TransferListProp
     };
 
     return (
-        <Grid container spacing={2} justifyContent="center" alignItems="center">
-            <Grid item>
+        <Grid container spacing={2} justifyContent="center" alignItems="center" sx={{minWidth: '580px'}}>
+            <Grid item xs={5}>
                 <Card>
                     <CardHeader
                         avatar={<Checkbox checked={leftChecked.length === left.length && left.length !== 0} />}
                         title={`그룹 내 업무`}
-                        subheader={`${leftChecked.length}/${left.length} selected`}
+                        subheader={`${leftChecked.length}/${left.length} 선택됨`}
                     />
                     <Divider />
                     <List dense component="div" role="list" sx={{
+                        width: '250px',
                         height: '300px',
                         overflowY: 'auto'
                     }}>
@@ -225,7 +226,8 @@ function SelectAllTransferList({projectsIdNum, taskGroupIdNum}: TransferListProp
                                         <ListItemIcon>
                                             <Checkbox checked={checked.some(item => item.idNum === value.idNum)} />
                                         </ListItemIcon>
-                                        <ListItemText id={value.idNum.toString()} primary={value.taskName} />
+                                        <ListItemText id={value.idNum.toString()} primary={value.taskName}
+                                                      sx={{ '& .MuiTypography-root': { fontSize: '13px' } }}  />
                                     </ListItem>
                                 ))
                                 : <ListItem><ListItemText primary="정보가 존재하지 않습니다" /></ListItem>
@@ -234,7 +236,7 @@ function SelectAllTransferList({projectsIdNum, taskGroupIdNum}: TransferListProp
                     </List>
                 </Card>
             </Grid>
-            <Grid item>
+            <Grid item xs={2}>
                 <Grid container direction="column" alignItems="center">
                     <Button variant="outlined" size="small" onClick={handleCheckedLeft} disabled={rightChecked.length === 0}>
                         &lt;
@@ -245,15 +247,16 @@ function SelectAllTransferList({projectsIdNum, taskGroupIdNum}: TransferListProp
                     </Button>
                 </Grid>
             </Grid>
-            <Grid item>
+            <Grid item xs={5}>
                 <Card>
                     <CardHeader
                         avatar={<Checkbox checked={rightChecked.length === right.length && right.length !== 0} />}
                         title="업무"
-                        subheader={`${rightChecked.length}/${right.length} selected`}
+                        subheader={`${rightChecked.length}/${right.length} 선택됨`}
                     />
                     <Divider />
                     <List dense component="div" role="list" sx={{
+                        width: '250px',
                         height: '300px',
                         overflowY: 'auto'
                     }}>
@@ -264,7 +267,8 @@ function SelectAllTransferList({projectsIdNum, taskGroupIdNum}: TransferListProp
                                         <ListItemIcon>
                                             <Checkbox checked={checked.some(item => item.idNum === value.idNum)} />
                                         </ListItemIcon>
-                                        <ListItemText id={value.idNum} primary={`${value.taskName}`} />
+                                        <ListItemText id={value.idNum.toString()} primary={value.taskName}
+                                                      sx={{ '& .MuiTypography-root': { fontSize: '13px' } }}  />
                                     </ListItem>
                                 ))
                                 : <ListItem><ListItemText primary="정보가 존재하지 않습니다" /></ListItem>
@@ -318,12 +322,17 @@ function GroupTable({open, onClose}: GroupTableProps) {
 
 
     // expanded 배열을 관리하는 함수 추가
-    const handleNodeToggle = (
-        event: React.ChangeEvent<{}>,
-        nodeIds: string[]
-    ) => {
-        setExpanded(nodeIds); // 펼쳐진 노드 ID 목록 업데이트
+    const handleNodeToggle = (event: React.ChangeEvent<{}>, nodeIds: string[]) => {
+        const latestNodeId = nodeIds[0];
+
+        // 프로젝트의 ID만 저장합니다. (다른 노드들은 무시)
+        if (project.some(proj => proj.idNum.toString() === latestNodeId)) {
+            setExpanded(['root', latestNodeId]);
+        } else {
+            setExpanded(['root']);
+        }
     };
+
 
     // 새 그룹을 추가하는 함수
     const addNewGroup = (projectId: number) => {
@@ -382,7 +391,7 @@ function GroupTable({open, onClose}: GroupTableProps) {
                 bgcolor: 'background.paper',
                 boxShadow: 24,
                 p: 4,
-                minWidth: 800,
+                minWidth: 1000,
                 minHeight: '50vh',
                 maxHeight: '90vh',
                 overflowY: 'auto',
@@ -423,7 +432,10 @@ function GroupTable({open, onClose}: GroupTableProps) {
                                         key={proj.idNum}
                                         nodeId={proj.idNum.toString()}
                                         label={<Typography style={{ fontSize: '14px' }}>{proj.projectName}</Typography>}
-                                        onClick={() => setProjectsIdNum(proj.idNum)}
+                                        onClick={() => {
+                                            setProjectsIdNum(proj.idNum)
+                                            setTaskGroupIdNum(0)
+                                        }}
                                     >
                                         {renderTaskGroupsForProject(proj.idNum)}
                                     </StyledTreeItem>
