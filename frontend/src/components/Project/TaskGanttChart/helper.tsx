@@ -8,6 +8,12 @@ type ProjectResponse = {
     status: string;
 }
 
+type TaskGroupResponse = {
+    idNum: number;
+    taskGroupName: string;
+    projectsIdNum: number;
+}
+
 type TaskResponse = {
     idNum: number;
     taskName: string;
@@ -15,38 +21,41 @@ type TaskResponse = {
     endDate: string;
     status: string;
     projectName: string;
+    taskGroupIdNum: number;
 }
 
 export function convertToGanttTasks(
     projectResponses: ProjectResponse[],
+    taskGroupResponses: TaskGroupResponse[],
     taskResponses: TaskResponse[]
 ): Task[] {
     let combinedTasks: Task[] = [];
     let displayOrderCounter = 1;
 
-    console.log(taskResponses)
+    // Task Group Response를 1차원 배열로 변환
+    const flattenedTaskGroupResponses = taskGroupResponses.flat();
 
     projectResponses.forEach((project) => {
+        // Project를 기준으로 Task Group과 Task를 분리
         const projectTask: Task = {
             start: new Date(project.startDate),
             end: new Date(project.endDate),
             name: project.projectName,
             id: "Project" + project.idNum,
-            progress: 20, // 달성률(임의값으로 설정) TODO : 달성률 계산
+            progress: 20, // TODO: Calculate progress
             type: "project",
             hideChildren: false,
             displayOrder: displayOrderCounter++,
         };
         combinedTasks.push(projectTask);
 
-        const tasksForProject = taskResponses.filter(
-            (task) => task.projectName === project.projectName // Map task.idNum to the appropriate project ID
-        );
-        tasksForProject.sort((a, b) =>
-            new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-        );
+        // Project에 속한 task와 taskGroup들만 추출
+        const tasksForProject = taskResponses.filter(task => task.projectName === project.projectName);
+        const taskGroupsForProject = flattenedTaskGroupResponses.filter(taskGroup => taskGroup.projectsIdNum === project.idNum);
 
-        tasksForProject.forEach((task, i) => {
+        // Task Group이 없는 Task를 분리
+        const tasksWithoutTaskGroup = tasksForProject.filter(task => task.taskGroupIdNum === null);
+        tasksWithoutTaskGroup.forEach((task) => {
             const taskItem: Task = {
                 start: new Date(task.startDate),
                 end: new Date(task.endDate),
@@ -59,10 +68,51 @@ export function convertToGanttTasks(
             };
             combinedTasks.push(taskItem);
         });
+
+        // Task Group이 있는 Task를 분리
+        const tasksWithTaskGroup = tasksForProject.filter(task => task.taskGroupIdNum !== null);
+
+        taskGroupsForProject.forEach((taskGroup) => {
+            // Task Group에 속한 task들만 추출
+            const tasksForTaskGroup = tasksWithTaskGroup.filter(task => task.taskGroupIdNum === taskGroup.idNum);
+
+            if (tasksForTaskGroup.length > 0) {
+                // Task Group에 속한 task들중 시작일이 가장 빠른 값 하나만 추출
+                tasksForTaskGroup.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+                // Process Task Group as a 'task'
+                const taskGroupItem: Task = {
+                    start: new Date(tasksForTaskGroup[0].startDate),
+                    end: new Date(tasksForTaskGroup[0].startDate),
+                    name: taskGroup.taskGroupName,
+                    id: "TaskGroup" + taskGroup.idNum,
+                    progress: 100, // Set progress as needed
+                    type: "task",
+                    project: "Project" + project.idNum,
+                    displayOrder: displayOrderCounter++,
+                };
+                combinedTasks.push(taskGroupItem);
+
+                // Process Tasks
+                tasksForTaskGroup.forEach((task) => {
+                    const taskItem: Task = {
+                        start: new Date(task.startDate),
+                        end: new Date(task.endDate),
+                        name: task.taskName,
+                        id: "Task" + task.idNum,
+                        progress: 100, // Set progress as needed
+                        type: "task",
+                        project: "Project" + project.idNum,
+                        displayOrder: displayOrderCounter++,
+                    };
+                    combinedTasks.push(taskItem);
+                });
+            }
+        });
     });
+
     return combinedTasks;
 }
-
 
 export function initTasks() {
     const currentDate = new Date();
@@ -76,87 +126,7 @@ export function initTasks() {
             type: "project",
             hideChildren: false,
             displayOrder: 1,
-        },
-        {
-            start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
-            end: new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                2,
-                12,
-                28
-            ),
-            name: "Idea",
-            id: "Task 0",
-            progress: 45,
-            type: "task",
-            project: "ProjectSample",
-            displayOrder: 2,
-        },
-        {
-            start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 2),
-            end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4, 0, 0),
-            name: "Research",
-            id: "Task 1",
-            progress: 25,
-            dependencies: ["Task 0"],
-            type: "task",
-            project: "ProjectSample",
-            displayOrder: 3,
-        },
-        {
-            start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 4),
-            end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8, 0, 0),
-            name: "Discussion with team",
-            id: "Task 2",
-            progress: 10,
-            dependencies: ["Task 1"],
-            type: "task",
-            project: "ProjectSample",
-            displayOrder: 4,
-        },
-        {
-            start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-            end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 9, 0, 0),
-            name: "Developing",
-            id: "Task 3",
-            progress: 2,
-            dependencies: ["Task 2"],
-            type: "task",
-            project: "ProjectSample",
-            displayOrder: 5,
-        },
-        {
-            start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-            end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 10),
-            name: "Review",
-            id: "Task 4",
-            type: "task",
-            progress: 70,
-            dependencies: ["Task 1"],
-            project: "ProjectSample",
-            displayOrder: 6,
-        },
-        {
-            start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
-            end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15),
-            name: "Release",
-            id: "Task 6",
-            progress: currentDate.getMonth(),
-            type: "milestone",
-            dependencies: ["Task 4"],
-            project: "ProjectSample",
-            displayOrder: 7,
-        },
-        {
-            start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 18),
-            end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 19),
-            name: "Party Time",
-            id: "Task 9",
-            progress: 0,
-            isDisabled: true,
-            type: "task",
-        },
+        }
     ];
     return tasks;
 }

@@ -119,7 +119,7 @@ public class TasksController {
 
     @Operation(summary = "업무 그룹 업무 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
-    @PutMapping("/group")
+    @PutMapping("/group/task")
     public ResponseEntity<String> putTasksGroupTask (
             @RequestBody Long taskIdNum
     ) {

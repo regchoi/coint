@@ -175,7 +175,7 @@ function SelectAllTransferList({projectsIdNum, taskGroupIdNum}: TransferListProp
         // 요청이 성공하면 left, right state를 갱신
         leftChecked.forEach(async (task) => {
             try {
-                await axios.put(`/api/task/group`, task.idNum);
+                await axios.put(`/api/task/group/task`, task.idNum);
 
                 setRight(right.concat(leftChecked));
                 setLeft(left.filter(value => !leftChecked.some(item => item.idNum === value.idNum)));

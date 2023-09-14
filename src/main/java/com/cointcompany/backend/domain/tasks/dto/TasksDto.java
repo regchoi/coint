@@ -117,6 +117,8 @@ public class TasksDto {
 
         private String projectName;
 
+        private Long taskGroupIdNum;
+
         public GetTaskRes (Tasks tasks) {
 
             this.idNum = tasks.getIdNum();
@@ -128,6 +130,11 @@ public class TasksDto {
             this.regDate = String.valueOf(tasks.getRegDate());
             this.regUserid = String.valueOf(tasks.getRegUserid());
             this.projectName = tasks.getProjects().getProjectName();
+            if (tasks.getTaskGroup() != null) {
+                this.taskGroupIdNum = tasks.getTaskGroup().getIdNum();
+            } else {
+                this.taskGroupIdNum = null;
+            }
 
         }
     }

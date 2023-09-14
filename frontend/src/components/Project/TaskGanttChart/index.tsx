@@ -28,6 +28,12 @@ type ProjectResponse = {
     status: string;
 }
 
+type TaskGroupResponse = {
+    idNum: number;
+    taskGroupName: string;
+    projectsIdNum: number;
+}
+
 type TaskResponse = {
     idNum: number;
     taskName: string;
@@ -35,6 +41,7 @@ type TaskResponse = {
     endDate: string;
     status: string;
     projectName: string;
+    taskGroupIdNum: number;
 }
 
 const TaskGanttChart = () => {
@@ -47,6 +54,7 @@ const TaskGanttChart = () => {
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
+    const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
     const [taskResponses, setTaskResponses] = useState<TaskResponse[]>([]);
     const [isExcelModalOpen, setExcelModalOpen] = useState(false);
 
@@ -66,10 +74,18 @@ const TaskGanttChart = () => {
                 const projectResponse = await axios.get("/api/project");
                 setProjectResponses(projectResponse.data);
 
+                // 조회된 project들의 idNum을 통해 taskGroup 조회
+                // 반복문으로 조회하는 것보다 한번에 조회하는 것이 더 효율적이지만, 현재는 반복문으로 조회
+                const taskGroupResponses = await Promise.all(projectResponse.data.map(async (project: ProjectResponse) => {
+                    const taskGroupResponse = await axios.get(`/api/task/group/${project.idNum}`);
+                    return taskGroupResponse.data;
+                }));
+                setTaskGroupResponses(taskGroupResponses);
+
                 const taskResponse = await axios.get("/api/task");
                 setTaskResponses(taskResponse.data);
 
-                const ganttTasks = convertToGanttTasks(projectResponse.data, taskResponse.data);
+                const ganttTasks = convertToGanttTasks(projectResponse.data, taskGroupResponses, taskResponse.data);
                 setTasks(ganttTasks);
             } catch (error) {
                 setErrorModalOpen(true)
@@ -168,7 +184,7 @@ const TaskGanttChart = () => {
 
         // 검색어가 비어 있으면 전체 데이터를 다시 조회
         if (newValue === "") {
-            const ganttTasks = convertToGanttTasks(projectResponses, taskResponses);
+            const ganttTasks = convertToGanttTasks(projectResponses, taskGroupResponses , taskResponses);
             setTasks(ganttTasks);
             return;
         }
@@ -178,8 +194,10 @@ const TaskGanttChart = () => {
             setSelectedProjectId(selectedProject.idNum);
             const projectId = selectedProject.idNum;
             const filteredProjects = projectResponses.filter(pr => pr.idNum === projectId);
+            const flattenedTaskGroups = taskGroupResponses.flat();
+            const filteredTaskGroups = flattenedTaskGroups.filter(tgr => tgr.projectsIdNum === projectId);
             const filteredTasks = taskResponses.filter(tr => tr.projectName === newValue);
-            const ganttTasks = convertToGanttTasks(filteredProjects, filteredTasks);
+            const ganttTasks = convertToGanttTasks(filteredProjects, filteredTaskGroups, filteredTasks);
             setTasks(ganttTasks);
         }
     };
