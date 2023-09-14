@@ -277,65 +277,113 @@ const Kanban: React.FC = () => {
                     <div style={{ marginTop: '10px' }}>
                         <Grid container spacing={2}>
                             {
-                                projectResponses.map((project) => (
-                                    <Grid item xs={12} sm={6} md={3} key={project.idNum}>
-                                        <MUICard
-                                            style={{ marginBottom: '10px', cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setSearchTerm(project.projectName);
-                                                setSelectedProjectIdNum(project.idNum);
-                                                setProjectListOpen(false);
-                                            }}
-                                        >
-                                            <CardContent>
-                                                <Typography variant="h6" gutterBottom>
-                                                    {project.projectName}
-                                                </Typography>
+                                projectResponses.map((project) => {
+                                    // TODO: 프로젝트별 업무, TODO, WORKING, WAITING, DONE 개수 조회
+                                    // projectName과 동일한 task들을 추출
+                                    const tasks = taskResponses.filter(task => task.projectName === project.projectName);
+                                    const todoTasks = tasks.filter(task => task.status === "TODO" || null);
+                                    const workingTasks = tasks.filter(task => task.status === "WORKING");
+                                    const waitingTasks = tasks.filter(task => task.status === "WAITING");
+                                    const doneTasks = tasks.filter(task => task.status === "DONE");
 
-                                                <Typography variant="subtitle1">
-                                                    {project.startDate} ~ {project.endDate}
-                                                </Typography>
-
-                                                <Box display="flex" alignItems="center" mt={1}>
-                                                    <Chip
-                                                        label={project.status}
-                                                        color={project.status === "진행중" ? "primary" : project.status === "완료" ? "secondary" : "default"}
-                                                        size="small"
-                                                    />
-                                                    <Typography variant="body2" style={{marginLeft: '8px', display: 'inline-block'}}>
-                                                        {project.status}
+                                    return (
+                                        <Grid item xs={12} sm={6} md={3} key={project.idNum}>
+                                            <MUICard
+                                                style={{ marginBottom: '10px', cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setSearchTerm(project.projectName);
+                                                    setSelectedProjectIdNum(project.idNum);
+                                                    setProjectListOpen(false);
+                                                }}
+                                            >
+                                                <CardContent>
+                                                    <Typography variant="h6" gutterBottom>
+                                                        {project.projectName}
                                                     </Typography>
-                                                </Box>
 
-                                                <Typography variant="body2" mt={1}>
-                                                    작업인원: {"몇"}명
-                                                </Typography>
+                                                    <Typography variant="subtitle1">
+                                                        {project.startDate} ~ {project.endDate}
+                                                    </Typography>
 
-                                                <Divider style={{margin: '10px 0'}}/>
+                                                    <Box display="flex" alignItems="center" mt={1}>
+                                                        <Chip
+                                                            label={project.status}
+                                                            color={project.status === "진행중" ? "primary" : project.status === "완료" ? "secondary" : "default"}
+                                                            size="small"
+                                                        />
+                                                        <Typography variant="body2" style={{ marginLeft: '8px', display: 'inline-block' }}>
+                                                            {project.status}
+                                                        </Typography>
+                                                    </Box>
 
-                                                <Typography variant="body2">
-                                                    업무: {"몇"}개
-                                                </Typography>
+                                                    <Typography variant="body2" mt={1}>
+                                                        작업인원: {"몇"}명
+                                                    </Typography>
 
-                                                <Typography variant="body2">
-                                                    TODO: {"몇"}개
-                                                </Typography>
+                                                    <Divider style={{ margin: '10px 0' }} />
+                                                    <Typography variant="body2">
+                                                        업무: {tasks.length}개
+                                                    </Typography>
 
-                                                <Typography variant="body2">
-                                                    WORKING: {"몇"}개
-                                                </Typography>
+                                                    <Box display="flex" alignItems="center" mt={1}>
+                                                        <Chip
+                                                            label="••"
+                                                            color="default"
+                                                            size="small"
+                                                            style={{
+                                                                backgroundColor: "rgb(101, 173, 245, 0.5)",
+                                                                color: "transparent"
+                                                            }}
+                                                        />
+                                                        <Typography variant="body2" style={{ marginLeft: '8px' }}>
+                                                            TODO: {todoTasks.length}개
+                                                        </Typography>
+                                                    </Box>
 
-                                                <Typography variant="body2">
-                                                    WAITING: {"몇"}개
-                                                </Typography>
+                                                    <Box display="flex" alignItems="center" mt={1}>
+                                                        <Chip
+                                                            label="••"
+                                                            color="default"
+                                                            size="small"
+                                                            style={{ backgroundColor: "rgb(108, 181, 111, 0.5)",
+                                                                color: "transparent" }}
+                                                        />
+                                                        <Typography variant="body2" style={{ marginLeft: '8px' }}>
+                                                            WORKING: {workingTasks.length}개
+                                                        </Typography>
+                                                    </Box>
 
-                                                <Typography variant="body2">
-                                                    DONE: {"몇"}개
-                                                </Typography>
-                                            </CardContent>
-                                        </MUICard>
-                                    </Grid>
-                                ))
+                                                    <Box display="flex" alignItems="center" mt={1}>
+                                                        <Chip
+                                                            label="••"
+                                                            color="default"
+                                                            size="small"
+                                                            style={{ backgroundColor: "rgb(234, 128, 56, 0.5)",
+                                                                color: "transparent" }}
+                                                        />
+                                                        <Typography variant="body2" style={{ marginLeft: '8px' }}>
+                                                            WAITING: {waitingTasks.length}개
+                                                        </Typography>
+                                                    </Box>
+
+                                                    <Box display="flex" alignItems="center" mt={1}>
+                                                        <Chip
+                                                            label="••"
+                                                            color="default"
+                                                            size="small"
+                                                            style={{ backgroundColor: "rgb(50, 65, 122, 0.5)",
+                                                                color: "transparent" }}
+                                                        />
+                                                        <Typography variant="body2" style={{ marginLeft: '8px' }}>
+                                                            DONE: {doneTasks.length}개
+                                                        </Typography>
+                                                    </Box>
+
+                                                </CardContent>
+                                            </MUICard>
+                                        </Grid>
+                                    );
+                                })
                             }
                         </Grid>
                     </div>
