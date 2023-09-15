@@ -20,6 +20,7 @@ import {green, yellow, red, blue} from '@mui/material/colors';
 import axios from "../../../redux/axiosConfig";
 import ErrorModal from "../../common/ErrorModal";
 import "../../../assets/css/common/kanban-transition.css"
+import CloseIcon from "@mui/icons-material/Close";
 
 const ItemType = {
     CARD: 'card',
@@ -104,10 +105,39 @@ const Card: React.FC<TaskResponse & CardProps> = ({
                      p: 2,
                      border: 'none',
                      backgroundColor: 'rgb(255, 255, 255, 0.5)',
-                     boxShadow: 3
+                     boxShadow: 3,
+                     position: 'relative'
                  }}
         >
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom
+                        component={"div"}
+                        sx={{
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>
+                <Chip
+                    label={status}
+                    sx={{
+                        backgroundColor: status === 'TODO' ? red[400] : status === 'WORKING' ? yellow[400] : status === 'WAITING' ? blue[400] : green[400],
+                        marginRight: 'auto',
+                        width: '40px',
+                        height: '10px',
+                        fontSize: '0.8rem',
+                        padding: '2px 12px'
+                    }}
+                />
+                <span>
+                    &nbsp;
+                </span>
+            </Typography>
+            <Typography variant="h6" gutterBottom
+                        sx={{
+                                fontSize: '18px',
+                                fontWeight: 'bold'
+                            }}>
                 {taskName}
             </Typography>
             <Typography variant="subtitle1" color="textSecondary" gutterBottom>
@@ -124,14 +154,6 @@ const Card: React.FC<TaskResponse & CardProps> = ({
             <Typography variant="body2">
                 {startDate} ~ {endDate}
             </Typography>
-            <Chip
-                label={status}
-                style={{
-                    backgroundColor: status === 'TODO' ? red[400] : status === 'WORKING' ? yellow[400] : status === 'WAITING' ? blue[400] : green[400],
-                    color: 'white',
-                    marginTop: '8px'
-                }}
-            />
         </MUICard>
     );
 };
@@ -297,6 +319,30 @@ const Kanban: React.FC = () => {
                                                 }}
                                             >
                                                 <CardContent>
+                                                    <Typography variant="h6" gutterBottom
+                                                                component={"div"}
+                                                                sx={{
+                                                                    fontSize: '18px',
+                                                                    fontWeight: 'bold',
+                                                                    display: 'flex',
+                                                                    justifyContent: 'center',
+                                                                    alignItems: 'center'
+                                                                }}>
+                                                        <Chip
+                                                            label={project.status}
+                                                            sx={{
+                                                                backgroundColor: project.status === 'TODO' ? red[400] : project.status === 'WORKING' ? yellow[400] : project.status === 'WAITING' ? blue[400] : green[400],
+                                                                marginRight: 'auto',
+                                                                width: '40px',
+                                                                height: '10px',
+                                                                fontSize: '0.8rem',
+                                                                padding: '2px 12px'
+                                                            }}
+                                                        />
+                                                        <span>
+                                                        &nbsp;
+                                                    </span>
+                                                    </Typography>
                                                     <Typography variant="h6" gutterBottom>
                                                         {project.projectName}
                                                     </Typography>
@@ -304,17 +350,6 @@ const Kanban: React.FC = () => {
                                                     <Typography variant="subtitle1">
                                                         {project.startDate} ~ {project.endDate}
                                                     </Typography>
-
-                                                    <Box display="flex" alignItems="center" mt={1}>
-                                                        <Chip
-                                                            label={project.status}
-                                                            color={project.status === "진행중" ? "primary" : project.status === "완료" ? "secondary" : "default"}
-                                                            size="small"
-                                                        />
-                                                        <Typography variant="body2" style={{ marginLeft: '8px', display: 'inline-block' }}>
-                                                            {project.status}
-                                                        </Typography>
-                                                    </Box>
 
                                                     <Typography variant="body2" mt={1}>
                                                         작업인원: {"몇"}명

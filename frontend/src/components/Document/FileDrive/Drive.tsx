@@ -740,7 +740,7 @@ const Drive: React.FC = () => {
                                                     }}
                                                 />
                                                 <ListItemSecondaryAction>
-                                                    <StyledMenu>
+                                                    <StyledMenu open={false}>
                                                         &nbsp;
                                                     </StyledMenu>
                                                 </ListItemSecondaryAction>
