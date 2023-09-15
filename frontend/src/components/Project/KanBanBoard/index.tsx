@@ -441,7 +441,6 @@ const Kanban: React.FC = () => {
                                 bgColor = 'rgb(234, 128, 56, 0.1)';
                                 break;
                             case 'DONE':
-                                // WAITING - FEEDBACK
                                 bgColor = 'rgb(50, 65, 122, 0.1)';
                                 break;
                             // case 'WAITING':

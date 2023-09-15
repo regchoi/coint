@@ -31,6 +31,7 @@ import FileDrive from "./components/Document/FileDrive";
 import "./assets/css/common/chart.css";
 import {getRole} from "./components/common/tokenUtils";
 import KanBanBoard from "./components/Project/KanBanBoard";
+import Calendar from "./components/Project/Calendar";
 
 const ROUTES = {
     LOGIN: '/login',
@@ -44,6 +45,7 @@ const ROUTES = {
     PROJECTTASKTABLE: '/project/task',
     TASKGANTTCHART: '/project/task/ganttchart',
     KANBANBOARD: '/project/task/kanbanboard',
+    CALENDAR: '/project/task/calendar',
 
     // Document
     FILEDRIVE: '/document/drive',
@@ -88,6 +90,7 @@ const App: React.FC = () => {
                         <Route path={ROUTES.PROJECTTASKTABLE} element={<ProjectTaskTable/>}/>
                         <Route path={ROUTES.TASKGANTTCHART} element={<TaskGanttChart/>}/>
                         <Route path={ROUTES.KANBANBOARD} element={<KanBanBoard/>}/>
+                        <Route path={ROUTES.CALENDAR} element={<Calendar />} />
 
                         <Route path={ROUTES.FILEDRIVE} element={<FileDrive/>}/>
 
