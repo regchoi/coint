@@ -187,7 +187,7 @@ public class TasksController {
 
     @Operation(summary = "업무 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
-    @PutMapping("/{pojectId}")
+    @PutMapping("/{projectId}")
     public ResponseEntity<String> putTasks (
             @PathVariable Long projectId,
             @RequestBody TasksDto.PostTaskReq postTaskReq

@@ -1,7 +1,6 @@
 package com.cointcompany.backend.domain.projects.dto;
 
 import com.cointcompany.backend.domain.projects.entity.Projects;
-import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
