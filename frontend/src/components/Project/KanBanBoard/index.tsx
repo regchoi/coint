@@ -48,6 +48,11 @@ type ProjectResponse = {
     status: string;
 }
 
+type ProjectUserNum = {
+    projectIdNum: number;
+    projectUserNum: number;
+}
+
 type TaskGroupResponse = {
     idNum: number;
     taskGroupName: string;
@@ -75,7 +80,7 @@ const Card: React.FC<TaskResponse & CardProps> = ({
                                                       taskGroupIdNum,
                                                       columnIndex,
                                                       index,
-                                                      moveCard
+                                                      moveCard,
                                                   }) => {
     const ref = useRef<HTMLDivElement>(null);
 
@@ -163,6 +168,7 @@ const Kanban: React.FC = () => {
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
     const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
     const [taskResponses, setTaskResponses] = useState<TaskResponse[]>([]);
+    const [projectUserNum, setProjectUserNum] = useState<ProjectUserNum[]>([]);
     const [options, setOptions] = useState<ProjectSelectResponse[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedProjectIdNum, setSelectedProjectIdNum] = useState<number>(0);
@@ -223,13 +229,21 @@ const Kanban: React.FC = () => {
                 const projectResponse = await axios.get("/api/project");
                 setProjectResponses(projectResponse.data);
 
-                // 조회된 project들의 idNum을 통해 taskGroup 조회
-                // 반복문으로 조회하는 것보다 한번에 조회하는 것이 더 효율적이지만, 현재는 반복문으로 조회
+                // 조회된 project들의 idNum을 통해 taskGroup과 projectUserNum을 조회
                 const taskGroupResponses = await Promise.all(projectResponse.data.map(async (project: ProjectResponse) => {
                     const taskGroupResponse = await axios.get(`/api/task/group/${project.idNum}`);
                     return taskGroupResponse.data;
                 }));
+
                 setTaskGroupResponses(taskGroupResponses);
+
+                const projectUserNum: ProjectUserNum[] = await Promise.all(projectResponse.data.map(async (project: ProjectResponse) => {
+                    const projectUserNum = await axios.get(`/api/project/user/${project.idNum}`);
+                    return { projectIdNum: project.idNum, projectUserNum: projectUserNum.data.length };
+                }));
+
+                setProjectUserNum(projectUserNum);
+
 
                 const taskResponse = await axios.get("/api/task");
                 setTaskResponses(taskResponse.data);
@@ -303,6 +317,7 @@ const Kanban: React.FC = () => {
                                     // TODO: 프로젝트별 업무, TODO, WORKING, WAITING, DONE 개수 조회
                                     // projectName과 동일한 task들을 추출
                                     const tasks = taskResponses.filter(task => task.projectName === project.projectName);
+                                    const projectNum = projectUserNum.find(projectUserNum => projectUserNum.projectIdNum === project.idNum)?.projectUserNum || 0;
                                     const todoTasks = tasks.filter(task => task.status === "TODO" || null);
                                     const workingTasks = tasks.filter(task => task.status === "WORKING");
                                     const waitingTasks = tasks.filter(task => task.status === "WAITING");
@@ -352,7 +367,7 @@ const Kanban: React.FC = () => {
                                                     </Typography>
 
                                                     <Typography variant="body2" mt={1}>
-                                                        작업인원: {"몇"}명
+                                                        작업인원: {projectNum}명
                                                     </Typography>
 
                                                     <Divider style={{ margin: '10px 0' }} />
@@ -495,7 +510,8 @@ const Kanban: React.FC = () => {
                                                 tasksForStatus.map((task, index) => (
                                                     <Card key={task.idNum} {...task}
                                                           columnIndex={COLUMN_STATUSES.indexOf(status)} index={index}
-                                                          moveCard={moveCard}/>
+                                                          moveCard={moveCard}
+                                                    />
                                                 ))
                                             )
                                         }
