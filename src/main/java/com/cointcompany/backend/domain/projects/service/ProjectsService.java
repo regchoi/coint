@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -161,16 +162,20 @@ public class ProjectsService {
         List<ProjectsDto.ProjectUserDto> projectUserDtoList = new ArrayList<>();
 
         for (ProjectUser projectUser : projectUserList) {
+            ProjectRoles projectRole = projectUser.getProjectRole();
+            Integer roleLevel = (projectRole != null) ? projectRole.getRoleLevel() : null;
+
             ProjectsDto.ProjectUserDto projectUserDto = new ProjectsDto.ProjectUserDto(
                     projectUser.getProjects().getIdNum(),
                     projectUser.getUsers().getIdNum(),
-                    projectUser.getProjectRole().getRoleLevel()
+                    roleLevel
             );
             projectUserDtoList.add(projectUserDto);
         }
 
         return projectUserDtoList;
     }
+
 
     @Transactional
     public void modifyProjects (Projects getProjectRes) {

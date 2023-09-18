@@ -237,6 +237,7 @@ const Kanban: React.FC = () => {
 
                 setTaskGroupResponses(taskGroupResponses);
 
+                // TODO: projectIdNum 예외처리
                 const projectUserNum: ProjectUserNum[] = await Promise.all(projectResponse.data.map(async (project: ProjectResponse) => {
                     const projectUserNum = await axios.get(`/api/project/user/${project.idNum}`);
                     return { projectIdNum: project.idNum, projectUserNum: projectUserNum.data.length };
