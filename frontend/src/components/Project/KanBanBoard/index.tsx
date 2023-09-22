@@ -70,6 +70,81 @@ type TaskResponse = {
     taskGroupIdNum: number;
 }
 
+interface ColumnProps {
+    status: string;
+    tasks: TaskResponse[];
+    moveCard: (fromColumn: number, fromIndex: number, toColumn: number, toIndex: number) => void;
+    searchTerm: string;
+}
+
+const Column: React.FC<ColumnProps> = ({ status, tasks, moveCard, searchTerm }) => {
+    let bgColor = 'transparent';
+
+    switch (status) {
+        case 'TODO':
+            bgColor = 'rgb(101, 173, 245, 0.1)';
+            break;
+        case 'WORKING':
+            bgColor = 'rgb(108, 181, 111, 0.1)';
+            break;
+        case 'WAITING':
+            bgColor = 'rgb(234, 128, 56, 0.1)';
+            break;
+        case 'DONE':
+            bgColor = 'rgb(50, 65, 122, 0.1)';
+            break;
+        default:
+            break;
+    }
+
+    let tasksForStatus: typeof tasks = [];
+    if (searchTerm) {
+        const tasksForProject = tasks.filter(task => task.projectName === searchTerm);
+        tasksForStatus = tasksForProject.filter(task => task.status === status);
+        if (status === 'TODO') {
+            tasksForStatus.push(...tasksForProject.filter(task => task.status === null));
+        }
+    } else {
+        tasksForStatus = tasks.filter(task => task.status === status);
+        if (status === 'TODO') {
+            tasksForStatus.push(...tasks.filter(task => task.status === null));
+        }
+    }
+
+    const [, dropRef] = useDrop({
+        accept: ItemType.CARD,
+        drop: (item: { columnIndex: number; index: number }) => {
+            const fromColumnIndex = item.columnIndex;
+            const fromIndex = item.index;
+            const toColumnIndex = COLUMN_STATUSES.indexOf(status);
+            const toIndex = tasksForStatus.length;
+
+            moveCard(fromColumnIndex, fromIndex, toColumnIndex, toIndex);
+        }
+    });
+
+    return (
+        <Grid ref={dropRef} item xs={3} key={status}
+              sx={{ width: '100%', height: '100%' }}>
+            <Box component={Paper} elevation={3}
+                 sx={{ m: 1, p: 1, borderRadius: '6px', backgroundColor: bgColor, textAlign: 'center', minHeight: '200px' }}>
+                <Typography variant="h6">{status}</Typography>
+                <Divider sx={{ my: 1 }} />
+                {tasksForStatus.length === 0 ? (
+                    <Typography variant="body1">업무가 없습니다.</Typography>
+                ) : (
+                    tasksForStatus.map((task, index) => (
+                        <Card key={task.idNum} {...task}
+                              columnIndex={COLUMN_STATUSES.indexOf(status)} index={index}
+                              moveCard={moveCard}
+                        />
+                    ))
+                )}
+            </Box>
+        </Grid>
+    );
+}
+
 const Card: React.FC<TaskResponse & CardProps> = ({
                                                       taskName,
                                                       description,
@@ -82,28 +157,17 @@ const Card: React.FC<TaskResponse & CardProps> = ({
                                                       index,
                                                       moveCard,
                                                   }) => {
-    const ref = useRef<HTMLDivElement>(null);
+    const cardRef = useRef<HTMLDivElement>(null);
 
     const [, drag] = useDrag({
         type: ItemType.CARD,
         item: { columnIndex, index },
     });
 
-    const [, drop] = useDrop({
-        accept: ItemType.CARD,
-        hover: (draggedItem: { columnIndex: number; index: number }) => {
-            if (draggedItem.columnIndex === columnIndex && draggedItem.index === index) return;
-
-            moveCard(draggedItem.columnIndex, draggedItem.index, columnIndex, index);
-            draggedItem.index = index;
-            draggedItem.columnIndex = columnIndex;
-        },
-    });
-
-    drag(drop(ref));
+    drag(cardRef);
 
     return (
-        <MUICard ref={ref}
+        <MUICard ref={cardRef}
                  sx={{
                      m: 1,
                      mb: 2,
@@ -189,19 +253,29 @@ const Kanban: React.FC = () => {
         toColumn: number,
         toIndex: number
     ) => {
-        const updatedTasks = [...taskResponses];
-        const movedTask = updatedTasks.find((task, index) =>
-            task.status === COLUMN_STATUSES[fromColumn] && index === fromIndex
-        );
+        // drag된 카드 정보
+        const fromCard = columns[fromColumn][fromIndex];
 
-        if (movedTask) {
-            // 작업의 상태를 업데이트합니다.
-            movedTask.status = COLUMN_STATUSES[toColumn];
+        // drag된 카드의 taskIdNum
+        const fromTaskIdNum = taskResponses.find(task => task.taskName === fromCard)?.idNum || 0;
 
-            // 상태 업데이트 후 상태를 바탕으로 배열을 다시 정렬할 수 있습니다.
-            // (선택사항) 예를 들어, 상태 업데이트 후 `setTaskResponses(updatedTasks.sort(...))`와 같이 수행할 수 있습니다.
-            setTaskResponses(updatedTasks);
-        }
+        // drag된 카드의 taskGroupNum
+        const fromTaskGroupNum = taskResponses.find(task => task.taskName === fromCard)?.taskGroupIdNum || 0;
+
+        // drag된 카드의 status
+        const fromStatus = taskResponses.find(task => task.taskName === fromCard)?.status || "";
+
+        // drag된 카드의 index
+        const fromTaskIndex = taskResponses.findIndex(task => task.taskName === fromCard);
+
+        // drop된 카드의 status
+        const toStatus = COLUMN_STATUSES[toColumn];
+
+        console.log("fromTaskIdNum: " + fromTaskIdNum);
+        console.log("fromTaskIndex: " + fromTaskIndex);
+        console.log("fromTaskGroupNum: " + fromTaskGroupNum);
+        console.log("fromStatus: " + fromStatus);
+        console.log("toStatus: " + toStatus);
     };
 
     const handleInputChange = (
@@ -442,83 +516,9 @@ const Kanban: React.FC = () => {
 
                 <DndProvider backend={HTML5Backend}>
                     <Box sx={{ display: 'flex', width: '100%', backgroundColor: '#fff' }}>
-                        {COLUMN_STATUSES.map(status => {
-                            let bgColor = 'transparent';
-
-                            switch (status) {
-                            case 'TODO':
-                                bgColor = 'rgb(101, 173, 245, 0.1)';
-                                break;
-                            case 'WORKING':
-                                bgColor = 'rgb(108, 181, 111, 0.1)';
-                                break;
-                            case 'WAITING':
-                                // WAITING - FEEDBACK
-                                bgColor = 'rgb(234, 128, 56, 0.1)';
-                                break;
-                            case 'DONE':
-                                bgColor = 'rgb(50, 65, 122, 0.1)';
-                                break;
-                            // case 'WAITING':
-                            //     // WAITING - 보류
-                            //     bgColor = 'rgb(174, 174, 174, 0.1)';
-                            //     break;
-                            // 여기서 다른 상태에 따른 색상도 추가할 수 있습니다.
-                        }
-                            // 선택된 프로젝트에 속한 업무들을 조회
-                            let tasksForStatus: typeof taskResponses = [];
-
-                            if (searchTerm) {
-                                const tasksForProject = taskResponses.filter(task => task.projectName === searchTerm);
-                                tasksForStatus = tasksForProject.filter(task => task.status === status);
-                                if (status === 'TODO') {
-                                    tasksForStatus.push(...tasksForProject.filter(task => task.status === null));
-                                }
-                            } else {
-                                tasksForStatus = taskResponses.filter(task => task.status === status);
-                                if (status === 'TODO') {
-                                    tasksForStatus.push(...taskResponses.filter(task => task.status === null));
-                                }
-                            }
-
-                            return (
-                            <Grid item xs={3} key={status}
-                            sx={{
-                                width: '100%',
-                                height: '100%',
-                            }}
-                            >
-                                <Box component={Paper} elevation={3}
-                                     sx={{
-                                         m: 1,
-                                         p: 1,
-                                         borderRadius: '6px',
-                                         backgroundColor: bgColor,
-                                         textAlign: 'center',
-                                         minHeight: '200px'
-                                     }}>
-                                    <Typography variant="h6">{status}</Typography>
-                                        <Divider sx={{ my: 1 }} />
-                                        {
-                                            // // 업무 그룹에 속한 업무들을 조회
-                                            // const GroupedTasks = taskGroupResponses.filter(taskGroup => taskGroup.status === status);
-                                            // GroupedTasks.map((taskGroup, index) => (
-                                            //     <Card key={taskGroup.idNum} {...taskGroup} columnIndex={index} index={index} moveCard={moveCard} />
-                                            // ))
-                                            tasksForStatus.length === 0 ? (
-                                                <Typography variant="body1">업무가 없습니다.</Typography>
-                                            ) : (
-                                                tasksForStatus.map((task, index) => (
-                                                    <Card key={task.idNum} {...task}
-                                                          columnIndex={COLUMN_STATUSES.indexOf(status)} index={index}
-                                                          moveCard={moveCard}
-                                                    />
-                                                ))
-                                            )
-                                        }
-                                </Box>
-                            </Grid>
-                            )})}
+                        {COLUMN_STATUSES.map(status => (
+                            <Column status={status} tasks={taskResponses} moveCard={moveCard} searchTerm={searchTerm} />
+                        ))}
                     </Box>
                 </DndProvider>
             </Box>
