@@ -1,6 +1,8 @@
 package com.cointcompany.backend.domain.tasks.service;
 
 import com.cointcompany.backend.domain.departments.repository.DepartmentsRepository;
+import com.cointcompany.backend.domain.projects.entity.ProjectRoles;
+import com.cointcompany.backend.domain.projects.repository.ProjectRolesRepository;
 import com.cointcompany.backend.domain.projects.repository.ProjectsRepository;
 import com.cointcompany.backend.domain.tasks.dto.TasksDto;
 import com.cointcompany.backend.domain.tasks.entity.*;
@@ -16,6 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class TasksService {
 
     private final TasksRepository tasksRepository;
     private final ProjectsRepository projectsRepository;
+    private final ProjectRolesRepository projectRolesRepository;
     private final TaskUserRepository taskUserRepository;
     private final TaskDepartmentRepository taskDepartmentRepository;
     private final TaskTagRepository taskTagRepository;
@@ -98,15 +102,45 @@ public class TasksService {
     public String saveTaskUser (List<TasksDto.TaskUserDto> taskUserDtoList) {
 
         for (TasksDto.TaskUserDto taskUserDto : taskUserDtoList) {
+            // ProjectRoles 엔티티 조회
+            Long taskRoleIdLong = Long.valueOf(taskUserDto.getTaskRoleId());
+            ProjectRoles projectRole = projectRolesRepository.findById(taskRoleIdLong)
+                    .orElseThrow(() -> new IllegalArgumentException("ProjectRole not found with ID: " + taskRoleIdLong));
+
+            // 조회한 ProjectRoles 엔티티를 TaskUser 생성에 사용
             TaskUser taskUser = TaskUser.of(
-                    taskUserDto.getTaskRoleId(),
-                    tasksRepository.findById(taskUserDto.getTaskId()).orElseThrow(),
-                    usersRepository.findById(taskUserDto.getUserId()).orElseThrow()
+                    projectRole,
+                    tasksRepository.findById(taskUserDto.getTaskId()).orElseThrow(() -> new IllegalArgumentException("Task not found with ID: " + taskUserDto.getTaskId())),
+                    usersRepository.findById(taskUserDto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + taskUserDto.getUserId()))
             );
             taskUserRepository.save(taskUser);
         }
 
         return "SUCCESS";
+    }
+    @Transactional
+    public Integer getTaskUserLevel(Long userId, Long taskId) {
+        Optional<TaskUser> optionalTaskUser = taskUserRepository.findByUsers_IdNumAndTasks_IdNum(userId, taskId);
+
+        if (!optionalTaskUser.isPresent()) {
+            throw new IllegalArgumentException("주어진 사용자 및 작업에 대한 TaskUser를 찾을 수 없습니다.");
+        }
+
+        TaskUser taskUser = optionalTaskUser.get();
+
+        // getTaskRole이 null인지 검사
+        if (taskUser.getTaskRole() == null) {
+            // 보통 이런 경우는 없지만, 만약에 TaskUser의 TaskRole이 null이라면
+            // 평균적으로 level이 가장 낮은 4를 반환
+            return 4;
+        }
+
+        // getRoleLevel이 null인지 검사
+        if (taskUser.getTaskRole().getRoleLevel() == null) {
+            return 4;
+        }
+
+        return taskUser.getTaskRole().getRoleLevel();
     }
     @Transactional
     public String modifyTaskStatus (TasksDto.TaskStatus taskStatus) {

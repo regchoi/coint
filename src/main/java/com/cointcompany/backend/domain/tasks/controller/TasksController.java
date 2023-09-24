@@ -89,11 +89,10 @@ public class TasksController {
             @PathVariable Long taskId
     ) {
         UserDetailsImpl users = (UserDetailsImpl) authentication.getPrincipal();
+        log.info("User ID: " + users.getUserId() + ", Task ID: " + taskId);
+        Integer level = tasksService.getTaskUserLevel(users.getUserId(), taskId);
 
-        // TODO : 업무 사용자 권한 조회
-//        Integer level = tasksService.getTaskUserLevel(users.getUserId(), taskId);
-
-        return new ResponseEntity<>(1, HttpStatus.OK);
+        return new ResponseEntity<>(level, HttpStatus.OK);
     }
 
     @Operation(summary = "업무 태그 신규 등록")
