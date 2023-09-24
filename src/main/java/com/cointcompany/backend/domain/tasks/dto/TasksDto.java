@@ -186,5 +186,16 @@ public class TasksDto {
             this.status = tasks.getStatus();
         }
     }
+    @NoArgsConstructor
+    @Data
+    public static class TaskStatus {
+        private Long idNum;
+        private String status;
+
+        public TaskStatus (Long idNum, String status) {
+            this.idNum = idNum;
+            this.status = status;
+        }
+    }
 
 }

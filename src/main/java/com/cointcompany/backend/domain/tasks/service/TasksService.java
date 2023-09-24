@@ -109,6 +109,14 @@ public class TasksService {
         return "SUCCESS";
     }
     @Transactional
+    public String modifyTaskStatus (TasksDto.TaskStatus taskStatus) {
+
+        Tasks tasks = tasksRepository.findById(taskStatus.getIdNum()).orElseThrow();
+        tasks.setStatus(taskStatus.getStatus());
+
+        return "SUCCESS";
+    }
+    @Transactional
     public List<TasksDto.TaskTagDto> saveTaskTag(List<TasksDto.TaskTagDto> taskTagDtoList, Long taskId) {
 
         // Project의 태그 관리 기능과 동일

@@ -105,6 +105,18 @@ public class TasksController {
         return new ResponseEntity<>(taskIds, HttpStatus.OK);
     }
 
+    @Operation(summary = "업무 상태 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/status")
+    public ResponseEntity<String> putTasksStatus (
+            @RequestBody TasksDto.TaskStatus taskStatus
+    ) {
+
+        tasksService.modifyTaskStatus(taskStatus);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
     @Operation(summary = "업무 그룹 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/group")

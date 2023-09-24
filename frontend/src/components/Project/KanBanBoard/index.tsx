@@ -26,13 +26,15 @@ const ItemType = {
     CARD: 'card',
 };
 
-const COLUMN_STATUSES = ['TODO', 'WORKING', 'WAITING', 'DONE'];
+type Status = 'TODO' | 'WORKING' | 'WAITING' | 'DONE';
+
+const COLUMN_STATUSES: Status[]  = ['TODO', 'WORKING', 'WAITING', 'DONE'];
 
 interface CardProps {
     text: string;
     columnIndex: number;
     index: number;
-    moveCard: (fromColumn: number, fromIndex: number, toColumn: number, toIndex: number) => void;
+    moveCard: (fromColumn: Status, fromIndex: number, toColumn: Status, toIndex: number) => void;
 }
 
 type ProjectSelectResponse = {
@@ -70,10 +72,15 @@ type TaskResponse = {
     taskGroupIdNum: number;
 }
 
-interface ColumnProps {
+type TaskStatus = {
+    idNum: number;
     status: string;
+}
+
+interface ColumnProps {
+    status: Status;
     tasks: TaskResponse[];
-    moveCard: (fromColumn: number, fromIndex: number, toColumn: number, toIndex: number) => void;
+    moveCard: (fromColumn: Status, fromIndex: number, toColumn: Status, toIndex: number) => void;
     searchTerm: string;
 }
 
@@ -113,13 +120,17 @@ const Column: React.FC<ColumnProps> = ({ status, tasks, moveCard, searchTerm }) 
 
     const [, dropRef] = useDrop({
         accept: ItemType.CARD,
-        drop: (item: { columnIndex: number; index: number }) => {
-            const fromColumnIndex = item.columnIndex;
+        drop: (item: { columnStatus: Status; index: number }) => {
+            let status: Status = item.columnStatus;
+            if(item.columnStatus === null) {
+                status = 'TODO';
+            }
+            const fromColumn = status;
             const fromIndex = item.index;
-            const toColumnIndex = COLUMN_STATUSES.indexOf(status);
+            const toColumn = status;
             const toIndex = tasksForStatus.length;
 
-            moveCard(fromColumnIndex, fromIndex, toColumnIndex, toIndex);
+            moveCard(fromColumn, fromIndex, toColumn, toIndex);
         }
     });
 
@@ -161,7 +172,7 @@ const Card: React.FC<TaskResponse & CardProps> = ({
 
     const [, drag] = useDrag({
         type: ItemType.CARD,
-        item: { columnIndex, index },
+        item: { columnStatus: status, index },
     });
 
     drag(cardRef);
@@ -227,8 +238,16 @@ const Card: React.FC<TaskResponse & CardProps> = ({
     );
 };
 
+// column배열 초기상태
+const initialColumns: Record<Status, string[]> = {
+    'TODO': [],
+    'WORKING': [],
+    'WAITING': [],
+    'DONE': []
+};
+
 const Kanban: React.FC = () => {
-    const [columns, setColumns] = React.useState<string[][]>([[]]);
+    const [columns, setColumns] = React.useState<Record<Status, string[]>>(initialColumns);
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
     const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
     const [taskResponses, setTaskResponses] = useState<TaskResponse[]>([]);
@@ -248,34 +267,38 @@ const Kanban: React.FC = () => {
         : autocompleteOptions;
 
     const moveCard = (
-        fromColumn: number,
+        fromColumn: Status,
         fromIndex: number,
-        toColumn: number,
+        toColumn: Status,
         toIndex: number
     ) => {
+        console.log(fromColumn, fromIndex, toColumn, toIndex);
+        console.log(columns);
         // drag된 카드 정보
         const fromCard = columns[fromColumn][fromIndex];
 
         // drag된 카드의 taskIdNum
         const fromTaskIdNum = taskResponses.find(task => task.taskName === fromCard)?.idNum || 0;
 
-        // drag된 카드의 taskGroupNum
-        const fromTaskGroupNum = taskResponses.find(task => task.taskName === fromCard)?.taskGroupIdNum || 0;
+        // drop된 column의 status
+        const fromStatus = toColumn;
 
-        // drag된 카드의 status
-        const fromStatus = taskResponses.find(task => task.taskName === fromCard)?.status || "";
+        // taskIdNum과 status를 TaskStatus 형태로 전송
+        const taskStatus: TaskStatus = {
+            idNum: fromTaskIdNum,
+            status: fromStatus
+        }
 
-        // drag된 카드의 index
-        const fromTaskIndex = taskResponses.findIndex(task => task.taskName === fromCard);
-
-        // drop된 카드의 status
-        const toStatus = COLUMN_STATUSES[toColumn];
-
-        console.log("fromTaskIdNum: " + fromTaskIdNum);
-        console.log("fromTaskIndex: " + fromTaskIndex);
-        console.log("fromTaskGroupNum: " + fromTaskGroupNum);
-        console.log("fromStatus: " + fromStatus);
-        console.log("toStatus: " + toStatus);
+        axios.put("/api/task/status", taskStatus)
+            .then((response) => {
+                if (response.status === 200) {
+                    // 일단 성공
+                }
+            })
+            .catch((error) => {
+                setErrorModalOpen(true)
+                setErrorMessage("업무 상태 변경에 실패했습니다.")
+            });
     };
 
     const handleInputChange = (
@@ -319,16 +342,22 @@ const Kanban: React.FC = () => {
 
                 setProjectUserNum(projectUserNum);
 
-
                 const taskResponse = await axios.get("/api/task");
                 setTaskResponses(taskResponse.data);
 
-                // 단위 기능을 위한 임시코드
-                const updatedColumns = [taskResponse.data.map(task => task.taskName)];
-                setColumns(updatedColumns);
+                // 상태별로 업무를 분류하는 코드
+                const updatedColumns: typeof initialColumns = { ...initialColumns };
+                taskResponse.data.forEach((task: TaskResponse) => {  // 타입 명시
+                    if (task.status in updatedColumns) { // 타입 가드 사용
+                        updatedColumns[task.status].push(task.taskName);
+                    } else if (task.status === null) {
+                        updatedColumns.TODO.push(task.taskName);
+                    }
+                });
+
             } catch (error) {
-                setErrorModalOpen(true)
-                setErrorMessage("프로젝트 목록을 불러오는데 실패했습니다.")
+                setErrorModalOpen(true);
+                setErrorMessage("프로젝트 목록을 불러오는데 실패했습니다.");
             }
         };
 
