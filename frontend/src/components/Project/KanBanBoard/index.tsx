@@ -14,6 +14,8 @@ import {
     Divider, Chip, Button,
     Tooltip, IconButton, CardContent
 } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {green, yellow, red, blue} from '@mui/material/colors';
@@ -34,7 +36,7 @@ interface CardProps {
     text: string;
     columnIndex: number;
     index: number;
-    moveCard: (fromColumn: Status, fromIndex: number, toColumn: Status, toIndex: number) => void;
+    moveCard: (toColumn: Status, idNum: number) => void;
 }
 
 type ProjectSelectResponse = {
@@ -80,11 +82,13 @@ type TaskStatus = {
 interface ColumnProps {
     status: Status;
     tasks: TaskResponse[];
-    moveCard: (fromColumn: Status, fromIndex: number, toColumn: Status, toIndex: number) => void;
+    moveCard: (toColumn: Status, idNum: number) => void;
     searchTerm: string;
+    hoverColumn: Status | null;
+    setHoverColumn: (status: Status | null) => void;
 }
 
-const Column: React.FC<ColumnProps> = ({ status, tasks, moveCard, searchTerm }) => {
+const Column: React.FC<ColumnProps> = ({ status, tasks, moveCard, searchTerm, hoverColumn, setHoverColumn }) => {
     let bgColor = 'transparent';
 
     switch (status) {
@@ -103,7 +107,6 @@ const Column: React.FC<ColumnProps> = ({ status, tasks, moveCard, searchTerm }) 
         default:
             break;
     }
-
     let tasksForStatus: typeof tasks = [];
     if (searchTerm) {
         const tasksForProject = tasks.filter(task => task.projectName === searchTerm);
@@ -120,43 +123,59 @@ const Column: React.FC<ColumnProps> = ({ status, tasks, moveCard, searchTerm }) 
 
     const [, dropRef] = useDrop({
         accept: ItemType.CARD,
-        drop: (item: { columnStatus: Status; index: number }) => {
-            let status: Status = item.columnStatus;
+        hover: (item: { columnStatus: Status; idNum: number }) => {
+            setHoverColumn(status);
+        },
+        drop: (item: { columnStatus: Status; idNum: number }) => {
+            let fromStatus: Status = item.columnStatus;
             if(item.columnStatus === null) {
-                status = 'TODO';
+                fromStatus = 'TODO';
             }
-            const fromColumn = status;
-            const fromIndex = item.index;
+            const fromColumn = fromStatus;
             const toColumn = status;
-            const toIndex = tasksForStatus.length;
 
-            moveCard(fromColumn, fromIndex, toColumn, toIndex);
+            setHoverColumn(null);
+
+            if(fromColumn === toColumn) {
+                return;
+            }
+
+            moveCard(toColumn, item.idNum);
         }
     });
 
+    // DONE 상태의 컬럼에는 드롭 비활성화
+    const assignedDropRef = status !== "DONE" ? dropRef : null;
+
     return (
-        <Grid ref={dropRef} item xs={3} key={status}
+        <Grid ref={assignedDropRef} item xs={3} key={status}
               sx={{ width: '100%', height: '100%' }}>
             <Box component={Paper} elevation={3}
-                 sx={{ m: 1, p: 1, borderRadius: '6px', backgroundColor: bgColor, textAlign: 'center', minHeight: '200px' }}>
+                 sx={{
+                     m: 1,
+                     p: 1,
+                     borderRadius: '6px',
+                     backgroundColor: hoverColumn === status ? 'someOtherColor' : bgColor,
+                     textAlign: 'center',
+                     minHeight: '200px',
+                     ...hoverColumn === status && { boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.5)' }  // Add any other style changes here
+                 }}>
                 <Typography variant="h6">{status}</Typography>
                 <Divider sx={{ my: 1 }} />
                 {tasksForStatus.length === 0 ? (
                     <Typography variant="body1">업무가 없습니다.</Typography>
-                ) : (
-                    tasksForStatus.map((task, index) => (
-                        <Card key={task.idNum} {...task}
-                              columnIndex={COLUMN_STATUSES.indexOf(status)} index={index}
-                              moveCard={moveCard}
-                        />
-                    ))
-                )}
+                ) : tasksForStatus.map((task, index) => (
+                    <React.Fragment key={task.idNum}>
+                        <Card {...task} columnIndex={COLUMN_STATUSES.indexOf(status)} index={index} moveCard={moveCard} />
+                    </React.Fragment>
+                ))}
             </Box>
         </Grid>
     );
 }
 
 const Card: React.FC<TaskResponse & CardProps> = ({
+                                                      idNum,
                                                       taskName,
                                                       description,
                                                       startDate,
@@ -170,12 +189,32 @@ const Card: React.FC<TaskResponse & CardProps> = ({
                                                   }) => {
     const cardRef = useRef<HTMLDivElement>(null);
 
+    const [hasPermission, setHasPermission] = useState<boolean>(false);
+
+    useEffect(() => {
+        axios.get(`/api/task/level/${idNum}`)
+            .then(response => {
+                if(response.data === 1) {
+                    setHasPermission(true);
+                } else {
+                    setHasPermission(false);
+                }
+            })
+            .catch(error => {
+                console.error("Error checking permission:", error);
+            });
+    }, [idNum]);
+
     const [, drag] = useDrag({
         type: ItemType.CARD,
-        item: { columnStatus: status, index },
+        item: { columnStatus: status, idNum },
+        canDrag: status !== "WAITING" && status !== "DONE", // 드래그가 가능한 조건을 명시
     });
 
-    drag(cardRef);
+    // `status`가 "DONE"이 아닐 경우에만 drag 핸들러를 연결
+    if (status !== "DONE") {
+        drag(cardRef);
+    }
 
     return (
         <MUICard ref={cardRef}
@@ -199,9 +238,9 @@ const Card: React.FC<TaskResponse & CardProps> = ({
                             alignItems: 'center'
                         }}>
                 <Chip
-                    label={status}
+                    label=""
                     sx={{
-                        backgroundColor: status === 'TODO' ? red[400] : status === 'WORKING' ? yellow[400] : status === 'WAITING' ? blue[400] : green[400],
+                        backgroundColor: status === 'TODO' ? green[400] : status === 'WORKING' ? yellow[400] : status === 'WAITING' ? blue[400] : green[400],
                         marginRight: 'auto',
                         width: '40px',
                         height: '10px',
@@ -234,6 +273,52 @@ const Card: React.FC<TaskResponse & CardProps> = ({
             <Typography variant="body2">
                 {startDate} ~ {endDate}
             </Typography>
+            {status === 'WAITING' && hasPermission && (
+            <Box sx={{
+                marginTop: '10px',
+            }}>
+                <Button variant="contained" sx={{
+                    color: 'black',
+                    marginLeft: '10px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    height: '30px',
+                    backgroundColor: 'white',
+                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                    textTransform: 'none',
+                    minWidth: '75px',
+                    padding: '0 12px',
+                    '&:hover': {
+                        textDecoration: 'none',
+                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                    },
+                }}
+                        startIcon={<CheckCircleIcon style={{ color: 'rgb(23, 210, 23)'}} />}
+                >
+                    승인
+                </Button>
+                <Button variant="contained" sx={{
+                    color: 'black',
+                    marginLeft: '10px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    height: '30px',
+                    backgroundColor: 'white',
+                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                    textTransform: 'none',
+                    minWidth: '75px',
+                    padding: '0 12px',
+                    '&:hover': {
+                        textDecoration: 'none',
+                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                    },
+                }}
+                        startIcon={<CancelIcon style={{ color: 'red'}} />}
+                >
+                    거절
+                </Button>
+            </Box>
+                )}
         </MUICard>
     );
 };
@@ -247,7 +332,9 @@ const initialColumns: Record<Status, string[]> = {
 };
 
 const Kanban: React.FC = () => {
+    const [reloadData, setReloadData] = useState(false);
     const [columns, setColumns] = React.useState<Record<Status, string[]>>(initialColumns);
+    const [hoverColumn, setHoverColumn] = useState<Status | null>(null);
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
     const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
     const [taskResponses, setTaskResponses] = useState<TaskResponse[]>([]);
@@ -267,32 +354,19 @@ const Kanban: React.FC = () => {
         : autocompleteOptions;
 
     const moveCard = (
-        fromColumn: Status,
-        fromIndex: number,
         toColumn: Status,
-        toIndex: number
+        idNum: number,
     ) => {
-        console.log(fromColumn, fromIndex, toColumn, toIndex);
-        console.log(columns);
-        // drag된 카드 정보
-        const fromCard = columns[fromColumn][fromIndex];
-
-        // drag된 카드의 taskIdNum
-        const fromTaskIdNum = taskResponses.find(task => task.taskName === fromCard)?.idNum || 0;
-
-        // drop된 column의 status
-        const fromStatus = toColumn;
-
         // taskIdNum과 status를 TaskStatus 형태로 전송
         const taskStatus: TaskStatus = {
-            idNum: fromTaskIdNum,
-            status: fromStatus
+            idNum,
+            status: toColumn
         }
 
         axios.put("/api/task/status", taskStatus)
             .then((response) => {
                 if (response.status === 200) {
-                    // 일단 성공
+                    setReloadData(prev => !prev);
                 }
             })
             .catch((error) => {
@@ -308,6 +382,19 @@ const Kanban: React.FC = () => {
     ) => {
         setSearchTerm(newValue);
         setSelectedProjectIdNum(projectResponses.find(project => project.projectName === newValue)?.idNum || 0);
+    };
+
+    // 업무 상태에 따라 업무를 분류하는 함수
+    const classifyTasksByStatus = (tasks: TaskResponse[]): typeof initialColumns => {
+        const updatedColumns: typeof initialColumns = { ...initialColumns };
+        tasks.forEach((task: TaskResponse) => {
+            if (task.status in updatedColumns) {
+                updatedColumns[task.status].push(task.taskName);
+            } else if (task.status === null) {
+                updatedColumns.TODO.push(task.taskName);
+            }
+        });
+        return updatedColumns;
     };
 
     useEffect(() => {
@@ -346,14 +433,8 @@ const Kanban: React.FC = () => {
                 setTaskResponses(taskResponse.data);
 
                 // 상태별로 업무를 분류하는 코드
-                const updatedColumns: typeof initialColumns = { ...initialColumns };
-                taskResponse.data.forEach((task: TaskResponse) => {  // 타입 명시
-                    if (task.status in updatedColumns) { // 타입 가드 사용
-                        updatedColumns[task.status].push(task.taskName);
-                    } else if (task.status === null) {
-                        updatedColumns.TODO.push(task.taskName);
-                    }
-                });
+                const updatedColumns = classifyTasksByStatus(taskResponse.data);
+                setColumns(updatedColumns);
 
             } catch (error) {
                 setErrorModalOpen(true);
@@ -363,8 +444,17 @@ const Kanban: React.FC = () => {
 
         fetchData();
 
-    }, []);
+    }, [reloadData]);
 
+    useEffect(() => {
+        // column에 정의된 업무를 필터링
+        const filteredTasks = taskResponses.filter(task => task.projectName === searchTerm);
+
+        // 상태별로 업무를 분류하는 코드
+        const updatedColumns = classifyTasksByStatus(filteredTasks);
+        setColumns(updatedColumns);
+
+    }, [searchTerm]);
 
     return (
     <Grid container>
@@ -546,7 +636,7 @@ const Kanban: React.FC = () => {
                 <DndProvider backend={HTML5Backend}>
                     <Box sx={{ display: 'flex', width: '100%', backgroundColor: '#fff' }}>
                         {COLUMN_STATUSES.map(status => (
-                            <Column status={status} tasks={taskResponses} moveCard={moveCard} searchTerm={searchTerm} />
+                            <Column status={status} tasks={taskResponses} moveCard={moveCard} searchTerm={searchTerm} hoverColumn={hoverColumn} setHoverColumn={setHoverColumn} />
                         ))}
                     </Box>
                 </DndProvider>

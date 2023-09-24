@@ -81,6 +81,21 @@ public class TasksController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    @Operation(summary = "업무 사용자 권한 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/level/{taskId}")
+    public ResponseEntity<Integer> getTasksUserLevel (
+            Authentication authentication,
+            @PathVariable Long taskId
+    ) {
+        UserDetailsImpl users = (UserDetailsImpl) authentication.getPrincipal();
+
+        // TODO : 업무 사용자 권한 조회
+//        Integer level = tasksService.getTaskUserLevel(users.getUserId(), taskId);
+
+        return new ResponseEntity<>(1, HttpStatus.OK);
+    }
+
     @Operation(summary = "업무 태그 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/tag/{projectId}")
