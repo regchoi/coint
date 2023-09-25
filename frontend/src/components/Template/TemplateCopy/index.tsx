@@ -1,13 +1,12 @@
 import React, {SyntheticEvent, useEffect, useState} from 'react';
-import { Calendar, momentLocalizer, Event } from 'react-big-calendar';
-import moment from 'moment';
+import { Event } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import {
     Autocomplete, AutocompleteInputChangeReason, Box,
     Card as MUICard,
     CardContent, Chip, Divider,
     Grid,
-    IconButton,
+    IconButton, TextareaAutosize,
     TextField,
     Tooltip,
     Typography
@@ -15,14 +14,16 @@ import {
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {CSSTransition} from "react-transition-group";
-import {blue, green, red, yellow} from "@mui/material/colors";
 import ErrorModal from "../../common/ErrorModal";
 import axios from "../../../redux/axiosConfig";
 
-const localizer = momentLocalizer(moment);
-
 interface MyEvent extends Event {
     title: string;
+}
+
+type ProjectUserNum = {
+    projectIdNum: number;
+    projectUserNum: number;
 }
 
 type ProjectSelectResponse = {
@@ -55,7 +56,7 @@ type TaskResponse = {
     taskGroupIdNum: number;
 }
 
-const MyCalendar: React.FC = () => {
+const TemplateCopy: React.FC = () => {
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
     const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
     const [taskResponses, setTaskResponses] = useState<TaskResponse[]>([]);
@@ -67,49 +68,6 @@ const MyCalendar: React.FC = () => {
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [projectListOpen, setProjectListOpen] = useState(false);
-
-    const eventStyleGetter = (event: MyEvent, start: Date, end: Date, isSelected: boolean) => {
-        let backgroundColor = "rgb(174, 174, 174, 0.3)";
-        let color = "rgb(174, 174, 174)";
-        let fontSize = "12px";
-        let fontWeight = "bold";
-        switch(event.resource.status) {
-            case null:
-                backgroundColor = "rgb(101, 173, 245, 0.2)";
-                color = "rgb(5, 77, 149)";
-                break;
-            case "TODO":
-                backgroundColor = "rgb(101, 173, 245, 0.2)";
-                color = "rgb(5, 77, 149)";
-                break;
-            case "WORKING":
-                backgroundColor = "rgb(108, 181, 111, 0.2)";
-                color = "rgb(108, 181, 111)";
-                break;
-            case "WAITING":
-                // WAITING - FEEDBACK
-                backgroundColor = "rgb(234, 128, 56, 0.2)";
-                color = "rgb(234, 128, 56)";
-                break;
-            case 'DONE':
-                backgroundColor = 'rgb(50, 65, 122, 0.2)';
-                color = "rgb(10, 25, 82)";
-                fontWeight = "normal";
-                break;
-            // case 'WAITING':
-            //     // WAITING - 보류
-            //     backgroundColor = 'rgb(174, 174, 174, 0.1)';
-            //     break;
-        }
-        return {
-            style: {
-                backgroundColor,
-                color,
-                fontSize,
-                fontWeight
-            }
-        };
-    };
 
     const autocompleteOptions = options.map(option => option.projectName);
     const filteredOptions = searchTerm === ""
@@ -128,16 +86,6 @@ const MyCalendar: React.FC = () => {
         setSelectedProjectIdNum(projectResponses.find(project => project.projectName === newValue)?.idNum || 0);
     };
 
-    // TODO: 라이브러리 코드 확인해보고, 타입 정의하기
-    const mapTaskToEvent = (task: TaskResponse): MyEvent => ({
-        start: new Date(task.startDate),
-        end: new Date(task.endDate),
-        title: task.taskName,
-        resource: {
-            status: task.status
-        }
-    });
-
     useEffect(() => {
         // 프로목록 불러오기
         axios.get('/api/project')
@@ -155,12 +103,11 @@ const MyCalendar: React.FC = () => {
                 setProjectResponses(projectResponse.data);
 
                 // 조회된 project들의 idNum을 통해 taskGroup 조회
-                // 반복문으로 조회하는 것보다 한번에 조회하는 것이 더 효율적이지만, 현재는 반복문으로 조회
-                const taskGroupResponses = await Promise.all(projectResponse.data.map(async (project: ProjectResponse) => {
-                    const taskGroupResponse = await axios.get(`/api/task/group/${project.idNum}`);
-                    return taskGroupResponse.data;
-                }));
-                setTaskGroupResponses(taskGroupResponses);
+                // const taskGroupResponses = await Promise.all(projectResponse.data.map(async (project: ProjectResponse) => {
+                //     const taskGroupResponse = await axios.get(`/api/task/group/${project.idNum}`);
+                //     return taskGroupResponse.data;
+                // }));
+                // setTaskGroupResponses(taskGroupResponses);
 
                 // TODO: projectIdNum 예외처리
                 const projectUserNum: ProjectUserNum[] = await Promise.all(projectResponse.data.map(async (project: ProjectResponse) => {
@@ -172,7 +119,6 @@ const MyCalendar: React.FC = () => {
 
                 const taskResponse = await axios.get("/api/task");
                 setTaskResponses(taskResponse.data);
-                setCalendarEvents(taskResponse.data.map(task => mapTaskToEvent(task)));
             } catch (error) {
                 setErrorModalOpen(true);
                 setErrorMessage("프로젝트 목록을 불러오는데 실패했습니다.");
@@ -183,6 +129,10 @@ const MyCalendar: React.FC = () => {
 
     }, []);
 
+    // selectedProjectIdNum에 대응되는 selectProject
+    const selectedProject = projectResponses.find(project => project.idNum === selectedProjectIdNum);
+    // selectedProjectIdNum에 대응되는 task
+    const selectedProjectTask = taskResponses.filter(task => task.projectName === selectedProject?.projectName);
 
     return (
         <Grid container>
@@ -240,7 +190,6 @@ const MyCalendar: React.FC = () => {
                                         // TODO: 프로젝트별 업무, TODO, WORKING, WAITING, DONE 개수 조회
                                         // projectName과 동일한 task들을 추출
                                         const tasks = taskResponses.filter(task => task.projectName === project.projectName);
-                                        const projectNum = projectUserNum.find(projectUserNum => projectUserNum.projectIdNum === project.idNum)?.projectUserNum || 0;
                                         const todoTasks = tasks.filter(task => task.status === "TODO" || null);
                                         const workingTasks = tasks.filter(task => task.status === "WORKING");
                                         const waitingTasks = tasks.filter(task => task.status === "WAITING");
@@ -257,30 +206,30 @@ const MyCalendar: React.FC = () => {
                                                     }}
                                                 >
                                                     <CardContent>
-                                                        <Typography variant="h6" gutterBottom
-                                                                    component={"div"}
-                                                                    sx={{
-                                                                        fontSize: '18px',
-                                                                        fontWeight: 'bold',
-                                                                        display: 'flex',
-                                                                        justifyContent: 'center',
-                                                                        alignItems: 'center'
-                                                                    }}>
-                                                            <Chip
-                                                                label={project.status}
-                                                                sx={{
-                                                                    backgroundColor: project.status === 'TODO' ? red[400] : project.status === 'WORKING' ? yellow[400] : project.status === 'WAITING' ? blue[400] : green[400],
-                                                                    marginRight: 'auto',
-                                                                    width: '40px',
-                                                                    height: '10px',
-                                                                    fontSize: '0.8rem',
-                                                                    padding: '2px 12px'
-                                                                }}
-                                                            />
-                                                            <span>
-                                                        &nbsp;
-                                                    </span>
-                                                        </Typography>
+                                                    {/*    <Typography variant="h6" gutterBottom*/}
+                                                    {/*                component={"div"}*/}
+                                                    {/*                sx={{*/}
+                                                    {/*                    fontSize: '18px',*/}
+                                                    {/*                    fontWeight: 'bold',*/}
+                                                    {/*                    display: 'flex',*/}
+                                                    {/*                    justifyContent: 'center',*/}
+                                                    {/*                    alignItems: 'center'*/}
+                                                    {/*                }}>*/}
+                                                    {/*        <Chip*/}
+                                                    {/*            label={project.status}*/}
+                                                    {/*            sx={{*/}
+                                                    {/*                backgroundColor: project.status === 'TODO' ? red[400] : project.status === 'WORKING' ? yellow[400] : project.status === 'WAITING' ? blue[400] : green[400],*/}
+                                                    {/*                marginRight: 'auto',*/}
+                                                    {/*                width: '40px',*/}
+                                                    {/*                height: '10px',*/}
+                                                    {/*                fontSize: '0.8rem',*/}
+                                                    {/*                padding: '2px 12px'*/}
+                                                    {/*            }}*/}
+                                                    {/*        />*/}
+                                                    {/*        <span>*/}
+                                                    {/*    &nbsp;*/}
+                                                    {/*</span>*/}
+                                                    {/*    </Typography>*/}
                                                         <Typography variant="h6" gutterBottom>
                                                             {project.projectName}
                                                         </Typography>
@@ -367,16 +316,146 @@ const MyCalendar: React.FC = () => {
                             </Grid>
                         </div>
                     </CSSTransition>
-                    <div style={{height: '500px'}}>
-                        <Calendar
-                            localizer={localizer}
-                            defaultDate={new Date()}
-                            defaultView="month"
-                            events={calendarEvents}
-                            eventPropGetter={eventStyleGetter}
-                            style={{height: "100%"}}
-                        />
-                    </div>
+                        {
+                            selectedProjectIdNum !== 0 && selectedProject ? (
+                                <Box>
+                                    <TextField
+                                        label="프로젝트명"
+                                        name="projectName"
+                                        variant="filled"
+                                        value={selectedProject.projectName}
+                                        onChange={handleInputChange}
+                                        sx={{mt: 1, width: '50%'}}
+                                        InputProps={{
+                                            style: {fontSize: '14px', backgroundColor: 'transparent'}
+                                        }}
+                                        InputLabelProps={{
+                                            style: {fontSize: '14px'},
+                                        }}
+                                    />
+                                    <TextareaAutosize
+                                        aria-label="프로젝트 상세설명"
+                                        minRows={4}
+                                        name="description"
+                                        placeholder="프로젝트 상세설명을 입력하세요"
+                                        value={selectedProject.description}
+                                        onChange={handleInputChange}
+                                        style={{
+                                            fontSize: '14px',
+                                            width: '100%',
+                                            padding: '10px',
+                                            marginTop: '10px',
+                                            border: '1px solid #e0e0e0',
+                                            borderRadius: '4px',
+                                            resize: 'vertical'
+                                        }}
+                                    />
+
+                                    <Grid container spacing={2} sx={{mt: 3}}>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                label="프로젝트 시작예정일"
+                                                variant="outlined"
+                                                type="date"
+                                                name="startDate"
+                                                value={selectedProject.startDate}
+                                                onChange={handleInputChange}
+                                                fullWidth
+                                                InputProps={{
+                                                    style: {
+                                                        fontSize: '14px',
+                                                        backgroundColor: 'transparent'
+                                                    }
+                                                }}
+                                                InputLabelProps={{
+                                                    style: {fontSize: '14px'},
+                                                    shrink: true,
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                label="프로젝트 종료예정일"
+                                                variant="outlined"
+                                                type="date"
+                                                name="endDate"
+                                                value={selectedProject.endDate}
+                                                onChange={handleInputChange}
+                                                fullWidth
+                                                InputProps={{
+                                                    style: {
+                                                        fontSize: '14px',
+                                                        backgroundColor: 'transparent'
+                                                    }
+                                                }}
+                                                InputLabelProps={{
+                                                    style: {fontSize: '14px'},
+                                                    shrink: true,
+                                                }}
+                                            />
+                                        </Grid>
+                                    </Grid>
+
+                                    {
+                                        selectedProjectTask.length !== 0 ? (
+                                            <Box sx={{mt: 3}}>
+                                                <Typography variant="h6" gutterBottom>
+                                                    프로젝트 업무
+                                                </Typography>
+                                                <Divider/>
+                                                <Box sx={{mt: 2}}>
+                                                    <Grid container spacing={2}>
+                                                        {
+                                                            selectedProjectTask.map((task, index) => {
+                                                                return (
+                                                                    <Grid item xs={12} key={index}>
+                                                                        <MUICard>
+                                                                            <CardContent>
+                                                                                <Box display="flex"
+                                                                                     justifyContent="space-between">
+                                                                                    <Typography variant="h6"
+                                                                                                gutterBottom>
+                                                                                        {task.taskName}
+                                                                                    </Typography>
+                                                                                    <Typography variant="body2"
+                                                                                                gutterBottom>
+                                                                                        {task.status}
+                                                                                    </Typography>
+                                                                                </Box>
+                                                                                <Typography variant="body2"
+                                                                                            gutterBottom>
+                                                                                    {task.startDate} ~ {task.endDate}
+                                                                                </Typography>
+                                                                                <Typography variant="body2"
+                                                                                            gutterBottom>
+                                                                                    {task.description}
+                                                                                </Typography>
+                                                                            </CardContent>
+                                                                        </MUICard>
+                                                                    </Grid>
+                                                                );
+                                                            })
+                                                        }
+                                                    </Grid>
+                                                </Box>
+                                            </Box>
+                                        ) : (
+                                            <Box sx={{mt: 3}}>
+                                                <Typography variant="h6" gutterBottom>
+                                                    프로젝트 업무가 없습니다
+                                                </Typography>
+                                            </Box>
+                                        )
+                                    }
+                                </Box>
+                            ) : (
+                                <Box sx={{mt: 3}}>
+                                    <Typography variant="h6" gutterBottom>
+                                        프로젝트를 선택해주세요
+                                    </Typography>
+                                </Box>
+                            )
+                        }
                 </Box>
             </Grid>
 
@@ -392,4 +471,4 @@ const MyCalendar: React.FC = () => {
     );
 };
 
-export default MyCalendar;
+export default TemplateCopy;

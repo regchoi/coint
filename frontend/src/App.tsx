@@ -13,8 +13,12 @@ import DepartmentTable from "./components/User/DepartmentTable";
 import ProjectPlan from "./components/Project/ProjectPlan";
 import ProjectTaskTable from "./components/Project/ProjectTaskTable";
 import TaskGanttChart from "./components/Project/TaskGanttChart";
+import KanBanBoard from "./components/Project/KanBanBoard";
+import Calendar from "./components/Project/Calendar";
 // Document
 import FileDrive from "./components/Document/FileDrive";
+// Template
+import TemplateCopy from "./components/Template/TemplateCopy";
 
 // Example
 // import SampleTable from "./components/SampleTable";
@@ -30,8 +34,6 @@ import FileDrive from "./components/Document/FileDrive";
 
 import "./assets/css/common/chart.css";
 import {getRole} from "./components/common/tokenUtils";
-import KanBanBoard from "./components/Project/KanBanBoard";
-import Calendar from "./components/Project/Calendar";
 
 const ROUTES = {
     LOGIN: '/login',
@@ -46,9 +48,10 @@ const ROUTES = {
     TASKGANTTCHART: '/project/task/ganttchart',
     KANBANBOARD: '/project/task/kanbanboard',
     CALENDAR: '/project/task/calendar',
-
     // Document
     FILEDRIVE: '/document/drive',
+    // Template
+    TEMPLATECOPY: '/template/copy',
 
     // Example
     // SAMPLE_TABLE: '/sampletable',
@@ -93,6 +96,8 @@ const App: React.FC = () => {
                         <Route path={ROUTES.CALENDAR} element={<Calendar />} />
 
                         <Route path={ROUTES.FILEDRIVE} element={<FileDrive/>}/>
+
+                        <Route path={ROUTES.TEMPLATECOPY} element={<TemplateCopy/>}/>
 
                         {/* Example*/}
                         {/*<Route path={ROUTES.SAMPLE_TABLE} element={<SampleTable/>}/>*/}
