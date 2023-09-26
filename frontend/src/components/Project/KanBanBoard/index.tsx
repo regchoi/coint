@@ -497,8 +497,14 @@ const Kanban: React.FC = () => {
                     />
 
                     <Tooltip title={projectListOpen ? "프로젝트 목록 접기" : "프로젝트 목록 보기"}>
-                        <IconButton onClick={() => setProjectListOpen(!projectListOpen)}>
-                            {projectListOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        <IconButton
+                            onClick={() => setProjectListOpen(!projectListOpen)}
+                            sx={{
+                                transform: projectListOpen ? "rotate(180deg)" : "rotate(0deg)",
+                                transition: "transform 0.5s",
+                            }}
+                        >
+                            <ExpandMoreIcon />
                         </IconButton>
                     </Tooltip>
                 </div>

@@ -4,7 +4,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import {
     Autocomplete, AutocompleteInputChangeReason, Box,
     Card as MUICard,
-    CardContent, Chip, Divider,
+    CardContent, Chip, Collapse, Divider,
     Grid,
     IconButton, TextareaAutosize,
     TextField,
@@ -61,6 +61,7 @@ const TemplateCopy: React.FC = () => {
     const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
     const [taskResponses, setTaskResponses] = useState<TaskResponse[]>([]);
     const [projectUserNum, setProjectUserNum] = useState<ProjectUserNum[]>([]);
+    const [tasks, setTasks] = useState<TaskResponse[]>([]);
     const [options, setOptions] = useState<ProjectSelectResponse[]>([]);
     const [calendarEvents, setCalendarEvents] = useState<MyEvent[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -68,6 +69,7 @@ const TemplateCopy: React.FC = () => {
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [projectListOpen, setProjectListOpen] = useState(false);
+    const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
 
     const autocompleteOptions = options.map(option => option.projectName);
     const filteredOptions = searchTerm === ""
@@ -85,6 +87,24 @@ const TemplateCopy: React.FC = () => {
         setSearchTerm(newValue);
         setSelectedProjectIdNum(projectResponses.find(project => project.projectName === newValue)?.idNum || 0);
     };
+
+    const handleTaskChange = (index, key, value) => {
+        const updatedTasks = [...tasks];
+        updatedTasks[index][key] = value;
+        setTasks(updatedTasks);
+    };
+
+    const toggleTaskExpansion = (index: number) => {
+        const newExpandedTasks = [...expandedTasks];
+        if (newExpandedTasks.includes(index)) {
+            const indexToRemove = newExpandedTasks.indexOf(index);
+            newExpandedTasks.splice(indexToRemove, 1);
+        } else {
+            newExpandedTasks.push(index);
+        }
+        setExpandedTasks(newExpandedTasks);
+    };
+
 
     useEffect(() => {
         // 프로목록 불러오기
@@ -129,10 +149,13 @@ const TemplateCopy: React.FC = () => {
 
     }, []);
 
+    // useEffect로 selectedProjectIdNum이 변경될 때마다 실행
+    useEffect(() => {
+        setTasks(taskResponses.filter(task => task.projectName === selectedProject?.projectName));
+    }, [selectedProjectIdNum]);
+
     // selectedProjectIdNum에 대응되는 selectProject
     const selectedProject = projectResponses.find(project => project.idNum === selectedProjectIdNum);
-    // selectedProjectIdNum에 대응되는 task
-    const selectedProjectTask = taskResponses.filter(task => task.projectName === selectedProject?.projectName);
 
     return (
         <Grid container>
@@ -176,8 +199,14 @@ const TemplateCopy: React.FC = () => {
                         />
 
                         <Tooltip title={projectListOpen ? "프로젝트 목록 접기" : "프로젝트 목록 보기"}>
-                            <IconButton onClick={() => setProjectListOpen(!projectListOpen)}>
-                                {projectListOpen ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                            <IconButton
+                                onClick={() => setProjectListOpen(!projectListOpen)}
+                                sx={{
+                                    transform: projectListOpen ? "rotate(180deg)" : "rotate(0deg)",
+                                    transition: "transform 0.5s",
+                                }}
+                            >
+                                <ExpandMoreIcon/>
                             </IconButton>
                         </Tooltip>
                     </div>
@@ -319,128 +348,235 @@ const TemplateCopy: React.FC = () => {
                         {
                             selectedProjectIdNum !== 0 && selectedProject ? (
                                 <Box>
-                                    <TextField
-                                        label="프로젝트명"
-                                        name="projectName"
-                                        variant="filled"
-                                        value={selectedProject.projectName}
-                                        onChange={handleInputChange}
-                                        sx={{mt: 1, width: '50%'}}
-                                        InputProps={{
-                                            style: {fontSize: '14px', backgroundColor: 'transparent'}
-                                        }}
-                                        InputLabelProps={{
-                                            style: {fontSize: '14px'},
-                                        }}
-                                    />
-                                    <TextareaAutosize
-                                        aria-label="프로젝트 상세설명"
-                                        minRows={4}
-                                        name="description"
-                                        placeholder="프로젝트 상세설명을 입력하세요"
-                                        value={selectedProject.description}
-                                        onChange={handleInputChange}
-                                        style={{
-                                            fontSize: '14px',
-                                            width: '100%',
-                                            padding: '10px',
-                                            marginTop: '10px',
-                                            border: '1px solid #e0e0e0',
-                                            borderRadius: '4px',
-                                            resize: 'vertical'
-                                        }}
-                                    />
+                                    <Typography variant="h6" gutterBottom>
+                                        템플릿 상세정보
+                                    </Typography>
+                                    <Divider/>
+                                    <Box sx={{mt: 2}}>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} key={selectedProjectIdNum}>
+                                                <TextField
+                                                    label="템플릿명"
+                                                    name="projectName"
+                                                    variant="filled"
+                                                    value={selectedProject.projectName}
+                                                    onChange={handleInputChange}
+                                                    sx={{mt: 1, width: '51%'}}
+                                                    InputProps={{
+                                                        style: {fontSize: '14px', backgroundColor: 'transparent'}
+                                                    }}
+                                                    InputLabelProps={{
+                                                        style: {fontSize: '14px'},
+                                                    }}
+                                                />
+                                                <TextField
+                                                    label="프로젝트명"
+                                                    name="projectName"
+                                                    variant="filled"
+                                                    value={selectedProject.projectName}
+                                                    onChange={handleInputChange}
+                                                    sx={{mt: 1, width: '51%'}}
+                                                    InputProps={{
+                                                        style: {fontSize: '14px', backgroundColor: 'transparent'}
+                                                    }}
+                                                    InputLabelProps={{
+                                                        style: {fontSize: '14px'},
+                                                    }}
+                                                />
+                                                <TextareaAutosize
+                                                    aria-label="프로젝트 상세설명"
+                                                    minRows={4}
+                                                    name="description"
+                                                    placeholder="프로젝트 상세설명을 입력하세요"
+                                                    value={selectedProject.description}
+                                                    onChange={handleInputChange}
+                                                    style={{
+                                                        fontSize: '14px',
+                                                        width: '100%',
+                                                        padding: '10px',
+                                                        marginTop: '10px',
+                                                        border: '1px solid #e0e0e0',
+                                                        borderRadius: '4px',
+                                                        resize: 'vertical'
+                                                    }}
+                                                />
 
-                                    <Grid container spacing={2} sx={{mt: 3}}>
-                                        <Grid item xs={6}>
-                                            <TextField
-                                                label="프로젝트 시작예정일"
-                                                variant="outlined"
-                                                type="date"
-                                                name="startDate"
-                                                value={selectedProject.startDate}
-                                                onChange={handleInputChange}
-                                                fullWidth
-                                                InputProps={{
-                                                    style: {
-                                                        fontSize: '14px',
-                                                        backgroundColor: 'transparent'
-                                                    }
-                                                }}
-                                                InputLabelProps={{
-                                                    style: {fontSize: '14px'},
-                                                    shrink: true,
-                                                }}
-                                            />
+                                                <Grid container spacing={2} sx={{mt: 3}}>
+                                                    <Grid item xs={6}>
+                                                        <TextField
+                                                            label="프로젝트 시작예정일"
+                                                            variant="outlined"
+                                                            type="date"
+                                                            name="startDate"
+                                                            value={selectedProject.startDate}
+                                                            onChange={handleInputChange}
+                                                            fullWidth
+                                                            InputProps={{
+                                                                style: {
+                                                                    fontSize: '14px',
+                                                                    backgroundColor: 'transparent'
+                                                                }
+                                                            }}
+                                                            InputLabelProps={{
+                                                                style: {fontSize: '14px'},
+                                                                shrink: true,
+                                                            }}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <TextField
+                                                            label="프로젝트 종료예정일"
+                                                            variant="outlined"
+                                                            type="date"
+                                                            name="endDate"
+                                                            value={selectedProject.endDate}
+                                                            onChange={handleInputChange}
+                                                            fullWidth
+                                                            InputProps={{
+                                                                style: {
+                                                                    fontSize: '14px',
+                                                                    backgroundColor: 'transparent'
+                                                                }
+                                                            }}
+                                                            InputLabelProps={{
+                                                                style: {fontSize: '14px'},
+                                                                shrink: true,
+                                                            }}
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
                                         </Grid>
-                                        <Grid item xs={6}>
-                                            <TextField
-                                                label="프로젝트 종료예정일"
-                                                variant="outlined"
-                                                type="date"
-                                                name="endDate"
-                                                value={selectedProject.endDate}
-                                                onChange={handleInputChange}
-                                                fullWidth
-                                                InputProps={{
-                                                    style: {
-                                                        fontSize: '14px',
-                                                        backgroundColor: 'transparent'
-                                                    }
-                                                }}
-                                                InputLabelProps={{
-                                                    style: {fontSize: '14px'},
-                                                    shrink: true,
-                                                }}
-                                            />
-                                        </Grid>
-                                    </Grid>
+                                    </Box>
 
                                     {
-                                        selectedProjectTask.length !== 0 ? (
-                                            <Box sx={{mt: 3}}>
+                                        tasks.length !== 0 ? (
+                                            <Box sx={{ mt: 3 }}>
                                                 <Typography variant="h6" gutterBottom>
-                                                    프로젝트 업무
+                                                    템플릿 업무
                                                 </Typography>
-                                                <Divider/>
-                                                <Box sx={{mt: 2}}>
+                                                <Divider />
+                                                <Box sx={{ mt: 2 }}>
                                                     <Grid container spacing={2}>
                                                         {
-                                                            selectedProjectTask.map((task, index) => {
-                                                                return (
-                                                                    <Grid item xs={12} key={index}>
-                                                                        <MUICard>
-                                                                            <CardContent>
-                                                                                <Box display="flex"
-                                                                                     justifyContent="space-between">
-                                                                                    <Typography variant="h6"
-                                                                                                gutterBottom>
-                                                                                        {task.taskName}
-                                                                                    </Typography>
+                                                            tasks.map((task, index) => (
+                                                                <Grid item xs={12} key={index}>
+                                                                    <MUICard>
+                                                                        <CardContent>
+                                                                            <Box display="flex" justifyContent="space-between">
+                                                                                <Box display="flex" alignItems="center">
+                                                                                    <TextField
+                                                                                        label="업무명"
+                                                                                        value={task.taskName}
+                                                                                        onChange={e => handleTaskChange(index, 'taskName', e.target.value)}
+                                                                                        variant="filled"
+                                                                                        InputProps={{
+                                                                                            style: {fontSize: '14px', backgroundColor: 'transparent'}
+                                                                                        }}
+                                                                                        InputLabelProps={{
+                                                                                            style: {fontSize: '14px'},
+                                                                                        }}
+                                                                                    />
                                                                                     <Typography variant="body2"
-                                                                                                gutterBottom>
-                                                                                        {task.status}
+                                                                                                sx={{
+                                                                                                    marginLeft: '10px',
+                                                                                                    color: '#757575',
+                                                                                                    fontSize: '12px',
+                                                                                                    opacity: expandedTasks.includes(index) ? 0 : 1,
+                                                                                                    transition: 'opacity 300ms ease-in-out'
+                                                                                    }}>
+                                                                                        {
+                                                                                            // 시작일 ~ 종료일
+                                                                                            task.startDate + ' ~ ' + task.endDate
+                                                                                        }
                                                                                     </Typography>
                                                                                 </Box>
-                                                                                <Typography variant="body2"
-                                                                                            gutterBottom>
-                                                                                    {task.startDate} ~ {task.endDate}
-                                                                                </Typography>
-                                                                                <Typography variant="body2"
-                                                                                            gutterBottom>
-                                                                                    {task.description}
-                                                                                </Typography>
-                                                                            </CardContent>
-                                                                        </MUICard>
-                                                                    </Grid>
-                                                                );
-                                                            })
+                                                                                <IconButton
+                                                                                    aria-label="expand"
+                                                                                    onClick={() => toggleTaskExpansion(index)}
+                                                                                    sx={{
+                                                                                        transform: expandedTasks.includes(index) ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                                                        transition: '0.3s',
+                                                                                        width: '40px',
+                                                                                        height: '40px',
+                                                                                }}
+                                                                                >
+                                                                                    <ExpandMoreIcon />
+                                                                                </IconButton>
+                                                                            </Box>
+                                                                            <Collapse in={expandedTasks.includes(index)}>
+                                                                                <Grid container spacing={2} sx={{mt: 3}}>
+                                                                                    <Grid item xs={6}>
+                                                                                        <TextField
+                                                                                            label="시작일"
+                                                                                            variant="outlined"
+                                                                                            type="date"
+                                                                                            name="startDate"
+                                                                                            value={task.startDate}
+                                                                                            onChange={e => handleTaskChange(index, 'startDate', e.target.value)}
+                                                                                            fullWidth
+                                                                                            InputProps={{
+                                                                                                style: {
+                                                                                                    fontSize: '14px',
+                                                                                                    backgroundColor: 'transparent'
+                                                                                                }
+                                                                                            }}
+                                                                                            InputLabelProps={{
+                                                                                                style: {fontSize: '14px'},
+                                                                                                shrink: true,
+                                                                                            }}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                    <Grid item xs={6}>
+                                                                                        <TextField
+                                                                                            label="종료일"
+                                                                                            variant="outlined"
+                                                                                            type="date"
+                                                                                            name="endDate"
+                                                                                            value={task.endDate}
+                                                                                            onChange={e => handleTaskChange(index, 'endDate', e.target.value)}
+                                                                                            fullWidth
+                                                                                            InputProps={{
+                                                                                                style: {
+                                                                                                    fontSize: '14px',
+                                                                                                    backgroundColor: 'transparent'
+                                                                                                }
+                                                                                            }}
+                                                                                            InputLabelProps={{
+                                                                                                style: {fontSize: '14px'},
+                                                                                                shrink: true,
+                                                                                            }}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                                <TextareaAutosize
+                                                                                    aria-label="업무 상세설명"
+                                                                                    minRows={4}
+                                                                                    name="description"
+                                                                                    placeholder="업무 상세설명을 입력하세요"
+                                                                                    value={task.description}
+                                                                                    onChange={e => handleTaskChange(index, 'description', e.target.value)}
+                                                                                    style={{
+                                                                                        fontSize: '14px',
+                                                                                        width: '100%',
+                                                                                        padding: '10px',
+                                                                                        marginTop: '10px',
+                                                                                        border: '1px solid #e0e0e0',
+                                                                                        borderRadius: '4px',
+                                                                                        resize: 'vertical'
+                                                                                    }}
+                                                                                />
+                                                                            </Collapse>
+                                                                        </CardContent>
+                                                                    </MUICard>
+                                                                </Grid>
+                                                            ))
                                                         }
                                                     </Grid>
                                                 </Box>
                                             </Box>
                                         ) : (
-                                            <Box sx={{mt: 3}}>
+                                            <Box sx={{ mt: 3 }}>
                                                 <Typography variant="h6" gutterBottom>
                                                     프로젝트 업무가 없습니다
                                                 </Typography>
