@@ -1,8 +1,8 @@
 import React from 'react';
 import {TableRow, TableCell, Checkbox, IconButton} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import {Data} from "./data";
 import { useNavigate } from 'react-router-dom';
+import ProjectContext from "../ProjectContext";
 
 type RowProps = {
     row: Data,
@@ -15,6 +15,12 @@ type RowProps = {
 // row의 각 key를 기준으로 TableCell을 구성함
 // 각 key는 Data의 key type인 keyof Data로 정의함
 const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) => {
+
+    const context = React.useContext(ProjectContext);
+    if (!context) {
+        throw new Error("Cannot find ProjectProvider");
+    }
+    const { rolesList } = context;
 
     const navigate = useNavigate();
 
@@ -56,62 +62,18 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                         fontSize: "12px",
                     }} align="center" key={key}></TableCell>;
                 }
-                if (key === 'description') {
-                    if(row[key] === null) return (
-                        <TableCell sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "0px 10px",
-                            fontSize: "12px",
-                            width: "250px"
-                        }}
-                                   align="center" key={key}>
-                        </TableCell>
-                    );
-
-                    let description = row[key].substring(0, 25);
-                    const breakIndex = description.indexOf('\n'); // 첫 번째 줄바꿈 위치 찾기
-
-                    // 줄바꿈이 있을 경우에만 텍스트 잘라내기
-                    if (breakIndex !== -1) {
-                        description.substring(0, breakIndex);
-                    }
-                    return (
-                        <TableCell sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "0px 10px",
-                            fontSize: "12px",
-                            width: "250px",
-                            overflow: "hidden",
-                        }} align="center" key={key}>
-                            {description+'...'}
-                        </TableCell>
-                    );
-                }
-                if (key === 'startDate' || key === 'endDate' || key === 'regDate') {
+                if (key === 'role') {
                     return <TableCell sx={{
                         border: "1px solid rgba(0, 0, 0, 0.12)",
                         padding: "0px 10px",
                         fontSize: "12px",
-                    }} align="center" key={key}>{row[key] ? (row[key]).toString().substring(0, 10) : ''}</TableCell>;
-                }
-
-                const handleRedirect = (idNum: number) => {
-                    alert('TODO: Modal창으로 프로젝트 상세 정보 보여주기');
-                };
-
-                if (key === 'detail') {
-                    return (
-                        <TableCell sx={{
-                            border: "1px solid rgba(0, 0, 0, 0.12)",
-                            padding: "0px 10px",
-                            fontSize: "12px",
-                            width: "120px"
-                        }} align="center" key={key}>
-                            <IconButton onClick={() => handleRedirect}>  {/* 아이콘 버튼에 클릭 이벤트 연결 */}
-                                <SearchIcon/>
-                            </IconButton>
-                        </TableCell>
-                    );
+                    }} align="center" key={key}>{
+                        rolesList.map((role) => {
+                            if (role.roleLevel === Number(row[key])) {
+                                return role.roleName;
+                            }
+                        })
+                    }</TableCell>;
                 }
                 return <TableCell sx={{
                     border: "1px solid rgba(0, 0, 0, 0.12)",

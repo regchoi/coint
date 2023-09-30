@@ -225,101 +225,118 @@ const Card: React.FC<TaskResponse & CardProps> = ({
                      border: 'none',
                      backgroundColor: 'rgb(255, 255, 255, 0.5)',
                      boxShadow: 3,
-                     position: 'relative'
+                     position: 'relative',
+                     display: 'flex',
+                     flexDirection: 'column',
+                     justifyContent: 'space-between'
                  }}
         >
-            <Typography variant="h6" gutterBottom
-                        component={"div"}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="h6" gutterBottom
+                            component={"div"}
+                            sx={{
+                                fontSize: '18px',
+                                fontWeight: 'bold',
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}
+                >
+                    <Chip
+                        label=""
                         sx={{
-                            fontSize: '18px',
-                            fontWeight: 'bold',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}>
-                <Chip
-                    label=""
-                    sx={{
-                        backgroundColor: status === 'TODO' ? green[400] : status === 'WORKING' ? yellow[400] : status === 'WAITING' ? blue[400] : green[400],
-                        marginRight: 'auto',
-                        width: '40px',
-                        height: '10px',
-                        fontSize: '0.8rem',
-                        padding: '2px 12px'
-                    }}
-                />
-                <span>
-                    &nbsp;
-                </span>
-            </Typography>
-            <Typography variant="h6" gutterBottom
-                        sx={{
+                            backgroundColor: status === 'TODO' ? green[400] : status === 'WORKING' ? yellow[400] : status === 'WAITING' ? blue[400] : green[400],
+                            marginRight: 'auto',
+                            width: '40px',
+                            height: '10px',
+                            fontSize: '0.8rem',
+                            padding: '2px 12px'
+                        }}
+                    />
+                    <span style={{fontSize: '12px', color: 'gray', marginLeft: '5px'}} >
+                    {startDate} ~ {endDate}
+                    </span>
+                </Typography>
+                {status === 'WAITING' && hasPermission && (
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'flex-end'
+                    }}>
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    p: 0,
+                                    color: 'black',
+                                    marginLeft: '5px',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    width: '25px',
+                                    minWidth: '25px',
+                                    height: '20px',
+                                    backgroundColor: 'white',
+                                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                    textTransform: 'none',
+                                    '&:hover': {
+                                        textDecoration: 'none',
+                                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                                    },
+                                }}
+                            >
+                                <CheckCircleIcon style={{ color: 'rgb(23, 210, 23)', fontSize: '15px'}} />
+                            </Button>
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    p: 0,
+                                    color: 'black',
+                                    marginLeft: '5px',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    width: '25px',
+                                    minWidth: '25px',
+                                    height: '20px',
+                                    backgroundColor: 'white',
+                                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                    textTransform: 'none',
+                                    '&:hover': {
+                                        textDecoration: 'none',
+                                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                                    },
+                                }}
+                            >
+                                <CancelIcon style={{ color: 'red', fontSize: '15px'}} />
+                            </Button>
+                    </Box>
+                    )}
+            </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="h6" gutterBottom
+                            sx={{
                                 fontSize: '18px',
                                 fontWeight: 'bold'
-                            }}>
-                {taskName}
-            </Typography>
-            <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-                {projectName}
-            </Typography>
-            <Typography variant="body2" gutterBottom sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                width: '100%',
-            }}>
-                {description}
-            </Typography>
-            <Typography variant="body2">
-                {startDate} ~ {endDate}
-            </Typography>
-            {status === 'WAITING' && hasPermission && (
-            <Box sx={{
-                marginTop: '10px',
-            }}>
-                <Button variant="contained" sx={{
-                    color: 'black',
-                    marginLeft: '10px',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    height: '30px',
-                    backgroundColor: 'white',
-                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
-                    textTransform: 'none',
-                    minWidth: '75px',
-                    padding: '0 12px',
-                    '&:hover': {
-                        textDecoration: 'none',
-                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
-                    },
-                }}
-                        startIcon={<CheckCircleIcon style={{ color: 'rgb(23, 210, 23)'}} />}
+                            }}
                 >
-                    승인
-                </Button>
-                <Button variant="contained" sx={{
-                    color: 'black',
-                    marginLeft: '10px',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    height: '30px',
-                    backgroundColor: 'white',
-                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
-                    textTransform: 'none',
-                    minWidth: '75px',
-                    padding: '0 12px',
-                    '&:hover': {
-                        textDecoration: 'none',
-                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
-                    },
-                }}
-                        startIcon={<CancelIcon style={{ color: 'red'}} />}
-                >
-                    거절
-                </Button>
+                    {taskName}
+                </Typography>
+                {/*<Typography variant="subtitle1" color="textSecondary" gutterBottom>*/}
+                {/*    {projectName}*/}
+                {/*</Typography>*/}
             </Box>
-                )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center'}}>
+                <Typography variant="body2" gutterBottom
+                            sx={{
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                width: '100%',
+                                textAlign: 'left',
+                            }}>
+                    {description}
+                </Typography>
+            </Box>
         </MUICard>
+
     );
 };
 

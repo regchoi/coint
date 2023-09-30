@@ -1,7 +1,7 @@
 // data.ts
 
 // tableName 정의
-const tableName: string = '업무관리';
+const tableName: string = '업무조회';
 const API_LINK: string = '/api/task';
 
 // 테이블의 구조를 정의

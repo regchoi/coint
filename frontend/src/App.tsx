@@ -19,6 +19,7 @@ import Calendar from "./components/Project/Calendar";
 import FileDrive from "./components/Document/FileDrive";
 // Template
 import TemplateCopy from "./components/Template/TemplateCopy";
+import TemplateList from "./components/Template/TemplateList";
 
 // Example
 // import SampleTable from "./components/SampleTable";
@@ -52,6 +53,7 @@ const ROUTES = {
     FILEDRIVE: '/document/drive',
     // Template
     TEMPLATECOPY: '/template/copy',
+    TEMPLATELIST: '/template/list',
 
     // Example
     // SAMPLE_TABLE: '/sampletable',
@@ -98,6 +100,7 @@ const App: React.FC = () => {
                         <Route path={ROUTES.FILEDRIVE} element={<FileDrive/>}/>
 
                         <Route path={ROUTES.TEMPLATECOPY} element={<TemplateCopy/>}/>
+                        <Route path={ROUTES.TEMPLATELIST} element={<TemplateList/>}/>
 
                         {/* Example*/}
                         {/*<Route path={ROUTES.SAMPLE_TABLE} element={<SampleTable/>}/>*/}

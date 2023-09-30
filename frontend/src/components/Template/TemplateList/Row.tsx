@@ -1,8 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {TableRow, TableCell, Checkbox, IconButton} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import {Data} from "./data";
 import { useNavigate } from 'react-router-dom';
+import {CSSTransition} from "react-transition-group";
+import AddModal from "./AddModal";
 
 type RowProps = {
     row: Data,
@@ -15,6 +17,12 @@ type RowProps = {
 // row의 각 key를 기준으로 TableCell을 구성함
 // 각 key는 Data의 key type인 keyof Data로 정의함
 const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) => {
+    const [templateInfoModalOpen, setTemplateInfoModalOpen] = useState(false);
+
+    const handleTemplateModalClick = (event: React.MouseEvent<unknown>, id_num: number) => {
+        event.stopPropagation();  // 이벤트 전파 중단
+        setTemplateInfoModalOpen(true);
+    }
 
     const navigate = useNavigate();
 
@@ -80,24 +88,34 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                             border: "1px solid rgba(0, 0, 0, 0.12)",
                             padding: "0px 10px",
                             fontSize: "12px",
-                            width: "250px",
+                            width: "275px",
                             overflow: "hidden",
                         }} align="center" key={key}>
                             {description+'...'}
                         </TableCell>
                     );
                 }
-                if (key === 'startDate' || key === 'endDate' || key === 'regDate') {
+                if (key === 'period') {
                     return <TableCell sx={{
                         border: "1px solid rgba(0, 0, 0, 0.12)",
                         padding: "0px 10px",
                         fontSize: "12px",
-                    }} align="center" key={key}>{row[key] ? (row[key]).toString().substring(0, 10) : ''}</TableCell>;
+                    }} align="center" key={key}>{row[key]+'일'}</TableCell>;
                 }
-
-                const handleRedirect = (idNum: number) => {
-                    alert('TODO: Modal창으로 프로젝트 상세 정보 보여주기');
-                };
+                if (key === 'taskNum') {
+                    return <TableCell sx={{
+                        border: "1px solid rgba(0, 0, 0, 0.12)",
+                        padding: "0px 10px",
+                        fontSize: "12px",
+                    }} align="center" key={key}>{row[key]+'개'}</TableCell>;
+                }
+                if (key === 'workerNum') {
+                    return <TableCell sx={{
+                        border: "1px solid rgba(0, 0, 0, 0.12)",
+                        padding: "0px 10px",
+                        fontSize: "12px",
+                    }} align="center" key={key}>{row[key]+'명'}</TableCell>;
+                }
 
                 if (key === 'detail') {
                     return (
@@ -107,7 +125,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                             fontSize: "12px",
                             width: "120px"
                         }} align="center" key={key}>
-                            <IconButton onClick={() => handleRedirect}>  {/* 아이콘 버튼에 클릭 이벤트 연결 */}
+                            <IconButton onClick={(event) => handleTemplateModalClick(event, row.idNum)}>  {/* 아이콘 버튼에 클릭 이벤트 연결 */}
                                 <SearchIcon/>
                             </IconButton>
                         </TableCell>
@@ -119,6 +137,18 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                     fontSize: "12px",
                 }} align="center" key={key}>{row[key]}</TableCell>;
             })}
+
+            <CSSTransition
+                in={true}
+                appear={true}
+                timeout={300}
+                classNames="fade">
+                <AddModal
+                    open={templateInfoModalOpen}
+                    onClose={() => setTemplateInfoModalOpen(false)}
+                />
+            </CSSTransition>
+
         </TableRow>
     );
 };

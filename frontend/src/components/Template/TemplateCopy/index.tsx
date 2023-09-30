@@ -68,7 +68,7 @@ const TemplateCopy: React.FC = () => {
     const [selectedProjectIdNum, setSelectedProjectIdNum] = useState<number>(0);
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [projectListOpen, setProjectListOpen] = useState(false);
+    const [projectListOpen, setProjectListOpen] = useState(true);
     const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
 
     const autocompleteOptions = options.map(option => option.projectName);
@@ -347,7 +347,7 @@ const TemplateCopy: React.FC = () => {
                     </CSSTransition>
                         {
                             selectedProjectIdNum !== 0 && selectedProject ? (
-                                <Box>
+                                <Box sx={{mt: 3}}>
                                     <Typography variant="h6" gutterBottom>
                                         템플릿 상세정보
                                     </Typography>
@@ -357,20 +357,6 @@ const TemplateCopy: React.FC = () => {
                                             <Grid item xs={12} key={selectedProjectIdNum}>
                                                 <TextField
                                                     label="템플릿명"
-                                                    name="projectName"
-                                                    variant="filled"
-                                                    value={selectedProject.projectName}
-                                                    onChange={handleInputChange}
-                                                    sx={{mt: 1, width: '51%'}}
-                                                    InputProps={{
-                                                        style: {fontSize: '14px', backgroundColor: 'transparent'}
-                                                    }}
-                                                    InputLabelProps={{
-                                                        style: {fontSize: '14px'},
-                                                    }}
-                                                />
-                                                <TextField
-                                                    label="프로젝트명"
                                                     name="projectName"
                                                     variant="filled"
                                                     value={selectedProject.projectName}
@@ -451,7 +437,7 @@ const TemplateCopy: React.FC = () => {
 
                                     {
                                         tasks.length !== 0 ? (
-                                            <Box sx={{ mt: 3 }}>
+                                            <Box sx={{ mt: 7 }}>
                                                 <Typography variant="h6" gutterBottom>
                                                     템플릿 업무
                                                 </Typography>
