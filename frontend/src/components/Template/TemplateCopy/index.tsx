@@ -34,9 +34,16 @@ type ProjectSelectResponse = {
 type ProjectResponse = {
     idNum: number;
     projectName: string;
+    description: string;
     startDate: string;
     endDate: string;
     status: string;
+}
+
+type TemplateRequest = {
+    templateName: string;
+    description: string;
+    period: number;
 }
 
 type TaskGroupResponse = {
@@ -56,6 +63,13 @@ type TaskResponse = {
     taskGroupIdNum: number;
 }
 
+type TemplateTaskRequest = {
+    taskName: string;
+    description: string;
+    period: number;
+    offsetDay: number;
+}
+
 const TemplateCopy: React.FC = () => {
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
     const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
@@ -70,6 +84,9 @@ const TemplateCopy: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [projectListOpen, setProjectListOpen] = useState(true);
     const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
+    const [period, setPeriod] = useState<number>(0);
+    const [templateRequest, setTemplateRequest] = useState<TemplateRequest | null>(null);
+    const [templateTaskRequest, setTemplateTaskRequest] = useState<TemplateTaskRequest[]>([]);
 
     const autocompleteOptions = options.map(option => option.projectName);
     const filteredOptions = searchTerm === ""
@@ -88,6 +105,25 @@ const TemplateCopy: React.FC = () => {
         setSelectedProjectIdNum(projectResponses.find(project => project.projectName === newValue)?.idNum || 0);
     };
 
+    // ProjectResponse의 정보를 TemplateRequest형식으로 변환하는 함수
+    const convertProjectResponseToTemplateRequest = (projectResponse: ProjectResponse): TemplateRequest => {
+        return {
+            templateName: projectResponse.projectName,
+            description: projectResponse.description,
+            period: getDaysDifference(projectResponse.startDate, projectResponse.endDate),
+        }
+    }
+
+    // TaskResponse의 정보를 TemplateTaskRequest형식으로 변환하는 함수
+    const convertTaskResponseToTemplateTaskRequest = (taskResponse: TaskResponse): TemplateTaskRequest => {
+        return {
+            taskName: taskResponse.taskName,
+            description: taskResponse.description,
+            period: getDaysDifference(taskResponse.startDate, taskResponse.endDate),
+            offsetDay: getDaysDifference(projectResponses.find(project => project.idNum === taskResponse.projectsIdNum)?.startDate || "", taskResponse.startDate),
+        }
+    }
+
     const handleTaskChange = (index, key, value) => {
         const updatedTasks = [...tasks];
         updatedTasks[index][key] = value;
@@ -105,6 +141,11 @@ const TemplateCopy: React.FC = () => {
         setExpandedTasks(newExpandedTasks);
     };
 
+    function getDaysDifference(start: string, end: string) {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        return Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    };
 
     useEffect(() => {
         // 프로목록 불러오기
@@ -151,11 +192,15 @@ const TemplateCopy: React.FC = () => {
 
     // useEffect로 selectedProjectIdNum이 변경될 때마다 실행
     useEffect(() => {
-        setTasks(taskResponses.filter(task => task.projectName === selectedProject?.projectName));
-    }, [selectedProjectIdNum]);
+        // TemplateRequest에 selectedProjectIdNum에 대응되는 projectResponse를 넣어줌
+        setTemplateRequest(convertProjectResponseToTemplateRequest(projectResponses.find(project => project.idNum === selectedProjectIdNum) || null));
 
-    // selectedProjectIdNum에 대응되는 selectProject
-    const selectedProject = projectResponses.find(project => project.idNum === selectedProjectIdNum);
+        // TemplateTaskRequest에 selectedProjectIdNum에 대응되는 taskResponse를 넣어줌
+        setTemplateTaskRequest(taskResponses.filter(task => task.projectsIdNum === selectedProjectIdNum).map(task => convertTaskResponseToTemplateTaskRequest(task)));
+
+        // setTasks(taskResponses.filter(task => task.projectName === selectedProject?.projectName));
+        // setPeriod(getDaysDifference(selectedProject?.startDate, selectedProject?.endDate));
+    }, [selectedProjectIdNum]);
 
     return (
         <Grid container>
@@ -346,7 +391,7 @@ const TemplateCopy: React.FC = () => {
                         </div>
                     </CSSTransition>
                         {
-                            selectedProjectIdNum !== 0 && selectedProject ? (
+                            selectedProjectIdNum !== 0 && templateRequest !== null ? (
                                 <Box sx={{mt: 3}}>
                                     <Typography variant="h6" gutterBottom>
                                         템플릿 상세정보
@@ -359,7 +404,7 @@ const TemplateCopy: React.FC = () => {
                                                     label="템플릿명"
                                                     name="projectName"
                                                     variant="filled"
-                                                    value={selectedProject.projectName}
+                                                    value={templateRequest.templateName}
                                                     onChange={handleInputChange}
                                                     sx={{mt: 1, width: '51%'}}
                                                     InputProps={{
@@ -374,7 +419,7 @@ const TemplateCopy: React.FC = () => {
                                                     minRows={4}
                                                     name="description"
                                                     placeholder="프로젝트 상세설명을 입력하세요"
-                                                    value={selectedProject.description}
+                                                    value={templateRequest.description}
                                                     onChange={handleInputChange}
                                                     style={{
                                                         fontSize: '14px',
@@ -387,14 +432,14 @@ const TemplateCopy: React.FC = () => {
                                                     }}
                                                 />
 
-                                                <Grid container spacing={2} sx={{mt: 3}}>
-                                                    <Grid item xs={6}>
+                                                <Grid container spacing={4} sx={{mt: 3}}>
+                                                    <Grid item xs={3}>
                                                         <TextField
-                                                            label="프로젝트 시작예정일"
+                                                            label="기간 (일)"
                                                             variant="outlined"
-                                                            type="date"
-                                                            name="startDate"
-                                                            value={selectedProject.startDate}
+                                                            type="number"
+                                                            name="period"
+                                                            value={templateRequest.period}
                                                             onChange={handleInputChange}
                                                             fullWidth
                                                             InputProps={{
@@ -409,15 +454,43 @@ const TemplateCopy: React.FC = () => {
                                                             }}
                                                         />
                                                     </Grid>
-                                                    <Grid item xs={6}>
+
+                                                    <Grid item xs={3}>
+                                                        &nbsp;
+                                                    </Grid>
+
+                                                    <Grid item xs={3}>
+                                                        <TextField
+                                                            label="프로젝트 시작예정일"
+                                                            variant="outlined"
+                                                            type="date"
+                                                            name="startDate"
+                                                            // 시작예정일 = 오늘날짜
+                                                            value={}
+                                                            fullWidth
+                                                            disabled
+                                                            InputProps={{
+                                                                style: {
+                                                                    fontSize: '14px',
+                                                                    backgroundColor: 'transparent'
+                                                                }
+                                                            }}
+                                                            InputLabelProps={{
+                                                                style: {fontSize: '14px'},
+                                                                shrink: true,
+                                                            }}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={3}>
                                                         <TextField
                                                             label="프로젝트 종료예정일"
                                                             variant="outlined"
                                                             type="date"
                                                             name="endDate"
-                                                            value={selectedProject.endDate}
-                                                            onChange={handleInputChange}
+                                                            // 종료예정일 = 오늘날짜 + period
+                                                            value={}
                                                             fullWidth
+                                                            disabled
                                                             InputProps={{
                                                                 style: {
                                                                     fontSize: '14px',
