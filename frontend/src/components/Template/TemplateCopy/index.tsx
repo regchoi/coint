@@ -89,7 +89,7 @@ const TemplateCopy: React.FC = () => {
     const [templateRequest, setTemplateRequest] = useState<TemplateRequest | null>(null);
     const [templateTaskRequest, setTemplateTaskRequest] = useState<TemplateTaskRequest[]>([]);
     const [templateRoleRequest, setTemplateRoleRequest] = useState<Role[]>([]);
-    const [roleListOpen, setRoleListOpen] = useState(true);
+    const [roleListOpen, setRoleListOpen] = useState(false);
 
     const autocompleteOptions = options.map(option => option.projectName);
     const filteredOptions = searchTerm === ""
