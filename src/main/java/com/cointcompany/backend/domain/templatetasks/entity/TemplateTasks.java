@@ -38,11 +38,11 @@ public class TemplateTasks extends BaseEntity {
     @JoinColumn(name = "templateIdNum")
     private Templates templates;
 
-    @OneToMany(mappedBy = "templatetasks", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<TemplateDepartment> taskDepartments = new ArrayList<>();
+    @OneToMany(mappedBy = "templateTasks", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<TemplateTaskDepartment> taskDepartments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "templatetasks", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<TemplateUser> taskUsers = new ArrayList<>();
+    @OneToMany(mappedBy = "templateTasks", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<TemplateTaskUser> taskUsers = new ArrayList<>();
 
     public static TemplateTasks of (
             String taskName, String description, Integer period, Integer offsetDay, Templates templates

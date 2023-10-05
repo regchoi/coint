@@ -38,6 +38,11 @@ type ProjectResponse = {
     status: string;
 }
 
+type ProjectUserNum = {
+    projectIdNum: number;
+    projectUserNum: number;
+}
+
 type TaskGroupResponse = {
     idNum: number;
     taskGroupName: string;
@@ -295,7 +300,7 @@ const MyCalendar: React.FC = () => {
                                                         </Typography>
 
                                                         <Typography variant="body2" mt={1}>
-                                                            작업인원: {"몇"}명
+                                                            작업인원: {projectNum}명
                                                         </Typography>
 
                                                         <Divider style={{margin: '10px 0'}}/>

@@ -2,7 +2,7 @@ import React, {SyntheticEvent, useEffect, useState} from 'react';
 import { Event } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import {
-    Autocomplete, AutocompleteInputChangeReason, Box,
+    Autocomplete, AutocompleteInputChangeReason, Box, Button,
     Card as MUICard,
     CardContent, Chip, Collapse, Divider,
     Grid,
@@ -11,15 +11,12 @@ import {
     Tooltip,
     Typography
 } from "@mui/material";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import GroupsIcon from '@mui/icons-material/Groups';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {CSSTransition} from "react-transition-group";
 import ErrorModal from "../../common/ErrorModal";
 import axios from "../../../redux/axiosConfig";
-
-interface MyEvent extends Event {
-    title: string;
-}
+import RoleModal from "./RoleModal";
 
 type ProjectUserNum = {
     projectIdNum: number;
@@ -70,23 +67,29 @@ type TemplateTaskRequest = {
     offsetDay: number;
 }
 
+type Role = {
+    roleName: string;
+    roleLevel: number;
+    description: string;
+}
+
 const TemplateCopy: React.FC = () => {
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
-    const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
+    // const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
     const [taskResponses, setTaskResponses] = useState<TaskResponse[]>([]);
     const [projectUserNum, setProjectUserNum] = useState<ProjectUserNum[]>([]);
     const [tasks, setTasks] = useState<TaskResponse[]>([]);
     const [options, setOptions] = useState<ProjectSelectResponse[]>([]);
-    const [calendarEvents, setCalendarEvents] = useState<MyEvent[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedProjectIdNum, setSelectedProjectIdNum] = useState<number>(0);
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [projectListOpen, setProjectListOpen] = useState(true);
     const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
-    const [period, setPeriod] = useState<number>(0);
     const [templateRequest, setTemplateRequest] = useState<TemplateRequest | null>(null);
     const [templateTaskRequest, setTemplateTaskRequest] = useState<TemplateTaskRequest[]>([]);
+    const [templateRoleRequest, setTemplateRoleRequest] = useState<Role[]>([]);
+    const [roleListOpen, setRoleListOpen] = useState(true);
 
     const autocompleteOptions = options.map(option => option.projectName);
     const filteredOptions = searchTerm === ""
@@ -120,14 +123,20 @@ const TemplateCopy: React.FC = () => {
             taskName: taskResponse.taskName,
             description: taskResponse.description,
             period: getDaysDifference(taskResponse.startDate, taskResponse.endDate),
-            offsetDay: getDaysDifference(projectResponses.find(project => project.idNum === taskResponse.projectsIdNum)?.startDate || "", taskResponse.startDate),
+            offsetDay: getDaysDifference(projectResponses.find(project => project.projectName === taskResponse.projectName)?.startDate || "", taskResponse.startDate) || 0,
         }
     }
 
-    const handleTaskChange = (index, key, value) => {
-        const updatedTasks = [...tasks];
+    const handleTemplateChange = (key: string, value: string | number) => {
+        const updatedTemplate = {...templateRequest};
+        updatedTemplate[key] = value;
+        setTemplateRequest(updatedTemplate);
+    }
+
+    const handleTaskChange = (index: number, key: string, value: string | number) => {
+        const updatedTasks = [...templateTaskRequest];
         updatedTasks[index][key] = value;
-        setTasks(updatedTasks);
+        setTemplateTaskRequest(updatedTasks);
     };
 
     const toggleTaskExpansion = (index: number) => {
@@ -193,13 +202,24 @@ const TemplateCopy: React.FC = () => {
     // useEffect로 selectedProjectIdNum이 변경될 때마다 실행
     useEffect(() => {
         // TemplateRequest에 selectedProjectIdNum에 대응되는 projectResponse를 넣어줌
-        setTemplateRequest(convertProjectResponseToTemplateRequest(projectResponses.find(project => project.idNum === selectedProjectIdNum) || null));
+        const foundProject = projectResponses.find(project => project.idNum === selectedProjectIdNum);
+        if (foundProject) {
+            setTemplateRequest(convertProjectResponseToTemplateRequest(foundProject));
+        }
 
         // TemplateTaskRequest에 selectedProjectIdNum에 대응되는 taskResponse를 넣어줌
-        setTemplateTaskRequest(taskResponses.filter(task => task.projectsIdNum === selectedProjectIdNum).map(task => convertTaskResponseToTemplateTaskRequest(task)));
+        const relatedTasks = taskResponses.filter(task => task.projectName === searchTerm);
+        setTemplateTaskRequest(relatedTasks.map(task => convertTaskResponseToTemplateTaskRequest(task)));
 
-        // setTasks(taskResponses.filter(task => task.projectName === selectedProject?.projectName));
-        // setPeriod(getDaysDifference(selectedProject?.startDate, selectedProject?.endDate));
+        // 권한 목록 불러오기
+        axios.get(`/api/project/role/${selectedProjectIdNum}`)
+            .then((response) => {
+                setTemplateRoleRequest(response.data);
+            })
+            .catch((error) => {
+                setErrorModalOpen(true)
+                setErrorMessage("프로젝트 권한 목록을 불러오는데 실패했습니다.")
+            });
     }, [selectedProjectIdNum]);
 
     return (
@@ -264,6 +284,7 @@ const TemplateCopy: React.FC = () => {
                                         // TODO: 프로젝트별 업무, TODO, WORKING, WAITING, DONE 개수 조회
                                         // projectName과 동일한 task들을 추출
                                         const tasks = taskResponses.filter(task => task.projectName === project.projectName);
+                                        const projectNum = projectUserNum.find(projectUserNum => projectUserNum.projectIdNum === project.idNum)?.projectUserNum || 0;
                                         const todoTasks = tasks.filter(task => task.status === "TODO" || null);
                                         const workingTasks = tasks.filter(task => task.status === "WORKING");
                                         const waitingTasks = tasks.filter(task => task.status === "WAITING");
@@ -313,7 +334,7 @@ const TemplateCopy: React.FC = () => {
                                                         </Typography>
 
                                                         <Typography variant="body2" mt={1}>
-                                                            작업인원: {"몇"}명
+                                                            작업인원: {projectNum}명
                                                         </Typography>
 
                                                         <Divider style={{margin: '10px 0'}}/>
@@ -400,27 +421,51 @@ const TemplateCopy: React.FC = () => {
                                     <Box sx={{mt: 2}}>
                                         <Grid container spacing={2}>
                                             <Grid item xs={12} key={selectedProjectIdNum}>
-                                                <TextField
-                                                    label="템플릿명"
-                                                    name="projectName"
-                                                    variant="filled"
-                                                    value={templateRequest.templateName}
-                                                    onChange={handleInputChange}
-                                                    sx={{mt: 1, width: '51%'}}
-                                                    InputProps={{
-                                                        style: {fontSize: '14px', backgroundColor: 'transparent'}
-                                                    }}
-                                                    InputLabelProps={{
-                                                        style: {fontSize: '14px'},
-                                                    }}
-                                                />
+                                                <Box display="flex" justifyContent="space-between">
+                                                    <TextField
+                                                        label="템플릿명"
+                                                        name="projectName"
+                                                        variant="filled"
+                                                        value={templateRequest.templateName}
+                                                        onChange={e => handleTemplateChange('templateName', e.target.value)}
+                                                        sx={{mt: 1, width: '30%'}}
+                                                        InputProps={{
+                                                            style: {fontSize: '14px', backgroundColor: 'transparent'}
+                                                        }}
+                                                        InputLabelProps={{
+                                                            style: {fontSize: '14px'},
+                                                        }}
+                                                    />
+
+                                                    <Button variant="contained"
+                                                            startIcon={<GroupsIcon style={{ color: '#888888', marginRight: '2px', fontSize: '15px' }} />}
+                                                            sx={{ color: 'black',
+                                                                marginLeft: '10px',
+                                                                fontSize: '12px',
+                                                                fontWeight: 'bold',
+                                                                height: '30px',
+                                                                backgroundColor: 'white',
+                                                                boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                                textTransform: 'none',
+                                                                minWidth: '75px',
+                                                                padding: '0 12px',
+                                                                '&:hover': {
+                                                                    textDecoration: 'none',
+                                                                    backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                                                                }
+                                                            }}
+                                                            onClick={() => {setRoleListOpen(true)}}
+                                                    >
+                                                        권한관리
+                                                    </Button>
+                                                </Box>
                                                 <TextareaAutosize
                                                     aria-label="프로젝트 상세설명"
                                                     minRows={4}
                                                     name="description"
                                                     placeholder="프로젝트 상세설명을 입력하세요"
                                                     value={templateRequest.description}
-                                                    onChange={handleInputChange}
+                                                    onChange={e => handleTemplateChange('description', e.target.value)}
                                                     style={{
                                                         fontSize: '14px',
                                                         width: '100%',
@@ -440,7 +485,7 @@ const TemplateCopy: React.FC = () => {
                                                             type="number"
                                                             name="period"
                                                             value={templateRequest.period}
-                                                            onChange={handleInputChange}
+                                                            onChange={e => handleTemplateChange('period', e.target.value)}
                                                             fullWidth
                                                             InputProps={{
                                                                 style: {
@@ -461,12 +506,11 @@ const TemplateCopy: React.FC = () => {
 
                                                     <Grid item xs={3}>
                                                         <TextField
-                                                            label="프로젝트 시작예정일"
+                                                            label="임시 시작일"
                                                             variant="outlined"
                                                             type="date"
                                                             name="startDate"
-                                                            // 시작예정일 = 오늘날짜
-                                                            value={}
+                                                            value={new Date().toISOString().split('T')[0]}
                                                             fullWidth
                                                             disabled
                                                             InputProps={{
@@ -483,12 +527,12 @@ const TemplateCopy: React.FC = () => {
                                                     </Grid>
                                                     <Grid item xs={3}>
                                                         <TextField
-                                                            label="프로젝트 종료예정일"
+                                                            label="임시 종료일"
                                                             variant="outlined"
                                                             type="date"
                                                             name="endDate"
-                                                            // 종료예정일 = 오늘날짜 + period
-                                                            value={}
+                                                            // 종료예정일 = 오늘날짜 + period (임시)
+                                                            value={new Date(new Date().getTime() + (templateRequest.period * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
                                                             fullWidth
                                                             disabled
                                                             InputProps={{
@@ -509,7 +553,7 @@ const TemplateCopy: React.FC = () => {
                                     </Box>
 
                                     {
-                                        tasks.length !== 0 ? (
+                                        templateTaskRequest.length !== 0 ? (
                                             <Box sx={{ mt: 7 }}>
                                                 <Typography variant="h6" gutterBottom>
                                                     템플릿 업무
@@ -518,7 +562,7 @@ const TemplateCopy: React.FC = () => {
                                                 <Box sx={{ mt: 2 }}>
                                                     <Grid container spacing={2}>
                                                         {
-                                                            tasks.map((task, index) => (
+                                                            templateTaskRequest.map((task, index) => (
                                                                 <Grid item xs={12} key={index}>
                                                                     <MUICard>
                                                                         <CardContent>
@@ -543,10 +587,10 @@ const TemplateCopy: React.FC = () => {
                                                                                                     fontSize: '12px',
                                                                                                     opacity: expandedTasks.includes(index) ? 0 : 1,
                                                                                                     transition: 'opacity 300ms ease-in-out'
-                                                                                    }}>
+                                                                                                }}>
                                                                                         {
-                                                                                            // 시작일 ~ 종료일
-                                                                                            task.startDate + ' ~ ' + task.endDate
+                                                                                            new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000)).toISOString().split('T')[0] + ' ~ ' +
+                                                                                            new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000) + (task.period * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]
                                                                                         }
                                                                                     </Typography>
                                                                                 </Box>
@@ -564,15 +608,15 @@ const TemplateCopy: React.FC = () => {
                                                                                 </IconButton>
                                                                             </Box>
                                                                             <Collapse in={expandedTasks.includes(index)}>
-                                                                                <Grid container spacing={2} sx={{mt: 3}}>
-                                                                                    <Grid item xs={6}>
+                                                                                <Grid container spacing={4} sx={{mt: 3}}>
+                                                                                    <Grid item xs={3}>
                                                                                         <TextField
-                                                                                            label="시작일"
+                                                                                            label="기간 (일)"
                                                                                             variant="outlined"
-                                                                                            type="date"
-                                                                                            name="startDate"
-                                                                                            value={task.startDate}
-                                                                                            onChange={e => handleTaskChange(index, 'startDate', e.target.value)}
+                                                                                            type="number"
+                                                                                            name="period"
+                                                                                            value={task.period}
+                                                                                            onChange={e => handleTaskChange(index, 'period', e.target.value)}
                                                                                             fullWidth
                                                                                             InputProps={{
                                                                                                 style: {
@@ -586,15 +630,60 @@ const TemplateCopy: React.FC = () => {
                                                                                             }}
                                                                                         />
                                                                                     </Grid>
-                                                                                    <Grid item xs={6}>
+
+                                                                                    <Grid item xs={3}>
                                                                                         <TextField
-                                                                                            label="종료일"
+                                                                                            label="offsetDay"
+                                                                                            variant="outlined"
+                                                                                            type="number"
+                                                                                            name="period"
+                                                                                            value={task.offsetDay}
+                                                                                            onChange={e => handleTaskChange(index, 'offsetDay', e.target.value)}
+                                                                                            fullWidth
+                                                                                            InputProps={{
+                                                                                                style: {
+                                                                                                    fontSize: '14px',
+                                                                                                    backgroundColor: 'transparent'
+                                                                                                }
+                                                                                            }}
+                                                                                            InputLabelProps={{
+                                                                                                style: {fontSize: '14px'},
+                                                                                                shrink: true,
+                                                                                            }}
+                                                                                        />
+                                                                                    </Grid>
+
+                                                                                    <Grid item xs={3}>
+                                                                                        <TextField
+                                                                                            label="임시 시작일"
+                                                                                            variant="outlined"
+                                                                                            type="date"
+                                                                                            name="startDate"
+                                                                                            value={new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
+                                                                                            fullWidth
+                                                                                            disabled
+                                                                                            InputProps={{
+                                                                                                style: {
+                                                                                                    fontSize: '14px',
+                                                                                                    backgroundColor: 'transparent'
+                                                                                                }
+                                                                                            }}
+                                                                                            InputLabelProps={{
+                                                                                                style: {fontSize: '14px'},
+                                                                                                shrink: true,
+                                                                                            }}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                    <Grid item xs={3}>
+                                                                                        <TextField
+                                                                                            label="임시 종료일"
                                                                                             variant="outlined"
                                                                                             type="date"
                                                                                             name="endDate"
-                                                                                            value={task.endDate}
-                                                                                            onChange={e => handleTaskChange(index, 'endDate', e.target.value)}
+                                                                                            // 종료예정일 = 오늘날짜 + offsetDay + period (임시)
+                                                                                            value={new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000) + (task.period * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
                                                                                             fullWidth
+                                                                                            disabled
                                                                                             InputProps={{
                                                                                                 style: {
                                                                                                     fontSize: '14px',
@@ -654,6 +743,11 @@ const TemplateCopy: React.FC = () => {
                 </Box>
             </Grid>
 
+            {
+                templateRoleRequest.length > 0 && (
+                    <RoleModal open={roleListOpen} onClose={() => setRoleListOpen(false)} roleList={templateRoleRequest} setRoleList={setTemplateRoleRequest} />
+                )
+            }
 
             {/*에러 발생 Modal*/}
             <ErrorModal
