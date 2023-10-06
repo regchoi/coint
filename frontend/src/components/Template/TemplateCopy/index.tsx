@@ -11,12 +11,14 @@ import {
     Tooltip,
     Typography
 } from "@mui/material";
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import GroupsIcon from '@mui/icons-material/Groups';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {CSSTransition} from "react-transition-group";
 import ErrorModal from "../../common/ErrorModal";
 import axios from "../../../redux/axiosConfig";
 import RoleModal from "./RoleModal";
+import UserModal from "./UserModal";
 
 type ProjectUserNum = {
     projectIdNum: number;
@@ -73,6 +75,11 @@ type Role = {
     description: string;
 }
 
+type User = {
+    userId: number;
+    templateRoleId: number;
+}
+
 const TemplateCopy: React.FC = () => {
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
     // const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
@@ -90,6 +97,8 @@ const TemplateCopy: React.FC = () => {
     const [templateTaskRequest, setTemplateTaskRequest] = useState<TemplateTaskRequest[]>([]);
     const [templateRoleRequest, setTemplateRoleRequest] = useState<Role[]>([]);
     const [roleListOpen, setRoleListOpen] = useState(false);
+    const [templateUserRequest, setTemplateUserRequest] = useState<User[]>([]);
+    const [userListOpen, setUserListOpen] = useState(false);
 
     const autocompleteOptions = options.map(option => option.projectName);
     const filteredOptions = searchTerm === ""
@@ -219,6 +228,25 @@ const TemplateCopy: React.FC = () => {
             .catch((error) => {
                 setErrorModalOpen(true)
                 setErrorMessage("프로젝트 권한 목록을 불러오는데 실패했습니다.")
+            });
+
+        // 템플릿 작업자 목록 불러오기
+        axios.get(`/api/project/user/${selectedProjectIdNum}`)
+            .then((response) => {
+                // response.data의 형태는
+                // { projectIdNum: number, userId: number, projectRoleId: number 인데
+                // userId는 그대로 갖오고 projectRoleId는 templateRoleId로 바꿔서 templateUserRequest에 넣어줌
+                const templateUserRequest = response.data.map((user: any) => {
+                    return {
+                        userId: user.userId,
+                        templateRoleId: user.projectRoleId,
+                    }
+                });
+                setTemplateUserRequest(templateUserRequest);
+            })
+            .catch((error) => {
+                setErrorModalOpen(true)
+                setErrorMessage("프로젝트 작업자 목록을 불러오는데 실패했습니다.")
             });
     }, [selectedProjectIdNum]);
 
@@ -437,27 +465,50 @@ const TemplateCopy: React.FC = () => {
                                                         }}
                                                     />
 
-                                                    <Button variant="contained"
-                                                            startIcon={<GroupsIcon style={{ color: '#888888', marginRight: '2px', fontSize: '15px' }} />}
-                                                            sx={{ color: 'black',
-                                                                marginLeft: '10px',
-                                                                fontSize: '12px',
-                                                                fontWeight: 'bold',
-                                                                height: '30px',
-                                                                backgroundColor: 'white',
-                                                                boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
-                                                                textTransform: 'none',
-                                                                minWidth: '75px',
-                                                                padding: '0 12px',
-                                                                '&:hover': {
-                                                                    textDecoration: 'none',
-                                                                    backgroundColor: 'rgb(0, 0, 0, 0.1)',
-                                                                }
-                                                            }}
-                                                            onClick={() => {setRoleListOpen(true)}}
-                                                    >
-                                                        권한관리
-                                                    </Button>
+                                                    <Box>
+                                                        <Button variant="contained"
+                                                                startIcon={<ManageAccountsIcon style={{ color: '#888888', marginRight: '2px', fontSize: '15px' }} />}
+                                                                sx={{ color: 'black',
+                                                                    marginLeft: '10px',
+                                                                    fontSize: '12px',
+                                                                    fontWeight: 'bold',
+                                                                    height: '30px',
+                                                                    backgroundColor: 'white',
+                                                                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                                    textTransform: 'none',
+                                                                    minWidth: '75px',
+                                                                    padding: '0 12px',
+                                                                    '&:hover': {
+                                                                        textDecoration: 'none',
+                                                                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                                                                    }
+                                                                }}
+                                                                onClick={() => {setRoleListOpen(true)}}
+                                                        >
+                                                            권한관리
+                                                        </Button>
+                                                        <Button variant="contained"
+                                                                startIcon={<GroupsIcon style={{ color: '#888888', marginRight: '2px', fontSize: '15px' }} />}
+                                                                sx={{ color: 'black',
+                                                                    marginLeft: '10px',
+                                                                    fontSize: '12px',
+                                                                    fontWeight: 'bold',
+                                                                    height: '30px',
+                                                                    backgroundColor: 'white',
+                                                                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                                    textTransform: 'none',
+                                                                    minWidth: '75px',
+                                                                    padding: '0 12px',
+                                                                    '&:hover': {
+                                                                        textDecoration: 'none',
+                                                                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                                                                    }
+                                                                }}
+                                                                onClick={() => {setRoleListOpen(true)}}
+                                                        >
+                                                            작업자관리
+                                                        </Button>
+                                                    </Box>
                                                 </Box>
                                                 <TextareaAutosize
                                                     aria-label="프로젝트 상세설명"
@@ -744,8 +795,13 @@ const TemplateCopy: React.FC = () => {
             </Grid>
 
             {
-                templateRoleRequest.length > 0 && (
+                templateRoleRequest && (
                     <RoleModal open={roleListOpen} onClose={() => setRoleListOpen(false)} roleList={templateRoleRequest} setRoleList={setTemplateRoleRequest} />
+                )
+            }
+            {
+                templateUserRequest && (
+                    <UserModal open={userListOpen} onClose={() => setUserListOpen(false)} userList={templateUserRequest} setUserList={setTemplateUserRequest} />
                 )
             }
 

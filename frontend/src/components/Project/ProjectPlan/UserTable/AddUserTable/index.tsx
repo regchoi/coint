@@ -114,7 +114,7 @@ export default function AddUserTable(props: AddUserTableProps) {
                 const userData = response.data.map((userData: UserResponse) => ({
                     idNum: userData.idNum,
                     name: userData.name || '',  // handle the potential null value
-                    department: userData.getUserDepartmentResList.length > 0 ? userData.getUserDepartmentResList[0].departmentName : 'N/A',
+                    department: userData.getUserDepartmentResList.length > 0 ? userData.getUserDepartmentResList[0].departmentName : '부서 미배정',
                     email: userData.email || '',  // handle the potential null value
                 }));
                 // usersList에 있는 사용자는 제외하고 setUsers 구성

@@ -97,6 +97,16 @@ public class UsersController {
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
+
+    @Operation(summary = "사용자 이름 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/name/{userId}")
+    public ResponseEntity<String> getUserName (@PathVariable Long userId) {
+
+        return new ResponseEntity<>(usersService.getUserName(userId), HttpStatus.OK);
+    }
+
+
     @Operation(summary = "사용자&사용자그룹 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/usergroup/{userGroupId}")

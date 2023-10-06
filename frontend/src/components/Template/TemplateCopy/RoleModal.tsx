@@ -10,7 +10,7 @@ import {
     Grid,
     TextareaAutosize, TableHead, TableRow, TableCell, Collapse
 } from "@mui/material";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import * as React from "react";
 import axios from "../../../redux/axiosConfig";
@@ -19,37 +19,10 @@ import SuccessModal from "../../common/SuccessModal";
 import AddIcon from "@mui/icons-material/Add";
 import {DeleteOutline} from "@mui/icons-material";
 
-type Tag = {
-    projectId: number;
-    tagName: string;
-}
-
 type Role = {
     roleName: string;
     roleLevel: number;
     description: string;
-}
-
-type Data = {
-    projectName: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-}
-
-type User = {
-    idNum: number;
-    name: string;
-    email: string;
-    department: string;
-    role: number;
-}
-
-type Department = {
-    idNum: number;
-    departmentName: string;
-    description: string;
-    role: string;
 }
 
 interface ModalProps {
@@ -75,8 +48,6 @@ const RoleDescription: React.FC = () => {
 }
 
 export default function RoleModal({ open, onClose, roleList, setRoleList }: ModalProps) {
-    const [page, setPage] = useState(1);
-    const [data, setData] = useState<Data>({} as Data);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [isErrorModalOpen, setErrorModalOpen] = useState<boolean>(false);
     const [isSuccessModalOpen, setSuccessModalOpen] = useState<boolean>(false);
@@ -160,8 +131,11 @@ export default function RoleModal({ open, onClose, roleList, setRoleList }: Moda
     };
 
     const handleProjectSave = async () => {
-
     }
+
+    useEffect(() => {
+        setRoleLevel(roleList.length + 1);
+    }, [roleList]);
 
     return (
             <Modal open={open}>

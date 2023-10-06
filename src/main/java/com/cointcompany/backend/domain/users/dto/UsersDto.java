@@ -129,7 +129,7 @@ public class UsersDto {
 
         }
     }
-
+    
     @NoArgsConstructor
     @Data
     public static class GetUserUsergroup {

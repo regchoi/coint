@@ -157,6 +157,11 @@ public class UsersService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public String getUserName(Long userId) {
+        return usersRepository.findById(userId).orElseThrow().getName();
+    }
+
     @Transactional(readOnly = true)
     public List<UsersDto.GetUserUsergroup> getUserUserGroups(Long userGroupId) {
 
