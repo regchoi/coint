@@ -141,26 +141,32 @@ const TemplateCopy: React.FC = () => {
 
     // 정리된 템플릿 상세정보의 내용을 저장하는 함수
     const handleSaveTemplate = () => {
-        if (templateRequest === null) {
-            return;
+        // {
+        //   "idNum": 0,
+        //   "templateName": "string",
+        //   "description": "string",
+        //   "period": 0,
+        //   "regDate": "string",
+        //   "regUserid": "string"
+        // }
+        // 이 데이터 형식에 맞추어
+        // /api/template에 POST 요청을 보낸다.
+
+        const tempReq = {
+            templateName: templateRequest.templateName,
+            description: templateRequest.description,
+            period: templateRequest.period,
+            regDate: new Date().toISOString().slice(0, 10),
+            regUserid: "admin",
         }
 
-        const templateRequestData = {
-            ...templateRequest,
-            templateTasks: templateTaskRequest,
-            templateRoles: templateRoleRequest,
-            templateUsers: templateUserRequest,
-        };
-
-        axios.post(`/templates`, templateRequestData)
+        axios.post("/api/template", tempReq)
             .then(response => {
                 setTemplateIdNum(response.data.idNum);
-                setErrorModalOpen(true);
-                setErrorMessage("템플릿이 저장되었습니다.");
             })
             .catch(error => {
                 setErrorModalOpen(true);
-                setErrorMessage("템플릿 저장에 실패했습니다.");
+                setErrorMessage("템플릿을 저장하는데 실패했습니다.");
             })
     }
 
@@ -651,7 +657,7 @@ const TemplateCopy: React.FC = () => {
                                                                     backgroundColor: 'rgb(40, 49, 66, 0.8)',
                                                                 },
                                                             }}
-                                                            onClick={() => {}}
+                                                            onClick={handleSaveTemplate}
                                                         >
                                                             임시저장
                                                         </Button>
@@ -663,176 +669,182 @@ const TemplateCopy: React.FC = () => {
                                     </Box>
 
                                     {
+                                        templateIdNum == 0 ? (
+                                            <span style={{opacity: 0.5, fontSize: '12px'}}>* 템플릿 업무는 임시저장 이후에 수정가능합니다.</span>
+                                        ) : ''
+                                    }
+
+                                    {
                                         templateTaskRequest.length !== 0 ? (
-                                            <Box sx={{ mt: 7 }}>
-                                                <Typography variant="h6" gutterBottom>
-                                                    템플릿 업무
-                                                </Typography>
-                                                <Divider />
-                                                <Box sx={{ mt: 2 }}>
-                                                    <Grid container spacing={2}>
-                                                        {
-                                                            templateTaskRequest.map((task, index) => (
-                                                                <Grid item xs={12} key={index}>
-                                                                    <MUICard>
-                                                                        <CardContent>
-                                                                            <Box display="flex" justifyContent="space-between">
-                                                                                <Box display="flex" alignItems="center">
-                                                                                    <TextField
-                                                                                        label="업무명"
-                                                                                        value={task.taskName}
-                                                                                        onChange={e => handleTaskChange(index, 'taskName', e.target.value)}
-                                                                                        variant="filled"
-                                                                                        InputProps={{
-                                                                                            style: {fontSize: '14px', backgroundColor: 'transparent'}
-                                                                                        }}
-                                                                                        InputLabelProps={{
-                                                                                            style: {fontSize: '14px'},
+                                                <Box sx={{ mt: 7, opacity: templateIdNum === 0 ? 0.5 : 1, pointerEvents: templateIdNum === 0 ? 'none' : 'all' }}>
+                                                    <Typography variant="h6" gutterBottom>
+                                                        템플릿 업무
+                                                    </Typography>
+                                                    <Divider />
+                                                    <Box sx={{ mt: 2 }}>
+                                                        <Grid container spacing={2}>
+                                                            {
+                                                                templateTaskRequest.map((task, index) => (
+                                                                    <Grid item xs={12} key={index}>
+                                                                        <MUICard>
+                                                                            <CardContent>
+                                                                                <Box display="flex" justifyContent="space-between">
+                                                                                    <Box display="flex" alignItems="center">
+                                                                                        <TextField
+                                                                                            label="업무명"
+                                                                                            value={task.taskName}
+                                                                                            onChange={e => handleTaskChange(index, 'taskName', e.target.value)}
+                                                                                            variant="filled"
+                                                                                            InputProps={{
+                                                                                                style: {fontSize: '14px', backgroundColor: 'transparent'}
+                                                                                            }}
+                                                                                            InputLabelProps={{
+                                                                                                style: {fontSize: '14px'},
+                                                                                            }}
+                                                                                        />
+                                                                                        <Typography variant="body2"
+                                                                                                    sx={{
+                                                                                                        marginLeft: '10px',
+                                                                                                        color: '#757575',
+                                                                                                        fontSize: '12px',
+                                                                                                        opacity: expandedTasks.includes(index) ? 0 : 1,
+                                                                                                        transition: 'opacity 300ms ease-in-out'
+                                                                                                    }}>
+                                                                                            {
+                                                                                                new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000)).toISOString().split('T')[0] + ' ~ ' +
+                                                                                                new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000) + (task.period * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]
+                                                                                            }
+                                                                                        </Typography>
+                                                                                    </Box>
+                                                                                    <IconButton
+                                                                                        aria-label="expand"
+                                                                                        onClick={() => toggleTaskExpansion(index)}
+                                                                                        sx={{
+                                                                                            transform: expandedTasks.includes(index) ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                                                            transition: '0.3s',
+                                                                                            width: '40px',
+                                                                                            height: '40px',
+                                                                                    }}
+                                                                                    >
+                                                                                        <ExpandMoreIcon />
+                                                                                    </IconButton>
+                                                                                </Box>
+                                                                                <Collapse in={expandedTasks.includes(index)}>
+                                                                                    <Grid container spacing={4} sx={{mt: 3}}>
+                                                                                        <Grid item xs={3}>
+                                                                                            <TextField
+                                                                                                label="기간 (일)"
+                                                                                                variant="outlined"
+                                                                                                type="number"
+                                                                                                name="period"
+                                                                                                value={task.period}
+                                                                                                onChange={e => handleTaskChange(index, 'period', e.target.value)}
+                                                                                                fullWidth
+                                                                                                InputProps={{
+                                                                                                    style: {
+                                                                                                        fontSize: '14px',
+                                                                                                        backgroundColor: 'transparent'
+                                                                                                    }
+                                                                                                }}
+                                                                                                InputLabelProps={{
+                                                                                                    style: {fontSize: '14px'},
+                                                                                                    shrink: true,
+                                                                                                }}
+                                                                                            />
+                                                                                        </Grid>
+
+                                                                                        <Grid item xs={3}>
+                                                                                            <TextField
+                                                                                                label="offsetDay"
+                                                                                                variant="outlined"
+                                                                                                type="number"
+                                                                                                name="period"
+                                                                                                value={task.offsetDay}
+                                                                                                onChange={e => handleTaskChange(index, 'offsetDay', e.target.value)}
+                                                                                                fullWidth
+                                                                                                InputProps={{
+                                                                                                    style: {
+                                                                                                        fontSize: '14px',
+                                                                                                        backgroundColor: 'transparent'
+                                                                                                    }
+                                                                                                }}
+                                                                                                InputLabelProps={{
+                                                                                                    style: {fontSize: '14px'},
+                                                                                                    shrink: true,
+                                                                                                }}
+                                                                                            />
+                                                                                        </Grid>
+
+                                                                                        <Grid item xs={3}>
+                                                                                            <TextField
+                                                                                                label="임시 시작일"
+                                                                                                variant="outlined"
+                                                                                                type="date"
+                                                                                                name="startDate"
+                                                                                                value={new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
+                                                                                                fullWidth
+                                                                                                disabled
+                                                                                                InputProps={{
+                                                                                                    style: {
+                                                                                                        fontSize: '14px',
+                                                                                                        backgroundColor: 'transparent'
+                                                                                                    }
+                                                                                                }}
+                                                                                                InputLabelProps={{
+                                                                                                    style: {fontSize: '14px'},
+                                                                                                    shrink: true,
+                                                                                                }}
+                                                                                            />
+                                                                                        </Grid>
+                                                                                        <Grid item xs={3}>
+                                                                                            <TextField
+                                                                                                label="임시 종료일"
+                                                                                                variant="outlined"
+                                                                                                type="date"
+                                                                                                name="endDate"
+                                                                                                // 종료예정일 = 오늘날짜 + offsetDay + period (임시)
+                                                                                                value={new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000) + (task.period * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
+                                                                                                fullWidth
+                                                                                                disabled
+                                                                                                InputProps={{
+                                                                                                    style: {
+                                                                                                        fontSize: '14px',
+                                                                                                        backgroundColor: 'transparent'
+                                                                                                    }
+                                                                                                }}
+                                                                                                InputLabelProps={{
+                                                                                                    style: {fontSize: '14px'},
+                                                                                                    shrink: true,
+                                                                                                }}
+                                                                                            />
+                                                                                        </Grid>
+                                                                                    </Grid>
+                                                                                    <TextareaAutosize
+                                                                                        aria-label="업무 상세설명"
+                                                                                        minRows={4}
+                                                                                        name="description"
+                                                                                        placeholder="업무 상세설명을 입력하세요"
+                                                                                        value={task.description}
+                                                                                        onChange={e => handleTaskChange(index, 'description', e.target.value)}
+                                                                                        style={{
+                                                                                            fontSize: '14px',
+                                                                                            width: '100%',
+                                                                                            padding: '10px',
+                                                                                            marginTop: '10px',
+                                                                                            border: '1px solid #e0e0e0',
+                                                                                            borderRadius: '4px',
+                                                                                            resize: 'vertical'
                                                                                         }}
                                                                                     />
-                                                                                    <Typography variant="body2"
-                                                                                                sx={{
-                                                                                                    marginLeft: '10px',
-                                                                                                    color: '#757575',
-                                                                                                    fontSize: '12px',
-                                                                                                    opacity: expandedTasks.includes(index) ? 0 : 1,
-                                                                                                    transition: 'opacity 300ms ease-in-out'
-                                                                                                }}>
-                                                                                        {
-                                                                                            new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000)).toISOString().split('T')[0] + ' ~ ' +
-                                                                                            new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000) + (task.period * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]
-                                                                                        }
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                                <IconButton
-                                                                                    aria-label="expand"
-                                                                                    onClick={() => toggleTaskExpansion(index)}
-                                                                                    sx={{
-                                                                                        transform: expandedTasks.includes(index) ? 'rotate(180deg)' : 'rotate(0deg)',
-                                                                                        transition: '0.3s',
-                                                                                        width: '40px',
-                                                                                        height: '40px',
-                                                                                }}
-                                                                                >
-                                                                                    <ExpandMoreIcon />
-                                                                                </IconButton>
-                                                                            </Box>
-                                                                            <Collapse in={expandedTasks.includes(index)}>
-                                                                                <Grid container spacing={4} sx={{mt: 3}}>
-                                                                                    <Grid item xs={3}>
-                                                                                        <TextField
-                                                                                            label="기간 (일)"
-                                                                                            variant="outlined"
-                                                                                            type="number"
-                                                                                            name="period"
-                                                                                            value={task.period}
-                                                                                            onChange={e => handleTaskChange(index, 'period', e.target.value)}
-                                                                                            fullWidth
-                                                                                            InputProps={{
-                                                                                                style: {
-                                                                                                    fontSize: '14px',
-                                                                                                    backgroundColor: 'transparent'
-                                                                                                }
-                                                                                            }}
-                                                                                            InputLabelProps={{
-                                                                                                style: {fontSize: '14px'},
-                                                                                                shrink: true,
-                                                                                            }}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                    <Grid item xs={3}>
-                                                                                        <TextField
-                                                                                            label="offsetDay"
-                                                                                            variant="outlined"
-                                                                                            type="number"
-                                                                                            name="period"
-                                                                                            value={task.offsetDay}
-                                                                                            onChange={e => handleTaskChange(index, 'offsetDay', e.target.value)}
-                                                                                            fullWidth
-                                                                                            InputProps={{
-                                                                                                style: {
-                                                                                                    fontSize: '14px',
-                                                                                                    backgroundColor: 'transparent'
-                                                                                                }
-                                                                                            }}
-                                                                                            InputLabelProps={{
-                                                                                                style: {fontSize: '14px'},
-                                                                                                shrink: true,
-                                                                                            }}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                    <Grid item xs={3}>
-                                                                                        <TextField
-                                                                                            label="임시 시작일"
-                                                                                            variant="outlined"
-                                                                                            type="date"
-                                                                                            name="startDate"
-                                                                                            value={new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
-                                                                                            fullWidth
-                                                                                            disabled
-                                                                                            InputProps={{
-                                                                                                style: {
-                                                                                                    fontSize: '14px',
-                                                                                                    backgroundColor: 'transparent'
-                                                                                                }
-                                                                                            }}
-                                                                                            InputLabelProps={{
-                                                                                                style: {fontSize: '14px'},
-                                                                                                shrink: true,
-                                                                                            }}
-                                                                                        />
-                                                                                    </Grid>
-                                                                                    <Grid item xs={3}>
-                                                                                        <TextField
-                                                                                            label="임시 종료일"
-                                                                                            variant="outlined"
-                                                                                            type="date"
-                                                                                            name="endDate"
-                                                                                            // 종료예정일 = 오늘날짜 + offsetDay + period (임시)
-                                                                                            value={new Date(new Date().getTime() + (task.offsetDay * 24 * 60 * 60 * 1000) + (task.period * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
-                                                                                            fullWidth
-                                                                                            disabled
-                                                                                            InputProps={{
-                                                                                                style: {
-                                                                                                    fontSize: '14px',
-                                                                                                    backgroundColor: 'transparent'
-                                                                                                }
-                                                                                            }}
-                                                                                            InputLabelProps={{
-                                                                                                style: {fontSize: '14px'},
-                                                                                                shrink: true,
-                                                                                            }}
-                                                                                        />
-                                                                                    </Grid>
-                                                                                </Grid>
-                                                                                <TextareaAutosize
-                                                                                    aria-label="업무 상세설명"
-                                                                                    minRows={4}
-                                                                                    name="description"
-                                                                                    placeholder="업무 상세설명을 입력하세요"
-                                                                                    value={task.description}
-                                                                                    onChange={e => handleTaskChange(index, 'description', e.target.value)}
-                                                                                    style={{
-                                                                                        fontSize: '14px',
-                                                                                        width: '100%',
-                                                                                        padding: '10px',
-                                                                                        marginTop: '10px',
-                                                                                        border: '1px solid #e0e0e0',
-                                                                                        borderRadius: '4px',
-                                                                                        resize: 'vertical'
-                                                                                    }}
-                                                                                />
-                                                                            </Collapse>
-                                                                        </CardContent>
-                                                                    </MUICard>
-                                                                </Grid>
-                                                            ))
-                                                        }
-                                                    </Grid>
+                                                                                </Collapse>
+                                                                            </CardContent>
+                                                                        </MUICard>
+                                                                    </Grid>
+                                                                ))
+                                                            }
+                                                        </Grid>
+                                                    </Box>
                                                 </Box>
-                                            </Box>
                                         ) : (
                                             <Box sx={{ mt: 3 }}>
                                                 <Typography variant="h6" gutterBottom>
