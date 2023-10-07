@@ -20,6 +20,8 @@ import axios from "../../../redux/axiosConfig";
 import RoleModal from "./RoleModal";
 import UserModal from "./UserModal";
 
+// TODO: 임시저장 후 수정되는 방식으로 변경
+
 type ProjectUserNum = {
     projectIdNum: number;
     projectUserNum: number;
@@ -83,6 +85,7 @@ type User = {
 const TemplateCopy: React.FC = () => {
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
     // const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
+    const [templateIdNum, setTemplateIdNum] = useState<number>(0);
     const [taskResponses, setTaskResponses] = useState<TaskResponse[]>([]);
     const [projectUserNum, setProjectUserNum] = useState<ProjectUserNum[]>([]);
     const [tasks, setTasks] = useState<TaskResponse[]>([]);
@@ -134,6 +137,31 @@ const TemplateCopy: React.FC = () => {
             period: getDaysDifference(taskResponse.startDate, taskResponse.endDate),
             offsetDay: getDaysDifference(projectResponses.find(project => project.projectName === taskResponse.projectName)?.startDate || "", taskResponse.startDate) || 0,
         }
+    }
+
+    // 정리된 템플릿 상세정보의 내용을 저장하는 함수
+    const handleSaveTemplate = () => {
+        if (templateRequest === null) {
+            return;
+        }
+
+        const templateRequestData = {
+            ...templateRequest,
+            templateTasks: templateTaskRequest,
+            templateRoles: templateRoleRequest,
+            templateUsers: templateUserRequest,
+        };
+
+        axios.post(`/templates`, templateRequestData)
+            .then(response => {
+                setTemplateIdNum(response.data.idNum);
+                setErrorModalOpen(true);
+                setErrorMessage("템플릿이 저장되었습니다.");
+            })
+            .catch(error => {
+                setErrorModalOpen(true);
+                setErrorMessage("템플릿 저장에 실패했습니다.");
+            })
     }
 
     const handleTemplateChange = (key: string, value: string | number) => {
@@ -599,6 +627,37 @@ const TemplateCopy: React.FC = () => {
                                                         />
                                                     </Grid>
                                                 </Grid>
+
+                                                <Box display="flex" justifyContent="space-between" sx={{mt: 5}}>
+                                                    <Box>
+                                                        &nbsp;
+                                                    </Box>
+
+                                                    <Box>
+                                                        <Button
+                                                            variant="contained"
+                                                            sx={{
+                                                                marginLeft: '10px',
+                                                                fontSize: '14px',
+                                                                fontWeight: 'bold',
+                                                                height: '35px',
+                                                                backgroundColor: 'rgb(40, 49, 66)',
+                                                                boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                                textTransform: 'none',
+                                                                minWidth: '75px',
+                                                                padding: '0 12px',
+                                                                '&:hover': {
+                                                                    textDecoration: 'none',
+                                                                    backgroundColor: 'rgb(40, 49, 66, 0.8)',
+                                                                },
+                                                            }}
+                                                            onClick={() => {}}
+                                                        >
+                                                            임시저장
+                                                        </Button>
+                                                    </Box>
+                                                </Box>
+
                                             </Grid>
                                         </Grid>
                                     </Box>
@@ -786,7 +845,7 @@ const TemplateCopy: React.FC = () => {
                             ) : (
                                 <Box sx={{mt: 3}}>
                                     <Typography variant="h6" gutterBottom>
-                                        프로젝트를 선택해주세요
+                                        복사할 프로젝트를 선택해주세요
                                     </Typography>
                                 </Box>
                             )
