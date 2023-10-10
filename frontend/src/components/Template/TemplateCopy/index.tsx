@@ -19,8 +19,7 @@ import ErrorModal from "../../common/ErrorModal";
 import axios from "../../../redux/axiosConfig";
 import RoleModal from "./RoleModal";
 import UserModal from "./UserModal";
-
-// TODO: 임시저장 후 수정되는 방식으로 변경
+import SuccessModal from "../../common/SuccessModal";
 
 type ProjectUserNum = {
     projectIdNum: number;
@@ -93,7 +92,9 @@ const TemplateCopy: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedProjectIdNum, setSelectedProjectIdNum] = useState<number>(0);
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
+    const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
     const [projectListOpen, setProjectListOpen] = useState(true);
     const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
     const [templateRequest, setTemplateRequest] = useState<TemplateRequest | null>(null);
@@ -140,34 +141,56 @@ const TemplateCopy: React.FC = () => {
     }
 
     // 정리된 템플릿 상세정보의 내용을 저장하는 함수
-    const handleSaveTemplate = () => {
-        // {
-        //   "idNum": 0,
-        //   "templateName": "string",
-        //   "description": "string",
-        //   "period": 0,
-        //   "regDate": "string",
-        //   "regUserid": "string"
-        // }
-        // 이 데이터 형식에 맞추어
-        // /api/template에 POST 요청을 보낸다.
+    const handleSaveTemplate = async () => {
+        try {
+            if (templateIdNum === 0) {
+                // template 저장
+                const tempReq = {
+                    templateName: templateRequest.templateName,
+                    description: templateRequest.description,
+                    period: templateRequest.period,
+                    regDate: new Date().toISOString().slice(0, 10),
+                    regUserid: "admin",
+                }
 
-        const tempReq = {
-            templateName: templateRequest.templateName,
-            description: templateRequest.description,
-            period: templateRequest.period,
-            regDate: new Date().toISOString().slice(0, 10),
-            regUserid: "admin",
+                const response = await axios.post("/api/template", tempReq);
+                const receivedTemplateIdNum = response.data;
+                setTemplateIdNum(receivedTemplateIdNum);
+
+                // templateRole 저장
+                const roleReq = templateRoleRequest.map(role => {
+                    return {
+                        templateId: receivedTemplateIdNum,
+                        roleName: role.roleName,
+                        roleLevel: role.roleLevel,
+                        description: role.description,
+                    }
+                });
+
+                await axios.post("/api/template/role", roleReq);
+
+                // templateUser 저장
+                const userReq = templateUserRequest.map(user => {
+                    return {
+                        templateId: receivedTemplateIdNum,
+                        userId: user.userId,
+                        templateRoleId: user.templateRoleId,
+                    }
+                });
+
+                await axios.post("/api/template/user", userReq);
+
+                // 성공 메세지
+                setSuccessModalOpen(true);
+                setSuccessMessage("템플릿의 임시저장이 완료되었습니다.");
+
+            } else {
+                // templateIdNum !== 0일 때의 처리 로직
+            }
+        } catch (error) {
+            setErrorModalOpen(true);
+            setErrorMessage("템플릿의 임시저장에 실패하였습니다.");
         }
-
-        axios.post("/api/template", tempReq)
-            .then(response => {
-                setTemplateIdNum(response.data.idNum);
-            })
-            .catch(error => {
-                setErrorModalOpen(true);
-                setErrorMessage("템플릿을 저장하는데 실패했습니다.");
-            })
     }
 
     const handleTemplateChange = (key: string, value: string | number) => {
@@ -500,48 +523,57 @@ const TemplateCopy: React.FC = () => {
                                                     />
 
                                                     <Box>
-                                                        <Button variant="contained"
-                                                                startIcon={<ManageAccountsIcon style={{ color: '#888888', marginRight: '2px', fontSize: '15px' }} />}
-                                                                sx={{ color: 'black',
-                                                                    marginLeft: '10px',
-                                                                    fontSize: '12px',
-                                                                    fontWeight: 'bold',
-                                                                    height: '30px',
-                                                                    backgroundColor: 'white',
-                                                                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
-                                                                    textTransform: 'none',
-                                                                    minWidth: '75px',
-                                                                    padding: '0 12px',
-                                                                    '&:hover': {
-                                                                        textDecoration: 'none',
-                                                                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
-                                                                    }
-                                                                }}
-                                                                onClick={() => {setRoleListOpen(true)}}
-                                                        >
-                                                            권한관리
-                                                        </Button>
-                                                        <Button variant="contained"
-                                                                startIcon={<GroupsIcon style={{ color: '#888888', marginRight: '2px', fontSize: '15px' }} />}
-                                                                sx={{ color: 'black',
-                                                                    marginLeft: '10px',
-                                                                    fontSize: '12px',
-                                                                    fontWeight: 'bold',
-                                                                    height: '30px',
-                                                                    backgroundColor: 'white',
-                                                                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
-                                                                    textTransform: 'none',
-                                                                    minWidth: '75px',
-                                                                    padding: '0 12px',
-                                                                    '&:hover': {
-                                                                        textDecoration: 'none',
-                                                                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
-                                                                    }
-                                                                }}
-                                                                onClick={() => {setRoleListOpen(true)}}
-                                                        >
-                                                            작업자관리
-                                                        </Button>
+                                                        <Tooltip title={templateIdNum === 0 ? "임시저장 이후 선택해주세요." : ""}>
+                                                            <span>
+                                                                <Button variant="contained"
+                                                                        startIcon={<ManageAccountsIcon style={{ color: '#888888', marginRight: '2px', fontSize: '15px' }} />}
+                                                                        sx={{ color: 'black',
+                                                                            marginLeft: '10px',
+                                                                            fontSize: '12px',
+                                                                            fontWeight: 'bold',
+                                                                            height: '30px',
+                                                                            backgroundColor: 'white',
+                                                                            boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                                            textTransform: 'none',
+                                                                            minWidth: '75px',
+                                                                            padding: '0 12px',
+                                                                            opacity: templateIdNum === 0 ? 0.5 : 1,
+                                                                            pointerEvents: templateIdNum === 0 ? 'none' : 'all',
+                                                                            '&:hover': {
+                                                                                textDecoration: 'none',
+                                                                                backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                                                                            }
+                                                                        }}
+                                                                        onClick={() => {setRoleListOpen(true)}}
+                                                                >
+                                                                    권한관리
+                                                                </Button>
+
+                                                                <Button variant="contained"
+                                                                        startIcon={<GroupsIcon style={{ color: '#888888', marginRight: '2px', fontSize: '15px' }} />}
+                                                                        sx={{ color: 'black',
+                                                                            marginLeft: '10px',
+                                                                            fontSize: '12px',
+                                                                            fontWeight: 'bold',
+                                                                            height: '30px',
+                                                                            backgroundColor: 'white',
+                                                                            boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                                            textTransform: 'none',
+                                                                            minWidth: '75px',
+                                                                            padding: '0 12px',
+                                                                            opacity: templateIdNum === 0 ? 0.5 : 1,
+                                                                            pointerEvents: templateIdNum === 0 ? 'none' : 'all',
+                                                                            '&:hover': {
+                                                                                textDecoration: 'none',
+                                                                                backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                                                                            }
+                                                                        }}
+                                                                        onClick={() => {setRoleListOpen(true)}}
+                                                                >
+                                                                    작업자관리
+                                                                </Button>
+                                                            </span>
+                                                        </Tooltip>
                                                     </Box>
                                                 </Box>
                                                 <TextareaAutosize
@@ -590,47 +622,55 @@ const TemplateCopy: React.FC = () => {
                                                     </Grid>
 
                                                     <Grid item xs={3}>
-                                                        <TextField
-                                                            label="임시 시작일"
-                                                            variant="outlined"
-                                                            type="date"
-                                                            name="startDate"
-                                                            value={new Date().toISOString().split('T')[0]}
-                                                            fullWidth
-                                                            disabled
-                                                            InputProps={{
-                                                                style: {
-                                                                    fontSize: '14px',
-                                                                    backgroundColor: 'transparent'
-                                                                }
-                                                            }}
-                                                            InputLabelProps={{
-                                                                style: {fontSize: '14px'},
-                                                                shrink: true,
-                                                            }}
-                                                        />
+                                                        <Tooltip title="이 날짜는 임시 시작일로, 수정할 수 없습니다.">
+                                                            <span>
+                                                                <TextField
+                                                                    label="임시 시작일"
+                                                                    variant="outlined"
+                                                                    type="date"
+                                                                    name="startDate"
+                                                                    value={new Date().toISOString().split('T')[0]}
+                                                                    fullWidth
+                                                                    disabled
+                                                                    InputProps={{
+                                                                        style: {
+                                                                            fontSize: '14px',
+                                                                            backgroundColor: 'transparent'
+                                                                        }
+                                                                    }}
+                                                                    InputLabelProps={{
+                                                                        style: {fontSize: '14px'},
+                                                                        shrink: true,
+                                                                    }}
+                                                                />
+                                                            </span>
+                                                        </Tooltip>
                                                     </Grid>
                                                     <Grid item xs={3}>
-                                                        <TextField
-                                                            label="임시 종료일"
-                                                            variant="outlined"
-                                                            type="date"
-                                                            name="endDate"
-                                                            // 종료예정일 = 오늘날짜 + period (임시)
-                                                            value={new Date(new Date().getTime() + (templateRequest.period * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
-                                                            fullWidth
-                                                            disabled
-                                                            InputProps={{
-                                                                style: {
-                                                                    fontSize: '14px',
-                                                                    backgroundColor: 'transparent'
-                                                                }
-                                                            }}
-                                                            InputLabelProps={{
-                                                                style: {fontSize: '14px'},
-                                                                shrink: true,
-                                                            }}
-                                                        />
+                                                        <Tooltip title="이 날짜는 임시 시작일로, 수정할 수 없습니다.">
+                                                            <span>
+                                                                <TextField
+                                                                    label="임시 종료일"
+                                                                    variant="outlined"
+                                                                    type="date"
+                                                                    name="endDate"
+                                                                    // 종료예정일 = 오늘날짜 + period (임시)
+                                                                    value={new Date(new Date().getTime() + (templateRequest.period * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]}
+                                                                    fullWidth
+                                                                    disabled
+                                                                    InputProps={{
+                                                                        style: {
+                                                                            fontSize: '14px',
+                                                                            backgroundColor: 'transparent'
+                                                                        }
+                                                                    }}
+                                                                    InputLabelProps={{
+                                                                        style: {fontSize: '14px'},
+                                                                        shrink: true,
+                                                                    }}
+                                                                />
+                                                            </span>
+                                                        </Tooltip>
                                                     </Grid>
                                                 </Grid>
 
@@ -883,6 +923,15 @@ const TemplateCopy: React.FC = () => {
                 title="요청 실패"
                 description={errorMessage || ""}
             />
+
+            {/*성공 Modal*/}
+            <SuccessModal
+                open={isSuccessModalOpen}
+                onClose={() => setSuccessModalOpen(false)}
+                title="요청 성공"
+                description={successMessage || ""}
+            />
+
         </Grid>
     );
 };

@@ -4,8 +4,6 @@ import com.cointcompany.backend.domain.departments.repository.DepartmentsReposit
 import com.cointcompany.backend.domain.projects.dto.ProjectsDto;
 import com.cointcompany.backend.domain.projects.entity.*;
 import com.cointcompany.backend.domain.projects.repository.*;
-import com.cointcompany.backend.domain.usergroups.dto.UserGroupsDto;
-import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import com.cointcompany.backend.domain.users.entity.Users;
 import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -112,8 +110,9 @@ public class ProjectsService {
             Users user = usersRepository.findById(userDto.getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found for ID: " + userDto.getUserId()));
 
-            ProjectRoles projectRole = projectRolesRepository.findById(Long.valueOf(userDto.getProjectRoleId()))
-                    .orElseThrow(() -> new IllegalArgumentException("Role not found for id: " + userDto.getProjectRoleId()));
+            // 프론트에서 보낸 roleLevel을 기준으로 ProjectRoles의 idNum을 조회합니다.
+            ProjectRoles projectRole = projectRolesRepository.findByRoleLevelAndProjectIdNum(userDto.getProjectRoleId(), userDto.getProjectId())
+                    .orElseThrow(() -> new NoSuchElementException("ProjectRole not found for roleLevel: " + userDto.getProjectRoleId()));
 
             ProjectUser projectUser = ProjectUser.of(projectRole, project, user);
             projectUsersToSave.add(projectUser);

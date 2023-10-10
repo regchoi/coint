@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Tag(name = "템플릿", description = "템플릿 API 명세서")
 @Slf4j
 @RestController
@@ -34,6 +36,29 @@ public class TemplatesController {
         return new ResponseEntity<>(templatesService.saveTemplates(template).getIdNum(), HttpStatus.OK);
     }
 
+    @Operation(summary = "템플릿 권한 신규 등록")
+    @ApiResponse(responseCode = "200", description = "등록 성공")
+    @PostMapping("/role")
+    public ResponseEntity<String> postTemplatesRole (
+            @RequestBody List<TemplatesDto.TemplateRolesDto> templateRolesDtoList
+    ) {
+
+        templatesService.saveTemplatesRole(templateRolesDtoList);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "템플릿 작업자 신규 등록")
+    @ApiResponse(responseCode = "200", description = "등록 성공")
+    @PostMapping("/user")
+    public ResponseEntity<String> postTemplatesUser (
+            @RequestBody List<TemplatesDto.TemplateUsersDto> templateUsersDtoList
+    ) {
+
+        templatesService.saveTemplatesUser(templateUsersDtoList);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
 
 
 }
