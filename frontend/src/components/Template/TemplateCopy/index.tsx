@@ -208,6 +208,17 @@ const TemplateCopy: React.FC = () => {
 
                 await axios.put(`/api/template/role/{templateIdNum}`, roleReq);
 
+                // templateUser 수정
+                const userReq = templateUserRequest.map(user => {
+                    return {
+                        templateId: templateIdNum,
+                        userId: user.userId,
+                        templateRoleId: user.templateRoleId,
+                    }
+                });
+
+                await axios.put(`/api/template/user/{templateIdNum}`, userReq);
+
             }
         } catch (error) {
             setErrorModalOpen(true);
