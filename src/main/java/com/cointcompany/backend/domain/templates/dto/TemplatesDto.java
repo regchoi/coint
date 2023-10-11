@@ -41,6 +41,22 @@ public class TemplatesDto {
 
     @NoArgsConstructor
     @Data
+    public static class UpdateTemplate {
+        private Long idNum;
+        private String templateName;
+        private String description;
+        private Integer period;
+
+        public UpdateTemplate (Long idNum, String templateName, String description, Integer period) {
+            this.idNum = idNum;
+            this.templateName = templateName;
+            this.description = description;
+            this.period = period;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
     public static class GetTemplateRes {
         private Long idNum;
         private String templateName;

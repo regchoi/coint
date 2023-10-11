@@ -11,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,6 +25,7 @@ public class TemplatesController {
     private final TemplatesService templatesService;
     private final ModelMapper modelMapper;
 
+    // Template
     @Operation(summary = "템플릿 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping
@@ -36,6 +34,18 @@ public class TemplatesController {
         return new ResponseEntity<>(templatesService.saveTemplates(template).getIdNum(), HttpStatus.OK);
     }
 
+    @Operation(summary = "템플릿 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping
+    public ResponseEntity<String> putTemplates (
+            @RequestBody TemplatesDto.UpdateTemplate updateTemplate
+    ) {
+        templatesService.updateTemplates(updateTemplate);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+
+    // TemplateRole
     @Operation(summary = "템플릿 권한 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/role")
@@ -48,6 +58,20 @@ public class TemplatesController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    @Operation(summary = "템플릿 권한 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/role/{templateIdNum}")
+    public ResponseEntity<String> putTemplatesRole (
+            @PathVariable Long templateIdNum,
+            @RequestBody List<TemplatesDto.TemplateRolesDto> updateTemplateRole
+    ) {
+
+        templatesService.updateTemplatesRole(templateIdNum, updateTemplateRole);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    // TemplateUser
     @Operation(summary = "템플릿 작업자 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/user")
@@ -56,6 +80,19 @@ public class TemplatesController {
     ) {
 
         templatesService.saveTemplatesUser(templateUsersDtoList);
+
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "템플릿 작업자 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/user/{templateIdNum}")
+    public ResponseEntity<String> putTemplatesUser (
+            @PathVariable Long templateIdNum,
+            @RequestBody List<TemplatesDto.TemplateUsersDto> updateTemplateUser
+    ) {
+
+        templatesService.updateTemplatesUser(templateIdNum, updateTemplateUser);
 
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }

@@ -21,6 +21,8 @@ import RoleModal from "./RoleModal";
 import UserModal from "./UserModal";
 import SuccessModal from "../../common/SuccessModal";
 
+// TODO: 템플릿에 저장된 값을 관리하는 type 정의 및 기능 (임시저장) 추가
+
 type ProjectUserNum = {
     projectIdNum: number;
     projectUserNum: number;
@@ -146,11 +148,10 @@ const TemplateCopy: React.FC = () => {
             if (templateIdNum === 0) {
                 // template 저장
                 const tempReq = {
-                    templateName: templateRequest.templateName,
-                    description: templateRequest.description,
-                    period: templateRequest.period,
+                    templateName: templateRequest?.templateName,
+                    description: templateRequest?.description,
+                    period: templateRequest?.period,
                     regDate: new Date().toISOString().slice(0, 10),
-                    regUserid: "admin",
                 }
 
                 const response = await axios.post("/api/template", tempReq);
@@ -185,7 +186,28 @@ const TemplateCopy: React.FC = () => {
                 setSuccessMessage("템플릿의 임시저장이 완료되었습니다.");
 
             } else {
-                // templateIdNum !== 0일 때의 처리 로직
+                // template 수정
+                const tempReq = {
+                    idNum: templateIdNum,
+                    templateName: templateRequest?.templateName,
+                    description: templateRequest?.description,
+                    period: templateRequest?.period,
+                }
+
+                await axios.put(`/api/template`, tempReq);
+
+                // templateRole 수정
+                const roleReq = templateRoleRequest.map(role => {
+                    return {
+                        templateId: templateIdNum,
+                        roleName: role.roleName,
+                        roleLevel: role.roleLevel,
+                        description: role.description,
+                    }
+                });
+
+                await axios.put(`/api/template/role/{templateIdNum}`, roleReq);
+
             }
         } catch (error) {
             setErrorModalOpen(true);
