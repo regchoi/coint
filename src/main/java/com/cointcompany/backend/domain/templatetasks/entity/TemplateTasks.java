@@ -17,7 +17,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Where(clause = "del = false")
-@SQLDelete(sql = "UPDATE TemplateTasks SET del = true WHERE id_num = ?")
+@SQLDelete(sql = "UPDATE template_tasks SET del = true WHERE id_num = ?")
 public class TemplateTasks extends BaseEntity {
 
     @Id

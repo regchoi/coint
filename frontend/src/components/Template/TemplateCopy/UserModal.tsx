@@ -66,8 +66,6 @@ export default function UserModal({ open, onClose, userList, setUserList, roleLi
     const [isErrorModalOpen, setErrorModalOpen] = useState<boolean>(false);
     const [isSuccessModalOpen, setSuccessModalOpen] = useState<boolean>(false);
 
-    console.log(roleList);
-
     const commonButtonStyles = {
         color: 'black',
         marginLeft: '10px',

@@ -93,7 +93,7 @@ public class TemplatesService {
 
         for(TemplatesDto.TemplateUsersDto templateUsersDto : templateUsersDtoList) {
             TemplateUser templateUser = TemplateUser.of(
-                    templateRolesRepository.findByRoleLevelAndTemplatesIdNum(templateUsersDto.getTemplateRoleId(), templateUsersDto.getTemplateId()).orElseThrow(),
+                    templateRolesRepository.findByRoleLevelAndTemplatesIdNum(templateUsersDto.getTemplateRoleId(), templateUsersDto.getTemplateId()).orElse(null),
                     templatesRepository.findById(templateUsersDto.getTemplateId()).orElseThrow(),
                     usersRepository.findById(templateUsersDto.getUserId()).orElseThrow()
             );

@@ -66,6 +66,7 @@ type TaskResponse = {
 }
 
 type TemplateTaskRequest = {
+    idNum: number;
     taskName: string;
     description: string;
     period: number;
@@ -136,6 +137,7 @@ const TemplateCopy: React.FC = () => {
     // TaskResponse의 정보를 TemplateTaskRequest형식으로 변환하는 함수
     const convertTaskResponseToTemplateTaskRequest = (taskResponse: TaskResponse): TemplateTaskRequest => {
         return {
+            idNum: taskResponse.idNum,
             taskName: taskResponse.taskName,
             description: taskResponse.description,
             period: getDaysDifference(taskResponse.startDate, taskResponse.endDate),
@@ -154,7 +156,6 @@ const TemplateCopy: React.FC = () => {
                     period: templateRequest?.period,
                     regDate: new Date().toISOString().slice(0, 10),
                 }
-
                 const response = await axios.post("/api/template", tempReq);
                 const receivedTemplateIdNum = response.data;
                 setTemplateIdNum(receivedTemplateIdNum);
@@ -168,7 +169,6 @@ const TemplateCopy: React.FC = () => {
                         description: role.description,
                     }
                 });
-
                 await axios.post("/api/template/role", roleReq);
 
                 // templateUser 저장
@@ -179,8 +179,24 @@ const TemplateCopy: React.FC = () => {
                         templateRoleId: user.templateRoleId,
                     }
                 });
-
                 await axios.post("/api/template/user", userReq);
+
+                // templateTask 저장
+                // templateTaskRequest는 배열형태이므로 순회하며 axios.post를 실행한다.
+                for (const task of templateTaskRequest) {
+                    const taskReq = {
+                        taskName: task.taskName,
+                        description: task.description,
+                        period: task.period,
+                        offsetDay: task.offsetDay,
+                    }
+
+                    const response = await axios.post(`/api/template/task/${receivedTemplateIdNum}`, taskReq);
+                    const receivedTaskIdNum = response.data;
+
+                    // 기존 항목에 idNum 추가
+                    task.idNum = receivedTaskIdNum;
+                }
 
                 // 성공 메세지
                 setTempSave(false);
@@ -195,7 +211,6 @@ const TemplateCopy: React.FC = () => {
                     description: templateRequest?.description,
                     period: templateRequest?.period,
                 }
-
                 await axios.put(`/api/template`, tempReq);
 
                 // templateRole 수정
@@ -207,7 +222,6 @@ const TemplateCopy: React.FC = () => {
                         description: role.description,
                     }
                 });
-
                 await axios.put(`/api/template/role/${templateIdNum}`, roleReq);
 
                 // templateUser 수정
@@ -218,8 +232,10 @@ const TemplateCopy: React.FC = () => {
                         templateRoleId: user.templateRoleId,
                     }
                 });
-
                 await axios.put(`/api/template/user/${templateIdNum}`, userReq);
+
+                // templateTask 수정
+                console.log(templateTaskRequest);
 
                 // 성공 메세지
                 setTempSave(false);
