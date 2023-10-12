@@ -107,7 +107,7 @@ public class TemplatesService {
         List<TemplateUser> existTemplateUsers = templateUserRepository.findByTemplatesIdNum(templateIdNum);
 
         for(TemplatesDto.TemplateUsersDto templateUsersDto : templateUsersDtoList) {
-            TemplateUser existingUser = templateUserRepository.findByTemplatesIdNumAndUsersId(templateIdNum, templateUsersDto.getUserId()).orElse(null);
+            TemplateUser existingUser = templateUserRepository.findByTemplatesIdNumAndUsersIdNum(templateIdNum, templateUsersDto.getUserId()).orElse(null);
 
             if(existingUser == null) {
                 // 새로 추가
@@ -121,7 +121,7 @@ public class TemplatesService {
             } else {
                 // 수정
                 existingUser.setTemplates(templatesRepository.findById(templateUsersDto.getTemplateId()).orElseThrow());
-                existingUser.setTemplateRoles(templateRolesRepository.findByRoleLevelAndTemplatesIdNum(templateUsersDto.getTemplateRoleId(), templateUsersDto.getTemplateId()).orElseThrow());
+                existingUser.setTemplateRoles(templateRolesRepository.findByRoleLevelAndTemplatesIdNum(templateUsersDto.getTemplateRoleId(), templateUsersDto.getTemplateId()).orElse(null));
                 existingUser.setUsers(usersRepository.findById(templateUsersDto.getUserId()).orElseThrow());
 
                 templateUserRepository.save(existingUser);

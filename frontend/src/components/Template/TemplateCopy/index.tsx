@@ -105,6 +105,7 @@ const TemplateCopy: React.FC = () => {
     const [roleListOpen, setRoleListOpen] = useState(false);
     const [templateUserRequest, setTemplateUserRequest] = useState<User[]>([]);
     const [userListOpen, setUserListOpen] = useState(false);
+    const [tempSave, setTempSave] = useState(true);
 
     const autocompleteOptions = options.map(option => option.projectName);
     const filteredOptions = searchTerm === ""
@@ -182,6 +183,7 @@ const TemplateCopy: React.FC = () => {
                 await axios.post("/api/template/user", userReq);
 
                 // 성공 메세지
+                setTempSave(false);
                 setSuccessModalOpen(true);
                 setSuccessMessage("템플릿의 임시저장이 완료되었습니다.");
 
@@ -206,7 +208,7 @@ const TemplateCopy: React.FC = () => {
                     }
                 });
 
-                await axios.put(`/api/template/role/{templateIdNum}`, roleReq);
+                await axios.put(`/api/template/role/${templateIdNum}`, roleReq);
 
                 // templateUser 수정
                 const userReq = templateUserRequest.map(user => {
@@ -217,7 +219,12 @@ const TemplateCopy: React.FC = () => {
                     }
                 });
 
-                await axios.put(`/api/template/user/{templateIdNum}`, userReq);
+                await axios.put(`/api/template/user/${templateIdNum}`, userReq);
+
+                // 성공 메세지
+                setTempSave(false);
+                setSuccessModalOpen(true);
+                setSuccessMessage("템플릿의 임시저장이 완료되었습니다.");
 
             }
         } catch (error) {
@@ -339,6 +346,10 @@ const TemplateCopy: React.FC = () => {
                 setErrorMessage("프로젝트 작업자 목록을 불러오는데 실패했습니다.")
             });
     }, [selectedProjectIdNum]);
+
+    useEffect(() => {
+        setTempSave(true);
+    }, [templateRequest, templateTaskRequest, templateRoleRequest, templateUserRequest]);
 
     return (
         <Grid container>
@@ -601,7 +612,7 @@ const TemplateCopy: React.FC = () => {
                                                                                 backgroundColor: 'rgb(0, 0, 0, 0.1)',
                                                                             }
                                                                         }}
-                                                                        onClick={() => {setRoleListOpen(true)}}
+                                                                        onClick={() => {setUserListOpen(true)}}
                                                                 >
                                                                     작업자관리
                                                                 </Button>
@@ -725,6 +736,7 @@ const TemplateCopy: React.FC = () => {
                                                                 textTransform: 'none',
                                                                 minWidth: '75px',
                                                                 padding: '0 12px',
+                                                                opacity: tempSave ? 1 : 0.5, pointerEvents: tempSave ? 'all' : 'none',
                                                                 '&:hover': {
                                                                     textDecoration: 'none',
                                                                     backgroundColor: 'rgb(40, 49, 66, 0.8)',
@@ -945,7 +957,7 @@ const TemplateCopy: React.FC = () => {
             }
             {
                 templateUserRequest && (
-                    <UserModal open={userListOpen} onClose={() => setUserListOpen(false)} userList={templateUserRequest} setUserList={setTemplateUserRequest} />
+                    <UserModal open={userListOpen} onClose={() => setUserListOpen(false)} userList={templateUserRequest} setUserList={setTemplateUserRequest} roleList={templateRoleRequest} setRoleList={setTemplateRoleRequest} />
                 )
             }
 

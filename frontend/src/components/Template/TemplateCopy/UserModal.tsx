@@ -18,6 +18,7 @@ import ErrorModal from "../../common/ErrorModal";
 import SuccessModal from "../../common/SuccessModal";
 import AddIcon from "@mui/icons-material/Add";
 import {DeleteOutline} from "@mui/icons-material";
+import AddUserTable from "./AddUserTable";
 
 type User = {
     userId: number;
@@ -61,8 +62,11 @@ interface ModalProps {
 export default function UserModal({ open, onClose, userList, setUserList, roleList, setRoleList }: ModalProps) {
     const [users, setUsers] = React.useState<AllUser[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const [isAddUserTableOpen, setAddUserTableOpen] = useState<boolean>(false);
     const [isErrorModalOpen, setErrorModalOpen] = useState<boolean>(false);
     const [isSuccessModalOpen, setSuccessModalOpen] = useState<boolean>(false);
+
+    console.log(roleList);
 
     const commonButtonStyles = {
         color: 'black',
@@ -185,9 +189,9 @@ export default function UserModal({ open, onClose, userList, setUserList, roleLi
                                 variant="contained"
                                 startIcon={<AddIcon style={{ color: 'rgb(23, 210, 23)', marginRight: '2px', fontSize: '15px' }} />}
                                 sx={{ ...commonButtonStyles }}
-                                onClick={() => {}}
+                                onClick={() => setAddUserTableOpen(true)}
                             >
-                                권한추가
+                                추가
                             </Button>
                         </Box>
                         <Table>
@@ -201,29 +205,14 @@ export default function UserModal({ open, onClose, userList, setUserList, roleLi
                             <TableBody>
                                 {userList.map((user, index) => (
                                     <TableRow key={index} sx={{ height: '30px' }}>
-                                        <TableCell sx={tableCellStyles} align="center" >
-                                            {index}
+                                        <TableCell sx={{...tableCellStyles, width: '75px'}} align="center" >
+                                            {index + 1}
                                         </TableCell>
                                         <TableCell sx={tableCellStyles} align="center" >
-                                            {
-                                                // users에서 user의 idNum과 같은 idNum을 가진 user의 이름을 가져옴
-                                                users.find((userData) => userData.idNum === user.idNum)?.name
-                                            }
+                                            { users.find((userData) => userData.idNum === user.userId)?.name }
                                         </TableCell>
                                         <TableCell sx={tableCellStyles} align="center" >
-                                            {
-                                                // roles에서 권한 가져오기
-                                            }
-                                            {/*<TextField*/}
-                                            {/*    fullWidth*/}
-                                            {/*    value={role.description}*/}
-                                            {/*    onChange={(e) => {*/}
-                                            {/*        const newList = [...roleList];*/}
-                                            {/*        newList[index].description = e.target.value;*/}
-                                            {/*        setRoleList(newList);*/}
-                                            {/*    }}*/}
-                                            {/*    sx={textFieldStyles}*/}
-                                            {/*/>*/}
+                                            { roleList && roleList.find((roleData) => roleData.roleLevel === user.templateRoleId)?.roleName }
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -250,11 +239,57 @@ export default function UserModal({ open, onClose, userList, setUserList, roleLi
                                 backgroundColor: 'rgb(40, 49, 66, 0.8)',
                             },
                         }}
-                        onClick={handleProjectSave}
+                        onClick={onClose}
                     >
                         저장
                     </Button>
                 </Box>
+
+                {/* 사용자 추가 Modal */}
+                <Modal
+                    open={isAddUserTableOpen}
+                    onClose={() => setAddUserTableOpen(false)}
+                    aria-labelledby="delete-modal-title"
+                    aria-describedby="delete-modal-description"
+                >
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4,
+                        minWidth: 300,
+                        minHeight: '50vh',
+                        maxHeight: '90vh',
+                        overflowY: 'auto',
+                        borderRadius: '10px',
+                    }}>
+                        <Typography variant="h6"
+                                    component={"div"}
+                                    sx={{
+                                        borderBottom: '2px solid #f0f0f0',
+                                        pb: 2,
+                                        mb: 2,
+                                        fontSize: '18px',
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                            <span>
+                            프로젝트 작업자관리
+                            </span>
+
+                            <IconButton onClick={() => setAddUserTableOpen(false)} size="small" sx={{ padding: '0' }}>
+                                <CloseIcon />
+                            </IconButton>
+                        </Typography>
+
+                        <AddUserTable onClose={() => setAddUserTableOpen(false)} userList={userList} setUserList={setUserList} rolesList={roleList} />
+                    </Box>
+                </Modal>
 
                 {/*성공 Modal*/}
                 <SuccessModal

@@ -258,7 +258,7 @@ export default function RoleModal({ open, onClose, roleList, setRoleList }: Moda
                                     backgroundColor: 'rgb(40, 49, 66, 0.8)',
                                 },
                             }}
-                            onClick={handleProjectSave}
+                            onClick={onClose}
                         >
                             저장
                         </Button>

@@ -11,7 +11,7 @@ import org.hibernate.annotations.Where;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Where(clause = "del = false")
-@SQLDelete(sql = "UPDATE TemplateUser SET del = true WHERE id_num = ?")
+@SQLDelete(sql = "UPDATE template_user SET del = true WHERE id_num = ?")
 public class TemplateUser {
 
     @Id

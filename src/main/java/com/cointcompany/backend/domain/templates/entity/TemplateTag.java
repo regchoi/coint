@@ -13,7 +13,7 @@ import org.hibernate.annotations.Where;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Where(clause = "del = false")
-@SQLDelete(sql = "UPDATE TemplateTag SET del = true WHERE id_num = ?")
+@SQLDelete(sql = "UPDATE template_tag SET del = true WHERE id_num = ?")
 public class TemplateTag extends BaseEntity {
 
     @Id

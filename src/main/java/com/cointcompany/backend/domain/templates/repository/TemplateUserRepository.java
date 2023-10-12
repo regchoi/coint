@@ -10,6 +10,6 @@ public interface TemplateUserRepository extends JpaRepository<TemplateUser, Long
 
     List<TemplateUser> findByTemplatesIdNum(Long templateIdNum);
 
-    Optional<TemplateUser> findByTemplatesIdNumAndUsersId(Long templateIdNum, Long userIdNum);
+    Optional<TemplateUser> findByTemplatesIdNumAndUsersIdNum(Long templateIdNum, Long userIdNum);
 
 }
