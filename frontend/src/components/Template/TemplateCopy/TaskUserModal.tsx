@@ -17,10 +17,10 @@ import axios from "../../../redux/axiosConfig";
 import ErrorModal from "../../common/ErrorModal";
 import SuccessModal from "../../common/SuccessModal";
 import AddIcon from "@mui/icons-material/Add";
-import {DeleteOutline} from "@mui/icons-material";
 import AddUserTable from "./AddUserTable";
 
 type User = {
+    templateTaskId: number;
     userId: number;
     templateRoleId: number;
 }
@@ -57,9 +57,10 @@ interface ModalProps {
     setUserList: (userList: User[]) => void;
     roleList: Role[];
     setRoleList: (roleList: Role[]) => void;
+    taskIdNum: number;
 }
 
-export default function UserModal({ open, onClose, userList, setUserList, roleList, setRoleList }: ModalProps) {
+export default function TaskUserModal({ open, onClose, userList, setUserList, roleList, setRoleList, taskIdNum }: ModalProps) {
     const [users, setUsers] = React.useState<AllUser[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [isAddUserTableOpen, setAddUserTableOpen] = useState<boolean>(false);
@@ -123,9 +124,6 @@ export default function UserModal({ open, onClose, userList, setUserList, roleLi
         onClose();
     };
 
-    const handleProjectSave = async () => {
-    }
-
 
     useEffect(() => {
         // 사용자 목록 불러오기
@@ -144,7 +142,7 @@ export default function UserModal({ open, onClose, userList, setUserList, roleLi
             });
     }, []);
 
-        return (
+    return (
         <Modal open={open}>
             <Box sx={{
                 position: 'absolute',
@@ -173,7 +171,7 @@ export default function UserModal({ open, onClose, userList, setUserList, roleLi
                                 alignItems: 'center'
                             }}>
                         <span>
-                            템플릿 작업자 설정
+                            업무 작업자 설정
                         </span>
                     <IconButton onClick={onClose} size="small" sx={{ padding: '0' }}>
                         <CloseIcon />
@@ -277,7 +275,7 @@ export default function UserModal({ open, onClose, userList, setUserList, roleLi
                                         alignItems: 'center'
                                     }}>
                             <span>
-                            템플릿 작업자관리
+                            업무 작업자관리
                             </span>
 
                             <IconButton onClick={() => setAddUserTableOpen(false)} size="small" sx={{ padding: '0' }}>

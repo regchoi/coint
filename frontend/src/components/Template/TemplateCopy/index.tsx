@@ -20,6 +20,7 @@ import axios from "../../../redux/axiosConfig";
 import RoleModal from "./RoleModal";
 import UserModal from "./UserModal";
 import SuccessModal from "../../common/SuccessModal";
+import TaskUserModal from "./TaskUserModal";
 
 // TODO: 템플릿에 저장된 값을 관리하는 type 정의 및 기능 (임시저장) 추가
 
@@ -113,6 +114,8 @@ const TemplateCopy: React.FC = () => {
     const [templateUserRequest, setTemplateUserRequest] = useState<User[]>([]);
     const [templateTaskUserRequest, setTemplateTaskUserRequest] = useState<TemplateTaskUser[]>([]);
     const [userListOpen, setUserListOpen] = useState(false);
+    const [taskUserListOpen, setTaskUserListOpen] = useState(false);
+    const [selectedTaskIdNum, setSelectedTaskIdNum] = useState<number>(0);
     const [tempSave, setTempSave] = useState(true);
 
     const autocompleteOptions = options.map(option => option.projectName);
@@ -218,7 +221,7 @@ const TemplateCopy: React.FC = () => {
                         userId: taskUser.userId,
                         templateRoleId: taskUser.templateRoleId,
                     }
-                    await axios.post(`/api/template/task/user`, taskUserReq);
+                    await axios.post(`/api/template/task/user/${receivedTemplateIdNum}`, taskUserReq);
 
                     // 기존 항목에 templateTaskId 추가
                     taskUser.templateTaskId = idNumMap.get(taskUser.templateTaskId);
@@ -397,7 +400,7 @@ const TemplateCopy: React.FC = () => {
             const taskUserResponse = await axios.get(`/api/task/user/${task.idNum}`);
             return taskUserResponse.data.map((user: any) => {
                 return {
-                    taskId: user.taskId,
+                    templateTaskId: user.taskId,
                     userId: user.userId,
                     templateRoleId: user.taskRoleId,
                 }
@@ -417,8 +420,6 @@ const TemplateCopy: React.FC = () => {
 
     // 임시저장 활성화 기능
     useEffect(() => {
-        console.log(templateTaskRequest);
-        console.log(templateTaskUserRequest);
         setTempSave(true);
     }, [templateRequest, templateTaskRequest, templateRoleRequest, templateUserRequest, templateTaskUserRequest]);
 
@@ -872,18 +873,48 @@ const TemplateCopy: React.FC = () => {
                                                                                             }
                                                                                         </Typography>
                                                                                     </Box>
-                                                                                    <IconButton
-                                                                                        aria-label="expand"
-                                                                                        onClick={() => toggleTaskExpansion(index)}
-                                                                                        sx={{
-                                                                                            transform: expandedTasks.includes(index) ? 'rotate(180deg)' : 'rotate(0deg)',
-                                                                                            transition: '0.3s',
-                                                                                            width: '40px',
-                                                                                            height: '40px',
-                                                                                    }}
-                                                                                    >
-                                                                                        <ExpandMoreIcon />
-                                                                                    </IconButton>
+                                                                                    <Box>
+                                                                                        <Button variant="contained"
+                                                                                                startIcon={<GroupsIcon style={{ color: '#888888', marginRight: '2px', fontSize: '15px' }} />}
+                                                                                                sx={{ color: 'black',
+                                                                                                    marginLeft: '10px',
+                                                                                                    marginRight: '10px',
+                                                                                                    fontSize: '12px',
+                                                                                                    fontWeight: 'bold',
+                                                                                                    height: '30px',
+                                                                                                    backgroundColor: 'white',
+                                                                                                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                                                                    textTransform: 'none',
+                                                                                                    minWidth: '75px',
+                                                                                                    padding: '0 12px',
+                                                                                                    opacity: expandedTasks.includes(index) ? 1 : 0,
+                                                                                                    transition: 'opacity 300ms ease-in-out',
+                                                                                                    '&:hover': {
+                                                                                                        textDecoration: 'none',
+                                                                                                        backgroundColor: 'rgb(0, 0, 0, 0.1)',
+                                                                                                    }
+                                                                                                }}
+                                                                                                onClick={() => {
+                                                                                                    setSelectedTaskIdNum(task.idNum)
+                                                                                                    setTaskUserListOpen(true)
+                                                                                                }}
+                                                                                        >
+                                                                                            작업자관리
+                                                                                        </Button>
+
+                                                                                        <IconButton
+                                                                                            aria-label="expand"
+                                                                                            onClick={() => toggleTaskExpansion(index)}
+                                                                                            sx={{
+                                                                                                transform: expandedTasks.includes(index) ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                                                                transition: '0.3s',
+                                                                                                width: '40px',
+                                                                                                height: '40px',
+                                                                                        }}
+                                                                                        >
+                                                                                            <ExpandMoreIcon />
+                                                                                        </IconButton>
+                                                                                    </Box>
                                                                                 </Box>
                                                                                 <Collapse in={expandedTasks.includes(index)}>
                                                                                     <Grid container spacing={4} sx={{mt: 3}}>
@@ -1029,6 +1060,11 @@ const TemplateCopy: React.FC = () => {
             {
                 templateUserRequest && (
                     <UserModal open={userListOpen} onClose={() => setUserListOpen(false)} userList={templateUserRequest} setUserList={setTemplateUserRequest} roleList={templateRoleRequest} setRoleList={setTemplateRoleRequest} />
+                )
+            }
+            {
+                templateTaskUserRequest && (
+                    <TaskUserModal open={taskUserListOpen} onClose={() => setTaskUserListOpen(false)} userList={templateTaskUserRequest} setUserList={setTemplateTaskUserRequest} roleList={templateRoleRequest} setRoleList={setTemplateRoleRequest} taskIdNum={selectedTaskIdNum}  />
                 )
             }
 
