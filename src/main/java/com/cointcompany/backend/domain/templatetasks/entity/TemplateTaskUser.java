@@ -23,7 +23,7 @@ public class TemplateTaskUser extends BaseEntity {
     private Long idNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "templateTaskRoleId")
+    @JoinColumn(name = "templateRoleId")
     private TemplateRoles templateRoles;
 
     private boolean del = Boolean.FALSE;

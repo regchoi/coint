@@ -28,5 +28,20 @@ public class TemplateTasksDto {
 
     }
 
+    @NoArgsConstructor
+    @Data
+    public static class TemplateTaskUsersDto {
+        private Long templateTaskId;
+        private Long userId;
+        private Integer templateRoleId;
+
+        public TemplateTaskUsersDto(Long templateId, Long userId, Integer templateRoleId) {
+            this.templateTaskId = templateId;
+            this.userId = userId;
+            this.templateRoleId = templateRoleId;
+        }
+
+    }
+
 
 }

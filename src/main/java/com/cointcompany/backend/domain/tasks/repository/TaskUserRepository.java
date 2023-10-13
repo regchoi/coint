@@ -11,4 +11,6 @@ public interface TaskUserRepository extends JpaRepository<TaskUser, Long> {
     List<TaskUser> findTaskUserByUsers_IdNum (Long userId);
 
     Optional<TaskUser> findByUsers_IdNumAndTasks_IdNum(Long userId, Long taskId);
+
+    List<TaskUser> findTaskUserByTasks_IdNum(Long taskId);
 }

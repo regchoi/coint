@@ -119,6 +119,26 @@ public class TasksService {
         return "SUCCESS";
     }
     @Transactional
+    public List<TasksDto.TaskUserDto> getTaskUser(Long taskId) {
+
+        List<TaskUser> taskUserList = taskUserRepository.findTaskUserByTasks_IdNum(taskId);
+        List<TasksDto.TaskUserDto> taskUserDtoList = new ArrayList<>();
+
+        for (TaskUser taskUser : taskUserList) {
+            ProjectRoles projectRole = taskUser.getTaskRole();
+            Integer roleLevel = (projectRole != null) ? projectRole.getRoleLevel() : null;
+
+            TasksDto.TaskUserDto taskUserDto = new TasksDto.TaskUserDto(
+                    taskUser.getTasks().getIdNum(),
+                    taskUser.getUsers().getIdNum(),
+                    roleLevel
+            );
+            taskUserDtoList.add(taskUserDto);
+        }
+
+        return taskUserDtoList;
+    }
+    @Transactional
     public Integer getTaskUserLevel(Long userId, Long taskId) {
         Optional<TaskUser> optionalTaskUser = taskUserRepository.findByUsers_IdNumAndTasks_IdNum(userId, taskId);
 

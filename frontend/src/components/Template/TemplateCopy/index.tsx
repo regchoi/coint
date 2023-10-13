@@ -84,6 +84,12 @@ type User = {
     templateRoleId: number;
 }
 
+type TemplateTaskUser = {
+    templateTaskId: number;
+    userId: number;
+    templateRoleId: number;
+}
+
 const TemplateCopy: React.FC = () => {
     const [projectResponses, setProjectResponses] = useState<ProjectResponse[]>([]);
     // const [taskGroupResponses, setTaskGroupResponses] = useState<TaskGroupResponse[]>([]);
@@ -105,6 +111,7 @@ const TemplateCopy: React.FC = () => {
     const [templateRoleRequest, setTemplateRoleRequest] = useState<Role[]>([]);
     const [roleListOpen, setRoleListOpen] = useState(false);
     const [templateUserRequest, setTemplateUserRequest] = useState<User[]>([]);
+    const [templateTaskUserRequest, setTemplateTaskUserRequest] = useState<TemplateTaskUser[]>([]);
     const [userListOpen, setUserListOpen] = useState(false);
     const [tempSave, setTempSave] = useState(true);
 
@@ -181,8 +188,11 @@ const TemplateCopy: React.FC = () => {
                 });
                 await axios.post("/api/template/user", userReq);
 
+                const idNumMap = new Map();
+
                 // templateTask 저장
                 // templateTaskRequest는 배열형태이므로 순회하며 axios.post를 실행한다.
+                // templateTask 저장
                 for (const task of templateTaskRequest) {
                     const taskReq = {
                         taskName: task.taskName,
@@ -194,8 +204,24 @@ const TemplateCopy: React.FC = () => {
                     const response = await axios.post(`/api/template/task/${receivedTemplateIdNum}`, taskReq);
                     const receivedTaskIdNum = response.data;
 
+                    // Map에 oldIdNum: newIdNum 형태로 저장
+                    idNumMap.set(task.idNum, receivedTaskIdNum);
+
                     // 기존 항목에 idNum 추가
                     task.idNum = receivedTaskIdNum;
+                }
+
+                // templateTaskUserRequest 저장
+                for (const taskUser of templateTaskUserRequest) {
+                    const taskUserReq = {
+                        templateTaskId: idNumMap.get(taskUser.templateTaskId),
+                        userId: taskUser.userId,
+                        templateRoleId: taskUser.templateRoleId,
+                    }
+                    await axios.post(`/api/template/task/user`, taskUserReq);
+
+                    // 기존 항목에 templateTaskId 추가
+                    taskUser.templateTaskId = idNumMap.get(taskUser.templateTaskId);
                 }
 
                 // 성공 메세지
@@ -235,7 +261,7 @@ const TemplateCopy: React.FC = () => {
                 await axios.put(`/api/template/user/${templateIdNum}`, userReq);
 
                 // templateTask 수정
-                console.log(templateTaskRequest);
+                await axios.put(`/api/template/task/${templateIdNum}`, templateTaskRequest)
 
                 // 성공 메세지
                 setTempSave(false);
@@ -361,11 +387,40 @@ const TemplateCopy: React.FC = () => {
                 setErrorModalOpen(true)
                 setErrorMessage("프로젝트 작업자 목록을 불러오는데 실패했습니다.")
             });
+
+        // 템플릿 업무 작업자 목록 불러오기
+        // relatedTasks의 taskIdNum을 통해 taskUserResponses를 조회
+        const taskUserResponses = relatedTasks.map(async (task: TaskResponse) => {
+            // response.data의 형태는
+            // { taskId: number, userId: number, taskRoleId: number 인데
+            // userId는 그대로 갖오고 projectRoleId는 templateRoleId로 바꿔서 templateTaskUserRequest에 넣어줌
+            const taskUserResponse = await axios.get(`/api/task/user/${task.idNum}`);
+            return taskUserResponse.data.map((user: any) => {
+                return {
+                    taskId: user.taskId,
+                    userId: user.userId,
+                    templateRoleId: user.taskRoleId,
+                }
+            });
+        });
+        Promise.all(taskUserResponses)
+            .then((responses) => {
+                const templateTaskUserRequest = responses.flat();
+                setTemplateTaskUserRequest(templateTaskUserRequest);
+            })
+            .catch((error) => {
+                setErrorModalOpen(true)
+                setErrorMessage("프로젝트 작업자 목록을 불러오는데 실패했습니다.")
+            });
+
     }, [selectedProjectIdNum]);
 
+    // 임시저장 활성화 기능
     useEffect(() => {
+        console.log(templateTaskRequest);
+        console.log(templateTaskUserRequest);
         setTempSave(true);
-    }, [templateRequest, templateTaskRequest, templateRoleRequest, templateUserRequest]);
+    }, [templateRequest, templateTaskRequest, templateRoleRequest, templateUserRequest, templateTaskUserRequest]);
 
     return (
         <Grid container>

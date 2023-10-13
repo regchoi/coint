@@ -44,4 +44,16 @@ public class TemplateTasksController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    // TemplateTaskUser
+    @Operation(summary = "업무 작업자 신규 등록")
+    @ApiResponse(responseCode = "200", description = "등록 성공")
+    @PostMapping("/user/{templateId}")
+    public ResponseEntity<String> createTemplateTaskUser (
+            @PathVariable Long templateId,
+            @RequestBody TemplateTasksDto.TemplateTaskUsersDto tasksUserDto
+    ) {
+        templateTasksService.saveTemplateTaskUser(templateId, tasksUserDto);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
 }

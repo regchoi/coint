@@ -81,6 +81,17 @@ public class TasksController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    @Operation(summary = "업무 사용자 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/user/{taskId}")
+    public ResponseEntity<List<TasksDto.TaskUserDto>> getTasksUser (
+            @PathVariable Long taskId
+    ) {
+        List<TasksDto.TaskUserDto> taskUserResList = tasksService.getTaskUser(taskId);
+
+        return new ResponseEntity<>(taskUserResList, HttpStatus.OK);
+    }
+
     @Operation(summary = "업무 사용자 권한 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/level/{taskId}")
