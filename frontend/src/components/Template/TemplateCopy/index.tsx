@@ -11,6 +11,7 @@ import {
     Tooltip,
     Typography
 } from "@mui/material";
+import { useNavigate } from 'react-router-dom';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import GroupsIcon from '@mui/icons-material/Groups';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -103,6 +104,7 @@ const TemplateCopy: React.FC = () => {
     const [selectedProjectIdNum, setSelectedProjectIdNum] = useState<number>(0);
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
     const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
+    const [isSavedModalOpen, setSavedModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
     const [projectListOpen, setProjectListOpen] = useState(true);
@@ -117,6 +119,7 @@ const TemplateCopy: React.FC = () => {
     const [taskUserListOpen, setTaskUserListOpen] = useState(false);
     const [selectedTaskIdNum, setSelectedTaskIdNum] = useState<number>(0);
     const [tempSave, setTempSave] = useState(true);
+    const navigate = useNavigate();
 
     const autocompleteOptions = options.map(option => option.projectName);
     const filteredOptions = searchTerm === ""
@@ -291,6 +294,146 @@ const TemplateCopy: React.FC = () => {
             setErrorModalOpen(true);
             setErrorMessage("템플릿의 임시저장에 실패하였습니다.");
         }
+    }
+
+    // 템플릿의 최종저장
+    const handleSave = async () => {
+        try {
+            if (templateIdNum === 0) {
+                // template 저장
+                const tempReq = {
+                    templateName: templateRequest?.templateName,
+                    description: templateRequest?.description,
+                    period: templateRequest?.period,
+                    regDate: new Date().toISOString().slice(0, 10),
+                }
+                const response = await axios.post("/api/template", tempReq);
+                const receivedTemplateIdNum = response.data;
+                setTemplateIdNum(receivedTemplateIdNum);
+
+                // templateRole 저장
+                const roleReq = templateRoleRequest.map(role => {
+                    return {
+                        templateId: receivedTemplateIdNum,
+                        roleName: role.roleName,
+                        roleLevel: role.roleLevel,
+                        description: role.description,
+                    }
+                });
+                await axios.post("/api/template/role", roleReq);
+
+                // templateUser 저장
+                const userReq = templateUserRequest.map(user => {
+                    return {
+                        templateId: receivedTemplateIdNum,
+                        userId: user.userId,
+                        templateRoleId: user.templateRoleId,
+                    }
+                });
+                await axios.post("/api/template/user", userReq);
+
+                const idNumMap = new Map();
+
+                // templateTask 저장
+                // templateTaskRequest는 배열형태이므로 순회하며 axios.post를 실행한다.
+                // templateTask 저장
+                for (const task of templateTaskRequest) {
+                    const taskReq = {
+                        taskName: task.taskName,
+                        description: task.description,
+                        period: task.period,
+                        offsetDay: task.offsetDay,
+                    }
+
+                    const response = await axios.post(`/api/template/task/${receivedTemplateIdNum}`, taskReq);
+                    const receivedTaskIdNum = response.data;
+
+                    // Map에 oldIdNum: newIdNum 형태로 저장
+                    idNumMap.set(task.idNum, receivedTaskIdNum);
+
+                    // 기존 항목에 idNum 추가
+                    task.idNum = receivedTaskIdNum;
+                }
+
+                // templateTaskUserRequest 저장
+                for (const taskUser of templateTaskUserRequest) {
+                    const taskUserReq = {
+                        templateTaskId: idNumMap.get(taskUser.templateTaskId),
+                        userId: taskUser.userId,
+                        templateRoleId: taskUser.templateRoleId,
+                    }
+                    await axios.post(`/api/template/task/user/${receivedTemplateIdNum}`, taskUserReq);
+
+                    // 기존 항목에 templateTaskId 추가
+                    taskUser.templateTaskId = idNumMap.get(taskUser.templateTaskId);
+                }
+
+                // 성공 메세지
+                setTempSave(false);
+                setSuccessModalOpen(true);
+                setSuccessMessage("템플릿의 임시저장이 완료되었습니다.");
+
+            } else {
+                // template 수정
+                const tempReq = {
+                    idNum: templateIdNum,
+                    templateName: templateRequest?.templateName,
+                    description: templateRequest?.description,
+                    period: templateRequest?.period,
+                }
+                await axios.put(`/api/template`, tempReq);
+
+                // templateRole 수정
+                const roleReq = templateRoleRequest.map(role => {
+                    return {
+                        templateId: templateIdNum,
+                        roleName: role.roleName,
+                        roleLevel: role.roleLevel,
+                        description: role.description,
+                    }
+                });
+                await axios.put(`/api/template/role/${templateIdNum}`, roleReq);
+
+                // templateUser 수정
+                const userReq = templateUserRequest.map(user => {
+                    return {
+                        templateId: templateIdNum,
+                        userId: user.userId,
+                        templateRoleId: user.templateRoleId,
+                    }
+                });
+                await axios.put(`/api/template/user/${templateIdNum}`, userReq);
+
+                // templateTask 수정
+                await axios.put(`/api/template/task/${templateIdNum}`, templateTaskRequest)
+
+                // templateTaskUser 수정
+                // 같은 templateTaskId를 가진 항목들을 묶어서 axios.put을 실행한다.
+                const taskUserReq = templateTaskUserRequest.reduce((acc, cur) => {
+                    if (acc[cur.templateTaskId]) {
+                        acc[cur.templateTaskId].push(cur);
+                    } else {
+                        acc[cur.templateTaskId] = [cur];
+                    }
+                    return acc;
+                }, {});
+
+                for (const [key, value] of Object.entries(taskUserReq)) {
+                    await axios.put(`/api/template/task/user/${key}`, value);
+                }
+
+                // 성공 메세지 이후 사용자가 확인버튼을 누르면 리다이렉트
+                setSavedModalOpen(true);
+                setSuccessMessage("템플릿의 생성이 완료되었습니다.");
+            }
+        } catch (error) {
+            setErrorModalOpen(true);
+            setErrorMessage("템플릿 생성에에 실패하였습니다.");
+        }
+    }
+    const handleConfirmSuccess = () => {
+        setSavedModalOpen(false);  // 성공 메시지 모달을 닫습니다.
+        navigate("/template/list");
     }
 
     const handleTemplateChange = (key: string, value: string | number) => {
@@ -1055,6 +1198,36 @@ const TemplateCopy: React.FC = () => {
                                             </Box>
                                         )
                                     }
+                                    <Box display="flex" justifyContent="space-between" sx={{mt: 5}}>
+                                        <Box>
+                                            &nbsp;
+                                        </Box>
+
+                                        <Box>
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    marginLeft: '10px',
+                                                    fontSize: '14px',
+                                                    fontWeight: 'bold',
+                                                    height: '35px',
+                                                    backgroundColor: 'rgb(40, 49, 66)',
+                                                    boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                    textTransform: 'none',
+                                                    minWidth: '75px',
+                                                    padding: '0 12px',
+                                                    opacity: templateIdNum === 0 ? 0.5 : 1, pointerEvents: templateIdNum === 0 ? 'none' : 'all',
+                                                    '&:hover': {
+                                                        textDecoration: 'none',
+                                                        backgroundColor: 'rgb(40, 49, 66, 0.8)',
+                                                    },
+                                                }}
+                                                onClick={handleSave}
+                                            >
+                                                템플릿 추가
+                                            </Button>
+                                        </Box>
+                                    </Box>
                                 </Box>
                             ) : (
                                 <Box sx={{mt: 3}}>
@@ -1095,6 +1268,14 @@ const TemplateCopy: React.FC = () => {
             <SuccessModal
                 open={isSuccessModalOpen}
                 onClose={() => setSuccessModalOpen(false)}
+                title="요청 성공"
+                description={successMessage || ""}
+            />
+
+            {/*최종 생성 Modal*/}
+            <SuccessModal
+                open={isSavedModalOpen}
+                onClose={handleConfirmSuccess}
                 title="요청 성공"
                 description={successMessage || ""}
             />
