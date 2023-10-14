@@ -95,5 +95,43 @@ public class TemplateTasksService {
         return "SUCCESS";
     }
 
+    public void updateTemplateTaskUser(Long taskId, List<TemplateTasksDto.TemplateTaskUsersDto> templateTaskUserDto) {
+        // 같은 taskId를 가진 업무들을 전부 조회한 뒤
+        List<TemplateTaskUser> existingTemplateTaskUsers = templateTaskUserRepository.findAllByTemplateTasks_IdNum(taskId);
+
+        for(TemplateTasksDto.TemplateTaskUsersDto taskUserDto : templateTaskUserDto) {
+            TemplateTaskUser existingTaskUser = templateTaskUserRepository.findByTemplateTasksIdNumAndUsersIdNum(taskId, taskUserDto.getUserId()).orElse(null);
+
+            if(existingTaskUser == null) {
+                // 새로 추가
+                TemplateTaskUser newTaskUser = TemplateTaskUser.of(
+                        templateRolesRepository.findByRoleLevelAndTemplatesIdNum(taskUserDto.getTemplateRoleId(), taskId).orElse(null),
+                        templateTasksRepository.findById(taskId).orElse(null),
+                        usersRepository.findById(taskUserDto.getUserId()).orElse(null)
+                );
+
+                templateTaskUserRepository.save(newTaskUser);
+            } else {
+                // 수정
+                existingTaskUser.setTemplateRoles(templateRolesRepository.findByRoleLevelAndTemplatesIdNum(taskUserDto.getTemplateRoleId(), taskId).orElse(null));
+                existingTaskUser.setTemplateTasks(templateTasksRepository.findById(taskId).orElse(null));
+                existingTaskUser.setUsers(usersRepository.findById(taskUserDto.getUserId()).orElse(null));
+
+                templateTaskUserRepository.save(existingTaskUser);
+            }
+
+            // existingTemplateTaskUsers에서 templateTaskUserDto에 없는 항목 삭제
+            for(TemplateTaskUser taskUser : existingTemplateTaskUsers) {
+                if(!existsInTaskUserDtoList(templateTaskUserDto, taskUser)) {
+                    templateTaskUserRepository.delete(taskUser);
+                }
+            }
+        }
+    }
+
+    private boolean existsInTaskUserDtoList(List<TemplateTasksDto.TemplateTaskUsersDto> dtos, TemplateTaskUser taskUser) {
+        return dtos.stream().anyMatch(dto -> dto.getUserId().equals(taskUser.getUsers().getIdNum()));
+    }
+
 
 }

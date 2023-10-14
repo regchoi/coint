@@ -266,6 +266,21 @@ const TemplateCopy: React.FC = () => {
                 // templateTask 수정
                 await axios.put(`/api/template/task/${templateIdNum}`, templateTaskRequest)
 
+                // templateTaskUser 수정
+                // 같은 templateTaskId를 가진 항목들을 묶어서 axios.put을 실행한다.
+                const taskUserReq = templateTaskUserRequest.reduce((acc, cur) => {
+                    if (acc[cur.templateTaskId]) {
+                        acc[cur.templateTaskId].push(cur);
+                    } else {
+                        acc[cur.templateTaskId] = [cur];
+                    }
+                    return acc;
+                }, {});
+
+                for (const [key, value] of Object.entries(taskUserReq)) {
+                    await axios.put(`/api/template/task/user/${key}`, value);
+                }
+
                 // 성공 메세지
                 setTempSave(false);
                 setSuccessModalOpen(true);

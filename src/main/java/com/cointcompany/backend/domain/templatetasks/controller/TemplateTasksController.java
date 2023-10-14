@@ -56,4 +56,15 @@ public class TemplateTasksController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    @Operation(summary = "업무 작업자 수정")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/user/{taskId}")
+    public ResponseEntity<String> updateTemplateTaskUser (
+            @PathVariable Long taskId,
+            @RequestBody List<TemplateTasksDto.TemplateTaskUsersDto> tasksUserDtoList
+    ) {
+        templateTasksService.updateTemplateTaskUser(taskId, tasksUserDtoList);
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
 }

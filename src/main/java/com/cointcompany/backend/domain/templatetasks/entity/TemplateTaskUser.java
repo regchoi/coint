@@ -4,15 +4,13 @@ import com.cointcompany.backend.domain.common.BaseEntity;
 import com.cointcompany.backend.domain.templates.entity.TemplateRoles;
 import com.cointcompany.backend.domain.users.entity.Users;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Where(clause = "del = false")
 @SQLDelete(sql = "UPDATE template_task_user SET del = true WHERE id_num = ?")

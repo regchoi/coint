@@ -17,7 +17,7 @@ import axios from "../../../redux/axiosConfig";
 import ErrorModal from "../../common/ErrorModal";
 import SuccessModal from "../../common/SuccessModal";
 import AddIcon from "@mui/icons-material/Add";
-import AddUserTable from "./AddUserTable";
+import AddTaskUserTable from "./AddTaskUserTable";
 
 type User = {
     templateTaskId: number;
@@ -283,7 +283,7 @@ export default function TaskUserModal({ open, onClose, userList, setUserList, ro
                             </IconButton>
                         </Typography>
 
-                        <AddUserTable onClose={() => setAddUserTableOpen(false)} userList={userList} setUserList={setUserList} rolesList={roleList} />
+                        <AddTaskUserTable onClose={() => setAddUserTableOpen(false)} userList={userList} setUserList={setUserList} rolesList={roleList} taskIdNum={taskIdNum} />
                     </Box>
                 </Modal>
 
