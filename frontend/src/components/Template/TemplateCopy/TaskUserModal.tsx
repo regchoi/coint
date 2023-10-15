@@ -25,6 +25,11 @@ type User = {
     templateRoleId: number;
 }
 
+type UserData = {
+    userId: number;
+    templateRoleId: number;
+}
+
 type Role = {
     roleName: string;
     roleLevel: number;
@@ -58,9 +63,10 @@ interface ModalProps {
     roleList: Role[];
     setRoleList: (roleList: Role[]) => void;
     taskIdNum: number;
+    userData: UserData[];
 }
 
-export default function TaskUserModal({ open, onClose, userList, setUserList, roleList, setRoleList, taskIdNum }: ModalProps) {
+export default function TaskUserModal({ open, onClose, userList, setUserList, roleList, setRoleList, taskIdNum, userData }: ModalProps) {
     const [users, setUsers] = React.useState<AllUser[]>([]);
     const [taskUsers, setTaskUsers] = React.useState<User[]>(userList);
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -303,6 +309,7 @@ export default function TaskUserModal({ open, onClose, userList, setUserList, ro
                             }}
                             rolesList={roleList}
                             taskIdNum={taskIdNum}
+                            tempUser={userData}
                         />
 
                     </Box>

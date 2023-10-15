@@ -31,6 +31,11 @@ type User = {
     templateRoleId: number;
 }
 
+type UserData = {
+    userId: number;
+    templateRoleId: number;
+}
+
 interface AllUser {
     idNum: number;
     name: string;
@@ -68,6 +73,7 @@ interface AddUserTableProps {
     setUserList: (userList: User[]) => void;
     rolesList: Role[];
     taskIdNum: number;
+    tempUser: UserData[];
 }
 
 function not(a: readonly number[], b: readonly number[]) {
@@ -86,7 +92,7 @@ export default function AddTaskUserTable(props: AddUserTableProps) {
     const [filter, setFilter] = React.useState<string>('');
     const [selectedDepartment, setSelectedDepartment] = React.useState<string>('');
     const [roles, setRoles] = React.useState<Record<number, string>>({});
-    const { onClose, userList, setUserList, rolesList, taskIdNum } = props;
+    const { onClose, userList, setUserList, rolesList, taskIdNum, tempUser } = props;
     
     // Table Cell 공통 스타일
     const tableCellStyle = {
@@ -118,12 +124,14 @@ export default function AddTaskUserTable(props: AddUserTableProps) {
         // 사용자 목록 불러오기
         axios.get('/api/user')
             .then((response) => {
-                const userData = response.data.map((userData: UserResponse) => ({
+                const allUser = response.data.map((userData: UserResponse) => ({
                     idNum: userData.idNum,
                     name: userData.name || '',  // handle the potential null value
                     department: userData.getUserDepartmentResList.length > 0 ? userData.getUserDepartmentResList[0].departmentName : '부서 미배정',
                     email: userData.email || '',  // handle the potential null value
                 }));
+                // allUser에서 tempUser userId와 동일한 idNum을 갖는 user만 userData에 저장
+                const userData = allUser.filter(user => tempUser.some(tempUser => tempUser.userId === user.idNum));
 
                 // type User에서 AllUser 타입으로 변환
                 const newUsersList = userList.map(user => ({

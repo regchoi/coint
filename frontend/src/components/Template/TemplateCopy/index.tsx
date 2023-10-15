@@ -1308,7 +1308,7 @@ const TemplateCopy: React.FC = () => {
             }
             {
                 templateTaskUserRequest && (
-                    <TaskUserModal open={taskUserListOpen} onClose={() => setTaskUserListOpen(false)} userList={templateTaskUserRequest} setUserList={setTemplateTaskUserRequest} roleList={templateRoleRequest} setRoleList={setTemplateRoleRequest} taskIdNum={selectedTaskIdNum}  />
+                    <TaskUserModal open={taskUserListOpen} onClose={() => setTaskUserListOpen(false)} userList={templateTaskUserRequest} setUserList={setTemplateTaskUserRequest} roleList={templateRoleRequest} setRoleList={setTemplateRoleRequest} taskIdNum={selectedTaskIdNum} userData={templateUserRequest}  />
                 )
             }
 
