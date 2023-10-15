@@ -11,5 +11,7 @@ public interface TemplateUserRepository extends JpaRepository<TemplateUser, Long
     List<TemplateUser> findByTemplatesIdNum(Long templateIdNum);
 
     Optional<TemplateUser> findByTemplatesIdNumAndUsersIdNum(Long templateIdNum, Long userIdNum);
+    // 카운트 메서드 추가
+    Long countByTemplates_IdNum(Long templateId);
 
 }

@@ -2,7 +2,7 @@
 
 // tableName 정의
 const tableName: string = '템플릿조회';
-const API_LINK: string = '/api/project';
+const API_LINK: string = '/api/template';
 
 // 테이블의 구조를 정의
 // 테이블 데이터형을 명시적으로 정의함으로써 가독성과 안정성을 높임

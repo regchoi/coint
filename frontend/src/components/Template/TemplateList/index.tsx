@@ -34,65 +34,6 @@ import { CSSTransition } from 'react-transition-group';
 import "../../../assets/css/common/modal-transition.css";
 import axios from "../../../redux/axiosConfig";
 
-// TODO: 백엔드 기능 구현
-const SAMPLE_DATA: Data[] = [
-    createData(
-        1,
-        "템플릿A",
-        "프로젝트A에 대한 템플릿입니다. 템플릿A는 ",
-        190,
-        5,
-        3,
-        "2023-04-01",
-        "김우일",
-        "템플릿A의 상세 정보"
-    ),
-    createData(
-        2,
-        "템플릿B",
-        "프로젝트B에 대한 템플릿입니다. 템플릿B는 ",
-        220,
-        7,
-        4,
-        "2023-05-05",
-        "김우일",
-        "템플릿B의 상세 정보"
-    ),
-    createData(
-        3,
-        "템플릿C",
-        "프로젝트C에 대한 템플릿입니다. 템플릿C는 ",
-        150,
-        4,
-        2,
-        "2023-06-01",
-        "김우일",
-        "템플릿C의 상세 정보"
-    ),
-    createData(
-        4,
-        "플랫폼 템플릿",
-        "플랫폼 개발을 위한 템플릿입니다. 플랫폼 템플릿은 ",
-        180,
-        6,
-        5,
-        "2023-07-10",
-        "김우일",
-        "템플릿D의 상세 정보"
-    ),
-    createData(
-        5,
-        "기술개발 템플릿",
-        "기술개발을 위한 절차를 정의해둔 템플릿",
-        150,
-        3,
-        1,
-        "2023-08-01",
-        "김우일",
-        "템플릿E의 상세 정보"
-    ),
-];
-
 export default function TemplateList() {
     const dispatch = useAppDispatch();
     const [added, setAdded] = useState([] as Data[]);
@@ -108,15 +49,11 @@ export default function TemplateList() {
     const [tags, setTags] = useState<string[]>([]);
     const [tagSearchId, setTagSearchId] = useState<number[]>([]);
 
-    // TODO: 백엔드 기능 구현
-    const [data, setData] = useState<Data[]>(SAMPLE_DATA);
-    const [loading, error] = [false, undefined];
-    // const { data, loading, error } = useAppSelector(state => state.table);
+    const { data, loading, error } = useAppSelector(state => state.table);
 
     // table data를 가져오는 hook
     useEffect(() => {
-        // TODO: 백엔드 기능 구현
-        // dispatch(fetchTableData(API_LINK));
+        dispatch(fetchTableData(API_LINK));
     }, [dispatch]);
 
     // 요청 실패 시 에러 처리

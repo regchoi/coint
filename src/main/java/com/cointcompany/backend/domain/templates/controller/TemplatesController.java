@@ -26,6 +26,13 @@ public class TemplatesController {
     private final ModelMapper modelMapper;
 
     // Template
+    @Operation(summary = "템플릿 전체 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping
+    public ResponseEntity<List<TemplatesDto.GetTemplateListRes>> getTemplates () {
+        return new ResponseEntity<>(templatesService.getTemplates(), HttpStatus.OK);
+    }
+
     @Operation(summary = "템플릿 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping

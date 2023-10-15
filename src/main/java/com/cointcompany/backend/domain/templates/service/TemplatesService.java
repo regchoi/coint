@@ -5,12 +5,16 @@ import com.cointcompany.backend.domain.templates.entity.TemplateRoles;
 import com.cointcompany.backend.domain.templates.entity.TemplateUser;
 import com.cointcompany.backend.domain.templates.entity.Templates;
 import com.cointcompany.backend.domain.templates.repository.*;
+import com.cointcompany.backend.domain.templatetasks.repository.TemplateTasksRepository;
 import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,11 +22,43 @@ import java.util.List;
 public class TemplatesService {
 
     private final TemplatesRepository templatesRepository;
+    private final TemplateTasksRepository templateTasksRepository;
     private final TemplateRolesRepository templateRolesRepository;
     private final TemplateUserRepository templateUserRepository;
     private final UsersRepository usersRepository;
 
     // Template
+    @Transactional(readOnly = true)
+    public List<TemplatesDto.GetTemplateListRes> getTemplates() {
+        List<Templates> templates = templatesRepository.findAll();
+
+        return templates.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private TemplatesDto.GetTemplateListRes convertToDto(Templates template) {
+        Long taskNum = templateTasksRepository.countByTemplates_IdNum(template.getIdNum()); // Assumes you have a method to count tasks
+        Long workerNum = templateUserRepository.countByTemplates_IdNum(template.getIdNum()); // Assumes you have a method to count users
+
+        // 날짜를 문자열로 변환
+        String formattedRegDate = template.getRegDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        // TODO: regUserId name으로 변경
+        String regUserIdAsString = String.valueOf(template.getRegUserid());
+
+        return new TemplatesDto.GetTemplateListRes(
+                template.getIdNum(),
+                template.getTemplateName(),
+                template.getDescription(),
+                template.getPeriod(),
+                taskNum.intValue(),
+                workerNum.intValue(),
+                formattedRegDate,
+                regUserIdAsString
+        );
+    }
+
     public Templates saveTemplates(Templates template) {
         return templatesRepository.save(template);
     }

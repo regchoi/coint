@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface TemplateTasksRepository extends JpaRepository<TemplateTasks, Long> {
     List<TemplateTasks> findAllByTemplates_IdNum(Long templateId);
+    // 카운트 메서드 추가
+    Long countByTemplates_IdNum(Long templateId);
 
 
 }

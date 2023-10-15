@@ -74,4 +74,28 @@ public class TemplatesDto {
             this.regUserid = regUserid;
         }
     }
+
+    @NoArgsConstructor
+    @Data
+    public static class GetTemplateListRes {
+        private Long idNum;
+        private String templateName;
+        private String description;
+        private Integer period;
+        private Integer taskNum;
+        private Integer workerNum;
+        private String regDate;
+        private String regUserid;
+
+        public GetTemplateListRes (Long idNum, String templateName, String description, Integer period, Integer taskNum, Integer workerNum, String regDate, String regUserid) {
+            this.idNum = idNum;
+            this.templateName = templateName;
+            this.description = description;
+            this.period = period;
+            this.taskNum = taskNum;
+            this.workerNum = workerNum;
+            this.regDate = regDate;
+            this.regUserid = regUserid;
+        }
+    }
 }
