@@ -62,6 +62,7 @@ interface ModalProps {
 
 export default function TaskUserModal({ open, onClose, userList, setUserList, roleList, setRoleList, taskIdNum }: ModalProps) {
     const [users, setUsers] = React.useState<AllUser[]>([]);
+    const [taskUsers, setTaskUsers] = React.useState<User[]>(userList);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [isAddUserTableOpen, setAddUserTableOpen] = useState<boolean>(false);
     const [isErrorModalOpen, setErrorModalOpen] = useState<boolean>(false);
@@ -124,7 +125,6 @@ export default function TaskUserModal({ open, onClose, userList, setUserList, ro
         onClose();
     };
 
-
     useEffect(() => {
         // 사용자 목록 불러오기
         axios.get('/api/user')
@@ -141,6 +141,10 @@ export default function TaskUserModal({ open, onClose, userList, setUserList, ro
                 console.log(error);
             });
     }, []);
+
+    useEffect(() => {
+        setTaskUsers(userList.filter(user => user.templateTaskId === taskIdNum));
+    }, [userList, taskIdNum]);
 
     return (
         <Modal open={open}>
@@ -199,7 +203,8 @@ export default function TaskUserModal({ open, onClose, userList, setUserList, ro
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {userList.map((user, index) => (
+                                {
+                                    taskUsers.map((user, index) => (
                                     <TableRow key={index} sx={{ height: '30px' }}>
                                         <TableCell sx={{...tableCellStyles, width: '75px'}} align="center" >
                                             {index + 1}
@@ -211,7 +216,8 @@ export default function TaskUserModal({ open, onClose, userList, setUserList, ro
                                             { roleList && roleList.find((roleData) => roleData.roleLevel === user.templateRoleId)?.roleName }
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                ))
+                                }
                             </TableBody>
                         </Table>
                     </Box>
@@ -282,8 +288,23 @@ export default function TaskUserModal({ open, onClose, userList, setUserList, ro
                                 <CloseIcon />
                             </IconButton>
                         </Typography>
+                        <AddTaskUserTable
+                            onClose={() => setAddUserTableOpen(false)}
+                            userList={taskUsers}
+                            setUserList={(updatedTaskUserList) => {
+                                // updatedTaskUserList: taskUserList에서의 변경사항이 반영된 리스트
 
-                        <AddTaskUserTable onClose={() => setAddUserTableOpen(false)} userList={userList} setUserList={setUserList} rolesList={roleList} taskIdNum={taskIdNum} />
+                                // 전체 userList에서 현재 task에 해당하지 않는 사용자들을 가져옵니다.
+                                const otherUsers = userList.filter(user => user.templateTaskId !== taskIdNum);
+
+                                // setUserList를 사용하여 userList를 업데이트합니다.
+                                // 현재 task에 해당하지 않는 사용자들 + 변경사항이 반영된 사용자들
+                                setUserList([...otherUsers, ...updatedTaskUserList]);
+                            }}
+                            rolesList={roleList}
+                            taskIdNum={taskIdNum}
+                        />
+
                     </Box>
                 </Modal>
 

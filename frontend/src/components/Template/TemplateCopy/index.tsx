@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import AddIcon from '@mui/icons-material/Add';
 import GroupsIcon from '@mui/icons-material/Groups';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {CSSTransition} from "react-transition-group";
@@ -458,6 +459,32 @@ const TemplateCopy: React.FC = () => {
         }
         setExpandedTasks(newExpandedTasks);
     };
+
+    const handleTaskAdd = async () => {
+        try {
+            const taskReq = {
+                taskName: "",
+                description: "",
+                period: 0,
+                offsetDay: 0,
+            }
+            const response = await axios.post(`/api/template/task/${templateIdNum}`, taskReq);
+            const receivedTaskIdNum = response.data;
+
+            const newTask = {
+                idNum: receivedTaskIdNum,
+                taskName: "",
+                description: "",
+                period: 0,
+                offsetDay: 0,
+            }
+            const updatedTasks = [...templateTaskRequest, newTask];
+            setTemplateTaskRequest(updatedTasks);
+        } catch (error) {
+            setErrorModalOpen(true);
+            setErrorMessage("템플릿 업무 추가에 실패하였습니다.");
+        }
+    }
 
     function getDaysDifference(start: string, end: string) {
         const startDate = new Date(start);
@@ -1187,6 +1214,35 @@ const TemplateCopy: React.FC = () => {
                                                                     </Grid>
                                                                 ))
                                                             }
+                                                            <Grid item xs={12}>
+                                                                <Tooltip title={'새 업무 추가'}>
+                                                                    <MUICard
+                                                                        sx={{
+                                                                            ':hover': {
+                                                                                backgroundColor: 'rgba(40, 49, 66, 0.1)', // 카드의 배경색을 변경합니다.
+                                                                                transition: 'background-color 0.3s', // 스무스한 전환 효과를 위해 transition 추가
+                                                                                pointer: 'cursor',
+                                                                            }
+                                                                        }}
+                                                                        onClick={handleTaskAdd}
+                                                                    >
+                                                                        <CardContent sx={{padding: '10px !important'}}>
+                                                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                                                                <IconButton
+                                                                                    aria-label="add"
+                                                                                    sx={{
+                                                                                        width: '40px',
+                                                                                        height: '40px',
+                                                                                        color: 'rgba(40, 49, 66, 0.5)',
+                                                                                    }}
+                                                                                >
+                                                                                    <AddIcon />
+                                                                                </IconButton>
+                                                                            </Box>
+                                                                        </CardContent>
+                                                                    </MUICard>
+                                                                </Tooltip>
+                                                            </Grid>
                                                         </Grid>
                                                     </Box>
                                                 </Box>
@@ -1224,7 +1280,7 @@ const TemplateCopy: React.FC = () => {
                                                 }}
                                                 onClick={handleSave}
                                             >
-                                                템플릿 추가
+                                                템플릿 생성
                                             </Button>
                                         </Box>
                                     </Box>
