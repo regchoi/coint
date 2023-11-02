@@ -24,8 +24,6 @@ import UserModal from "./UserModal";
 import SuccessModal from "../../common/SuccessModal";
 import TaskUserModal from "./TaskUserModal";
 
-// TODO: 템플릿에 저장된 값을 관리하는 type 정의 및 기능 (임시저장) 추가
-
 type ProjectUserNum = {
     projectIdNum: number;
     projectUserNum: number;
@@ -91,6 +89,11 @@ type TemplateTaskUser = {
     templateTaskId: number;
     userId: number;
     templateRoleId: number;
+}
+
+type Tag = {
+    templateIdNum: number;
+    tagName: string;
 }
 
 const TemplateCopy: React.FC = () => {
@@ -312,6 +315,19 @@ const TemplateCopy: React.FC = () => {
                 const receivedTemplateIdNum = response.data;
                 setTemplateIdNum(receivedTemplateIdNum);
 
+                // templateTag 저장
+                const tags: Tag[] = [];
+                const tagNames = tempReq.templateName?.split(' ').concat(tempReq.description?.split(' '));
+                // 중복되는 키워드는 제거
+                const uniqueTagNames = [...new Set(tagNames)];
+                uniqueTagNames.forEach((tagName) => {
+                    tags.push({
+                        templateIdNum: receivedTemplateIdNum,
+                        tagName,
+                    });
+                });
+                await axios.post(`/api/template/tag/${receivedTemplateIdNum}`, tags);
+
                 // templateRole 저장
                 const roleReq = templateRoleRequest.map(role => {
                     return {
@@ -384,6 +400,19 @@ const TemplateCopy: React.FC = () => {
                 }
                 await axios.put(`/api/template`, tempReq);
 
+                // templateTag 저장
+                const tags: Tag[] = [];
+                const tagNames = tempReq.templateName?.split(' ').concat(tempReq.description?.split(' '));
+                // 중복되는 키워드는 제거
+                const uniqueTagNames = [...new Set(tagNames)];
+                uniqueTagNames.forEach((tagName) => {
+                    tags.push({
+                        templateIdNum: templateIdNum,
+                        tagName,
+                    });
+                });
+                await axios.post(`/api/template/tag/${templateIdNum}`, tags);
+
                 // templateRole 수정
                 const roleReq = templateRoleRequest.map(role => {
                     return {
@@ -429,7 +458,7 @@ const TemplateCopy: React.FC = () => {
             }
         } catch (error) {
             setErrorModalOpen(true);
-            setErrorMessage("템플릿 생성에에 실패하였습니다.");
+            setErrorMessage("템플릿 생성에 실패하였습니다.");
         }
     }
     const handleConfirmSuccess = () => {
@@ -1247,10 +1276,36 @@ const TemplateCopy: React.FC = () => {
                                                     </Box>
                                                 </Box>
                                         ) : (
-                                            <Box sx={{ mt: 3 }}>
-                                                <Typography variant="h6" gutterBottom>
-                                                    프로젝트 업무가 없습니다
-                                                </Typography>
+                                            <Box sx={{ mt: 3, opacity: templateIdNum === 0 ? 0.5 : 1, pointerEvents: templateIdNum === 0 ? 'none' : 'all' }}>
+                                                <Grid item xs={12}>
+                                                    <Tooltip title={'새 업무 추가'}>
+                                                        <MUICard
+                                                            sx={{
+                                                                ':hover': {
+                                                                    backgroundColor: 'rgba(40, 49, 66, 0.1)', // 카드의 배경색을 변경합니다.
+                                                                    transition: 'background-color 0.3s', // 스무스한 전환 효과를 위해 transition 추가
+                                                                    pointer: 'cursor',
+                                                                }
+                                                            }}
+                                                            onClick={handleTaskAdd}
+                                                        >
+                                                            <CardContent sx={{padding: '10px !important'}}>
+                                                                <Box display="flex" alignItems="center" justifyContent="center">
+                                                                    <IconButton
+                                                                        aria-label="add"
+                                                                        sx={{
+                                                                            width: '40px',
+                                                                            height: '40px',
+                                                                            color: 'rgba(40, 49, 66, 0.5)',
+                                                                        }}
+                                                                    >
+                                                                        <AddIcon />
+                                                                    </IconButton>
+                                                                </Box>
+                                                            </CardContent>
+                                                        </MUICard>
+                                                    </Tooltip>
+                                                </Grid>
                                             </Box>
                                         )
                                     }

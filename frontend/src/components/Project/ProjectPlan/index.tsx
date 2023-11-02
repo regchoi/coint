@@ -30,6 +30,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import ErrorModal from "../../common/ErrorModal";
 import AddModal from "./AddModal";
+import SimpleAddModal from "./SimpleAddModal";
 import { CSSTransition } from 'react-transition-group';
 import "../../../assets/css/common/modal-transition.css";
 import axios from "../../../redux/axiosConfig";
@@ -41,6 +42,8 @@ export default function ProjectPlan() {
     const [updated, setUpdated] = useState([] as Data[]);
     // 생성 Modal 상태 관리
     const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+    // 간편 생성 Modal 상태 관리
+    const [isSimpleCreateModalOpen, setSimpleCreateModalOpen] = useState(false);
     // 삭제 확인 Modal 상태 관리
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     // 에러 확인 Modal 상태 관리
@@ -208,6 +211,7 @@ export default function ProjectPlan() {
                 <EnhancedTableToolbar
                     numSelected={selected.length}
                     tableName={tableName}
+                    onSimpleAdd={() => setSimpleCreateModalOpen(!isSimpleCreateModalOpen)}
                     onAdd={handleAdd}
                     onUpdate={handleUpdate}
                     onDelete={handleOpenDeleteModal}    // 삭제 버튼 클릭 시, 삭제 확인 Modal 열기
@@ -381,6 +385,19 @@ export default function ProjectPlan() {
                     onClose={() => setCreateModalOpen(false)}
                 />
             </CSSTransition>
+
+            {/*프로젝트 간편 생성 모달 (필요한 경우에 Transition) */}
+            <CSSTransition
+                in={true}
+                appear={true}
+                timeout={300}
+                classNames="fade">
+                <SimpleAddModal
+                    open={isSimpleCreateModalOpen}
+                    onClose={() => setSimpleCreateModalOpen(false)}
+                />
+            </CSSTransition>
+
             {/* 삭제 확인 Modal */}
             <Modal
                 open={isDeleteModalOpen}

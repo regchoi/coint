@@ -9,7 +9,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import CloseIcon from '@mui/icons-material/Close';
 import TextField from '@mui/material/TextField';
 import {useEffect} from "react";
-import axios from "../../../../../redux/axiosConfig";
+import axios from "../../../../redux/axiosConfig";
 import {
     Box, FormControl,
     IconButton, InputLabel, MenuItem,
@@ -24,14 +24,24 @@ import {
 } from "@mui/material";
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
-import ProjectContext from "../../ProjectContext";
 
-interface User {
+type User = {
+    userId: number;
+    templateRoleId: number;
+}
+
+interface AllUser {
     idNum: number;
     name: string;
     department: string;
     email: string;
     role: number;
+}
+
+type Role = {
+    roleName: string;
+    roleLevel: number;
+    description: string;
 }
 
 type Department = {
@@ -53,6 +63,9 @@ interface UserResponse {
 // props 정의
 interface AddUserTableProps {
     onClose: () => void;
+    userList: User[];
+    setUserList: (userList: User[]) => void;
+    rolesList: Role[];
 }
 
 function not(a: readonly number[], b: readonly number[]) {
@@ -64,20 +77,15 @@ function intersection(a: readonly number[], b: readonly number[]) {
 }
 
 export default function AddUserTable(props: AddUserTableProps) {
-    const [users, setUsers] = React.useState<User[]>([]);
+    const [users, setUsers] = React.useState<AllUser[]>([]);
+    const [usersList, setUsersList] = React.useState<AllUser[]>([]);
     const [departments, setDepartments] = React.useState<Department[]>([]);
     const [checked, setChecked] = React.useState<readonly number[]>([]);
     const [filter, setFilter] = React.useState<string>('');
     const [selectedDepartment, setSelectedDepartment] = React.useState<string>('');
     const [roles, setRoles] = React.useState<Record<number, string>>({});
-    const { onClose } = props;
-
-    const context = React.useContext(ProjectContext);
-    if (!context) {
-        throw new Error("Cannot find ProjectProvider");
-    }
-    const { rolesList, usersList, setUsersList } = context;
-
+    const { onClose, userList, setUserList, rolesList } = props;
+    
     // Table Cell 공통 스타일
     const tableCellStyle = {
         width: '30px', height: '30px',
@@ -103,9 +111,6 @@ export default function AddUserTable(props: AddUserTableProps) {
         setChecked(newChecked);
     };
 
-    const handleSave = () => {
-    }
-
     // department, usergroup redux로 값 받아오기
     useEffect(() => {
         // 사용자 목록 불러오기
@@ -114,12 +119,23 @@ export default function AddUserTable(props: AddUserTableProps) {
                 const userData = response.data.map((userData: UserResponse) => ({
                     idNum: userData.idNum,
                     name: userData.name || '',  // handle the potential null value
-                    department: userData.getUserDepartmentResList.length > 0 ? userData.getUserDepartmentResList[0].departmentName : 'N/A',
+                    department: userData.getUserDepartmentResList.length > 0 ? userData.getUserDepartmentResList[0].departmentName : '부서 미배정',
                     email: userData.email || '',  // handle the potential null value
                 }));
+
+                // type User에서 AllUser 타입으로 변환
+                const newUsersList = userList.map(user => ({
+                    idNum: user.userId,
+                    name: userData.find(userData => userData.idNum === user.userId)?.name || '',
+                    department: userData.find(userData => userData.idNum === user.userId)?.department || '',
+                    email: userData.find(userData => userData.idNum === user.userId)?.email || '',
+                    role: user.templateRoleId
+                }));
+                setUsersList(newUsersList);
+
                 // usersList에 있는 사용자는 제외하고 setUsers 구성
-                usersList.forEach(user => {
-                    userData.splice(userData.findIndex(userData => userData.idNum === user.idNum), 1);
+                userList.forEach(user => {
+                    userData.splice(userData.findIndex(userData => userData.idNum === user.userId), 1);
                 });
 
                 setUsers(userData);
@@ -169,6 +185,14 @@ export default function AddUserTable(props: AddUserTableProps) {
         setChecked(not(checked, rightChecked));
     };
 
+    useEffect(() => {
+        const updatedUsers = usersList.map(user => ({
+                userId: user.idNum,
+                templateRoleId: user.role
+            }));
+        setUserList(updatedUsers);
+    }, [usersList]);
+
     const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>, idNum: number) => {
         const newProjectUsers = usersList.map(user => {
             if (user.idNum === idNum) {
@@ -188,7 +212,7 @@ export default function AddUserTable(props: AddUserTableProps) {
 
     const numberOfChecked = (items: readonly number[]) => intersection(checked, items).length;
 
-    const customList = (title: React.ReactNode, users: User[]) => (
+    const customList = (title: React.ReactNode, users: AllUser[]) => (
         <Card>
             <CardHeader
                 avatar={
@@ -265,7 +289,7 @@ export default function AddUserTable(props: AddUserTableProps) {
                                                 fontSize: '14px',
                                             }}
                                         >
-                                            {rolesList.map((role) => (
+                                            {rolesList && rolesList.map((role) => (
                                                 <MenuItem key={role.roleLevel} value={role.roleLevel}>
                                                     {role.roleName}
                                                 </MenuItem>

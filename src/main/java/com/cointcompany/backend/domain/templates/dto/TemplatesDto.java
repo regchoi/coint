@@ -41,6 +41,18 @@ public class TemplatesDto {
 
     @NoArgsConstructor
     @Data
+    public static class TemplateTagDto {
+        private Long templateId;
+        private String tagName;
+
+        public TemplateTagDto (Long templateId, String tagName) {
+            this.templateId = templateId;
+            this.tagName = tagName;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
     public static class UpdateTemplate {
         private Long idNum;
         private String templateName;

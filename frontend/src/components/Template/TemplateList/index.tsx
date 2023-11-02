@@ -66,8 +66,8 @@ export default function TemplateList() {
 
     // useState의 Tags를 감지하여 변경마다 axios로 데이터를 요청합니다.
     useEffect(() => {
-        // 태그를 포함하는 ProjectIdNums를 가져옵니다.
-        axios.get(`/api/project/tag?tags=${tags.join(',')}`)
+        // 태그를 포함하는 TemplateIdNum 가져옵니다.
+        axios.get(`/api/template/tag?tags=${tags.join(',')}`)
             .then(res => {
                 setTagSearchId(res.data);
             })
@@ -342,15 +342,15 @@ export default function TemplateList() {
                                     />
                                 );
                             })}
-                            {emptyRows > 0 && (
-                                <TableRow
-                                    style={{
-                                        height: (dense ? 33 : 53) * emptyRows,
-                                    }}
-                                >
-                                    <TableCell colSpan={6}  sx={{border: "1px solid rgba(0, 0, 0, 0.12)"}} />
-                                </TableRow>
-                            )}
+                            {/*{emptyRows > 0 && (*/}
+                            {/*    <TableRow*/}
+                            {/*        style={{*/}
+                            {/*            height: (dense ? 33 : 53) * emptyRows,*/}
+                            {/*        }}*/}
+                            {/*    >*/}
+                            {/*        <TableCell colSpan={6}  sx={{border: "1px solid rgba(0, 0, 0, 0.12)"}} />*/}
+                            {/*    </TableRow>*/}
+                            {/*)}*/}
                         </TableBody>
                     </Table>
                 </TableContainer>

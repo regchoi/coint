@@ -53,6 +53,15 @@ public class TemplatesController {
 
 
     // TemplateRole
+    @Operation(summary = "템플릿 권한 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/role/{templateIdNum}")
+    public ResponseEntity<List<TemplatesDto.TemplateRolesDto>> getTemplatesRole (
+            @PathVariable Long templateIdNum
+    ) {
+        return new ResponseEntity<>(templatesService.getTemplatesRole(templateIdNum), HttpStatus.OK);
+    }
+
     @Operation(summary = "템플릿 권한 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/role")
@@ -79,6 +88,15 @@ public class TemplatesController {
     }
 
     // TemplateUser
+    @Operation(summary = "템플릿 작업자 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/user/{templateIdNum}")
+    public ResponseEntity<List<TemplatesDto.TemplateUsersDto>> getTemplatesUser (
+            @PathVariable Long templateIdNum
+    ) {
+        return new ResponseEntity<>(templatesService.getTemplatesUser(templateIdNum), HttpStatus.OK);
+    }
+
     @Operation(summary = "템플릿 작업자 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/user")
@@ -104,5 +122,25 @@ public class TemplatesController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    @Operation(summary = "템플릿 태그 신규 등록")
+    @ApiResponse(responseCode = "200", description = "등록 성공")
+    @PostMapping("/tag/{templateIdNum}")
+    public ResponseEntity<String> postTemplatesTag (
+            @PathVariable Long templateIdNum,
+            @RequestBody List<TemplatesDto.TemplateTagDto> templateTagsDtoList
+    ) {
+        templatesService.saveTemplatesTag(templateIdNum, templateTagsDtoList);
 
+        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+    }
+
+    @Operation(summary = "템플릿 태그 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/tag")
+    public ResponseEntity<List<Long>> getTemplatesTag (
+            @RequestParam List<String> tags
+    ) {
+        List<Long> templateIds = templatesService.getProjectTag(tags);
+        return new ResponseEntity<>(templateIds, HttpStatus.OK);
+    }
 }

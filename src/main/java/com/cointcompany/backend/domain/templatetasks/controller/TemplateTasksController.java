@@ -23,6 +23,15 @@ public class TemplateTasksController {
     private final TemplateTasksService templateTasksService;
 
     // TemplateTask
+    @Operation(summary = "업무 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/{templateId}")
+    public ResponseEntity<List<TemplateTasksDto.TasksDto>> getTemplateTask (
+            @PathVariable Long templateId
+    ) {
+        return new ResponseEntity<>(templateTasksService.getTemplateTask(templateId), HttpStatus.OK);
+    }
+
     @Operation(summary = "업무 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/{templateId}")
@@ -45,6 +54,15 @@ public class TemplateTasksController {
     }
 
     // TemplateTaskUser
+    @Operation(summary = "업무 작업자 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/user/{templateId}")
+    public ResponseEntity<List<TemplateTasksDto.TemplateTaskUsersDto>> getTemplateTaskUser (
+            @PathVariable Long templateId
+    ) {
+        return new ResponseEntity<>(templateTasksService.getTemplateTaskUser(templateId), HttpStatus.OK);
+    }
+
     @Operation(summary = "업무 작업자 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping("/user/{templateId}")

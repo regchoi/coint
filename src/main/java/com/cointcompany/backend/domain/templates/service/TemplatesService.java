@@ -2,6 +2,7 @@ package com.cointcompany.backend.domain.templates.service;
 
 import com.cointcompany.backend.domain.templates.dto.TemplatesDto;
 import com.cointcompany.backend.domain.templates.entity.TemplateRoles;
+import com.cointcompany.backend.domain.templates.entity.TemplateTag;
 import com.cointcompany.backend.domain.templates.entity.TemplateUser;
 import com.cointcompany.backend.domain.templates.entity.Templates;
 import com.cointcompany.backend.domain.templates.repository.*;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,7 @@ public class TemplatesService {
     private final TemplateTasksRepository templateTasksRepository;
     private final TemplateRolesRepository templateRolesRepository;
     private final TemplateUserRepository templateUserRepository;
+    private final TemplateTagRepository templateTagRepository;
     private final UsersRepository usersRepository;
 
     // Template
@@ -73,6 +76,24 @@ public class TemplatesService {
 
 
     // TemplateRole
+    @Transactional(readOnly = true)
+    public List<TemplatesDto.TemplateRolesDto> getTemplatesRole(Long templateIdNum) {
+        List<TemplateRoles> templateRoles = templateRolesRepository.findByTemplatesIdNum(templateIdNum);
+        List<TemplatesDto.TemplateRolesDto> templateRolesDtoList = new ArrayList<>();
+
+        for(TemplateRoles templateRole : templateRoles) {
+            TemplatesDto.TemplateRolesDto templateRolesDto = new TemplatesDto.TemplateRolesDto(
+                    templateRole.getIdNum(),
+                    templateRole.getRoleName(),
+                    templateRole.getRoleLevel(),
+                    templateRole.getDescription()
+            );
+            templateRolesDtoList.add(templateRolesDto);
+        }
+
+        return templateRolesDtoList;
+    }
+
     public void saveTemplatesRole(List<TemplatesDto.TemplateRolesDto> templateRolesDtoList) {
 
         for(TemplatesDto.TemplateRolesDto templateRolesDto : templateRolesDtoList) {
@@ -125,6 +146,23 @@ public class TemplatesService {
     }
 
     // TemplateUser
+    @Transactional(readOnly = true)
+    public List<TemplatesDto.TemplateUsersDto> getTemplatesUser(Long templateIdNum) {
+        List<TemplateUser> templateUsers = templateUserRepository.findByTemplatesIdNum(templateIdNum);
+        List<TemplatesDto.TemplateUsersDto> templateUsersDtoList = new ArrayList<>();
+
+        for(TemplateUser templateUser : templateUsers) {
+            TemplatesDto.TemplateUsersDto templateUsersDto = new TemplatesDto.TemplateUsersDto(
+                    templateUser.getIdNum(),
+                    templateUser.getUsers().getIdNum(),
+                    templateUser.getTemplateRoles().getRoleLevel()
+            );
+            templateUsersDtoList.add(templateUsersDto);
+        }
+
+        return templateUsersDtoList;
+    }
+
     public String saveTemplatesUser(List<TemplatesDto.TemplateUsersDto> templateUsersDtoList) {
 
         for(TemplatesDto.TemplateUsersDto templateUsersDto : templateUsersDtoList) {
@@ -174,5 +212,22 @@ public class TemplatesService {
 
     private boolean existsInUserDtoList(List<TemplatesDto.TemplateUsersDto> dtos, TemplateUser user) {
         return dtos.stream().anyMatch(dto -> dto.getUserId().equals(user.getUsers().getIdNum()));
+    }
+
+    // TemplateTag
+    public void saveTemplatesTag(Long templateIdNum, List<TemplatesDto.TemplateTagDto> templateTagsDtoList) {
+
+        for(TemplatesDto.TemplateTagDto templateTagsDto : templateTagsDtoList) {
+            TemplateTag templateTag = TemplateTag.of(
+                    templatesRepository.findById(templateIdNum).orElseThrow(),
+                    templateTagsDto.getTagName()
+            );
+            templateTagRepository.save(templateTag);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getProjectTag(List<String> tags) {
+        return templateTagRepository.findTemplateIdsByTags(tags, (long)tags.size());
     }
 }

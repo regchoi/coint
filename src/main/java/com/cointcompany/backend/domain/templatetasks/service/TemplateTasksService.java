@@ -14,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,13 @@ public class TemplateTasksService {
     private final ModelMapper modelMapper;
 
     // TemplateTask
+    @Transactional(readOnly = true)
+    public List<TemplateTasksDto.TasksDto> getTemplateTask(Long templateId) {
+        return templateTasksRepository.findAllByTemplates_IdNum(templateId).stream()
+                .map(templateTasks -> modelMapper.map(templateTasks, TemplateTasksDto.TasksDto.class))
+                .collect(Collectors.toList());
+    }
+
     public TemplateTasks saveTemplateTask(Long templateId, TemplateTasksDto.TasksDto templateTasks) {
 
         TemplateTasks templateTask = modelMapper.map(templateTasks, TemplateTasks.class);
@@ -82,6 +90,24 @@ public class TemplateTasksService {
     }
 
     // TemplateTaskUser
+    @Transactional(readOnly = true)
+    public List<TemplateTasksDto.TemplateTaskUsersDto> getTemplateTaskUser(Long templateId) {
+        List<TemplateTaskUser> templateTaskUsers = templateTaskUserRepository.findByTemplateIdNum(templateId);
+        List<TemplateTasksDto.TemplateTaskUsersDto> templateTaskUsersDtoList = new ArrayList<>();
+
+        for(TemplateTaskUser templateTaskUser : templateTaskUsers) {
+            TemplateTasksDto.TemplateTaskUsersDto templateTaskUsersDto = new TemplateTasksDto.TemplateTaskUsersDto(
+                    templateTaskUser.getIdNum(),
+                    templateTaskUser.getTemplateTasks().getIdNum(),
+                    templateTaskUser.getTemplateRoles().getRoleLevel()
+            );
+            templateTaskUsersDtoList.add(templateTaskUsersDto);
+        }
+
+        return templateTaskUsersDtoList;
+
+    }
+
     public String saveTemplateTaskUser(Long templateId, TemplateTasksDto.TemplateTaskUsersDto templateTaskUserDto) {
 
         TemplateTaskUser templateTaskUser = TemplateTaskUser.of(
