@@ -56,11 +56,11 @@ public class TemplateTasksController {
     // TemplateTaskUser
     @Operation(summary = "업무 작업자 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
-    @GetMapping("/user/{templateId}")
+    @GetMapping("/user/{taskId}")
     public ResponseEntity<List<TemplateTasksDto.TemplateTaskUsersDto>> getTemplateTaskUser (
-            @PathVariable Long templateId
+            @PathVariable Long taskId
     ) {
-        return new ResponseEntity<>(templateTasksService.getTemplateTaskUser(templateId), HttpStatus.OK);
+        return new ResponseEntity<>(templateTasksService.getTemplateTaskUser(taskId), HttpStatus.OK);
     }
 
     @Operation(summary = "업무 작업자 신규 등록")

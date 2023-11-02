@@ -33,6 +33,11 @@ type Tag = {
     tagName: string;
 }
 
+type TaskTag = {
+    taskId: number;
+    tagName: string;
+}
+
 type Role = {
     projectId: number;
     roleName: string;
@@ -67,6 +72,28 @@ type Template = {
     templateName: string;
     description: string;
     period: number;
+}
+
+type TaskResponse = {
+    idNum: number;
+    taskName: string,
+    description: string,
+    period: number,
+    offsetDay: number,
+}
+
+type TaskUserResponse = {
+    templateTaskId: number;
+    userId: number;
+    templateRoleId: number;
+}
+
+type Task = {
+    taskName: string,
+    description: string,
+    startDate: string,
+    endDate: string,
+    status: string | null,
 }
 
 interface ModalProps {
@@ -189,7 +216,7 @@ export default function AddModal({ open, onClose }: ModalProps) {
                     // 해당 API 요청을 통해 Role을 등록
 
                     // Role을 불러오는 GET 요청
-                    const rolesResponse = await axios.get(`/api/template/role/${selectedTemplate}`);
+                    const rolesResponse = await axios.get(`/api/template/role/${selectedTemplate.idNum}`);
 
                     // 불러온 Role을 새 프로젝트에 등록하는 POST 요청
                     if (rolesResponse.data) {
@@ -208,16 +235,16 @@ export default function AddModal({ open, onClose }: ModalProps) {
                     // 해당 API 요청을 통해 User를 등록
 
                     // User를 불러오는 GET 요청
-                    const usersResponse = await axios.get(`/api/template/user/${selectedTemplate}`);
+                    const usersResponse = await axios.get(`/api/template/user/${selectedTemplate.idNum}`);
 
                     // 불러온 User를 새 프로젝트에 등록하는 POST 요청
                     if (usersResponse.data) {
                         const usersList: { projectId: number, userId: number, projectRoleId: number }[] = [];
-                        usersResponse.data.forEach((user: { userId: number, projectRoleId: number }) => {
+                        usersResponse.data.forEach((user: { userId: number, templateRoleId: number }) => {
                             usersList.push({
                                 projectId: response.data,
                                 userId: user.userId,
-                                projectRoleId: user.projectRoleId,
+                                projectRoleId: user.templateRoleId,
                             });
                         });
                         await axios.post(`/api/project/user/${response.data}`, usersList);
@@ -225,17 +252,42 @@ export default function AddModal({ open, onClose }: ModalProps) {
 
                     // 해당 API 요청을 통해 Task를 등록
 
+
                     // Task를 불러오는 GET 요청
-                    const tasksResponse = await axios.get(`/api/template/task/${selectedTemplate}`);
+                    const tasksResponse = await axios.get(`/api/template/task/${selectedTemplate.idNum}`);
+
+                    // TaskUser를 불러오는 GET 요청
+                    const taskUsersResponse = await axios.get(`/api/template/task/user/${selectedTemplate.idNum}`);
 
                     // 불러온 Task를 새 프로젝트에 등록하는 POST 요청
                     if (tasksResponse.data) {
+                        for (const task of tasksResponse.data) {
+                            const responseTask = await axios.post(`/api/task/${response.data}`, {
+                                taskName: task.taskName,
+                                description: task.description,
+                                startDate: new Date(new Date().getTime() + task.offsetDay * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+                                endDate: new Date(new Date().getTime() + task.offsetDay * 24 * 60 * 60 * 1000 + task.period * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+                                status: null
+                            });
 
+                            if (responseTask.data) {
+                                // 새 TaskUser 정보 삽입
+                                const taskUsersList = taskUsersResponse.data
+                                    .filter((taskUser: TaskUserResponse) => taskUser.templateTaskId === task.idNum)
+                                    .map((taskUser: TaskUserResponse) => ({
+                                        taskId: responseTask.data, // responseTask.data가 새로 생성된 task의 정보를 담고 있다고 가정합니다.
+                                        userId: taskUser.userId,
+                                        taskRoleId: taskUser.templateRoleId,
+                                    }));
+
+                                await axios.post(`/api/task/user/${responseTask.data}`, taskUsersList);
+                            }
+                        }
                     }
 
-
-
                     setProjectIdNum(response.data);
+
+                    setSuccessModalOpen(true);
                 } else {
                     setErrorModalOpen(true);
                     setErrorMessage('성공적으로 프로젝트를 등록하지 못했습니다.');
@@ -565,7 +617,7 @@ export default function AddModal({ open, onClose }: ModalProps) {
                         open={isSuccessModalOpen}
                         onClose={SuccessClose}
                         title={""}
-                        description={"프로젝트가 성공적으로 등록되었습니다"}
+                        description={"프로젝트 간편등록이 완료되었습니다"}
                     />
 
                     {/*에러 발생 Modal*/}

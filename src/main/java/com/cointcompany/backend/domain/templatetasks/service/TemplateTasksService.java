@@ -91,8 +91,8 @@ public class TemplateTasksService {
 
     // TemplateTaskUser
     @Transactional(readOnly = true)
-    public List<TemplateTasksDto.TemplateTaskUsersDto> getTemplateTaskUser(Long templateId) {
-        List<TemplateTaskUser> templateTaskUsers = templateTaskUserRepository.findByTemplateIdNum(templateId);
+    public List<TemplateTasksDto.TemplateTaskUsersDto> getTemplateTaskUser(Long taskId) {
+        List<TemplateTaskUser> templateTaskUsers = templateTaskUserRepository.findAllByTemplateTasks_IdNum(taskId);
         List<TemplateTasksDto.TemplateTaskUsersDto> templateTaskUsersDtoList = new ArrayList<>();
 
         for(TemplateTaskUser templateTaskUser : templateTaskUsers) {

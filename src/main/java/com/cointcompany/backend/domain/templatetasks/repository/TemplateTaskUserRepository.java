@@ -8,8 +8,6 @@ import java.util.Optional;
 
 public interface TemplateTaskUserRepository extends JpaRepository<TemplateTaskUser, Long> {
 
-    List<TemplateTaskUser> findByTemplateIdNum(Long templateIdNum);
-
     List<TemplateTaskUser> findAllByTemplateTasks_IdNum(Long templateTaskId);
 
     Optional<TemplateTaskUser> findByTemplateTasksIdNumAndUsersIdNum(Long templateTaskId, Long userId);
