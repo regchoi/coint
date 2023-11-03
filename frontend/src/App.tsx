@@ -76,7 +76,7 @@ const App: React.FC = () => {
             <Route path={ROUTES.USERGROUPTABLE} element={<UserGroupTable/>}/>
             <Route path={ROUTES.DEPARTMENTTABLE} element={<DepartmentTable/>}/>
         </>
-    ) : null;
+    ) : '';
 
     return (
         <BrowserRouter>

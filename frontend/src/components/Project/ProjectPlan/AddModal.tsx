@@ -21,6 +21,7 @@ import SuccessModal from "../../common/SuccessModal";
 import ProjectContext from './ProjectContext';
 import {fetchTableData} from "../../../redux/tableSlice";
 import {API_LINK} from "./data";
+import { getRole } from '../../common/tokenUtils';
 import {AppDispatch, useAppDispatch, useAppSelector} from "../../../redux/store";
 import RoleTable from "./RoleTable";
 
@@ -89,12 +90,17 @@ export default function AddModal({ open, onClose }: ModalProps) {
     const handleProjectSave = async () => {
         if (page === 1) {
             try {
+                // 경영진 계정인지 검증
+                // 경영진이면 자체승인, 경영진이 아니라면 승인 절차
+                const isAdmin: boolean = getRole() === 'ROLE_ADMIN';
                 const response = await axios.post('/api/project', {
                     projectName: data.projectName,
                     description: data.description,
                     startDate: data.startDate,
                     endDate: data.endDate,
+                    isAdmin,
                 });
+
                 if (response.data) {
                     // response.data에는 projectIdNum이 담겨있음
                     // 해당 API 요청을 통해 Tag를 등록
@@ -159,6 +165,103 @@ export default function AddModal({ open, onClose }: ModalProps) {
                     // departmentsList에서 idNum과 role만 전송
                     return { departmentId: department.idNum, projectId: projectIdNum, role: department.role };
                 }));
+
+                // email 요청
+                if(getRole() !== 'ROLE_ADMIN') {
+                    const emailMessage = {
+                        to: 'chami0205@gmail.com',
+                        subject: `프로젝트 승인 요청 - ${data.projectName}`,
+                        html: `<!DOCTYPE html>
+                            <html lang="ko">
+                            <head>
+                              <meta charset="UTF-8">
+                              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                              <title>프로젝트 승인요청</title>
+                              <style>
+                                body {
+                                  font-family: Arial, sans-serif;
+                                  display: flex;
+                                  justify-content: center;
+                                  align-items: center;
+                                  height: 100vh;
+                                  background-color: #f4f4f4;
+                                }
+                            
+                                .container {
+                                  width: 600px;
+                                  padding: 20px;
+                                  border: 1px solid #e1e1e1;
+                                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                                  background-color: #ffffff;
+                                }
+                            
+                                .project-name {
+                                  font-size: 18px;
+                                  font-weight: bold;
+                                  margin-top: 20px;
+                                }
+                            
+                                .project-date {
+                                  color: #777;
+                                }
+                            
+                                .project-detail {
+                                  font-size: 14px;
+                                  margin-top: 20px;
+                                  white-space: pre-line;
+                                }
+                            
+                                .assignment-info, .task-info {
+                                  font-size: 14px;
+                                  margin-top: 20px;
+                                }
+                            
+                                .approve-button {
+                                  margin-top: 40px;
+                                  display: flex;
+                                  justify-content: center !important;
+                                  text-align: center !important;
+                                }
+                            
+                                a {
+                                  padding: 10px 20px;
+                                  font-size: 16px;
+                                  border: none;
+                                  border-radius: 4px;
+                                  background-color: #333;
+                                  color: #fff !important;
+                                  cursor: pointer;
+                                  text-decoration: none;
+                                }
+                            
+                                a:hover {
+                                  background-color: #555;
+                                }
+                              </style>
+                            </head>
+                            <body>
+                            <div class="container">
+                              <h1>프로젝트 승인 요청</h1>
+                              <div class="project-name">${data.projectName}</div>
+                              <span class="project-date">기간(${data.startDate} ~ ${data.endDate})</span>
+                            
+                              <div class="project-detail">
+                                ${data.description}
+                              </div>
+                            
+                              <div class="assignment-info">배정인원 : ${usersList.length}명</div>
+                              <div class="task-info">업무 : 아직 생성된 업무가 없습니다.</div>
+                            
+                              <div class="approve-button">
+                                <a href="http://localhost:3000/project/plan">세부 내용</a>
+                              </div>
+                            </div>
+                            </body>
+                            </html>
+                            `
+                    };
+                    await axios.post('/api/mail/project', emailMessage);
+                }
 
                 // 프로젝트 등록 성공 시, 성공 Modal 띄우고 모든 Modal 닫기
                 // 페이지 초기화

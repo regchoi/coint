@@ -76,6 +76,7 @@ public class ProjectsDto {
         private String status;
         private String regDate;
         private String regUserid;
+        private Boolean confirm;
 
         public GetProjectRes (Projects projects) {
 
@@ -87,6 +88,7 @@ public class ProjectsDto {
             this.status = projects.getStatus();
             this.regDate = String.valueOf(projects.getRegDate());
             this.regUserid = String.valueOf(projects.getRegUserid());
+            this.confirm = projects.getConfirm();
 
         }
     }

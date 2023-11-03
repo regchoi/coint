@@ -34,6 +34,8 @@ public class Projects extends BaseEntity {
 
     private String status;
 
+    private Boolean confirm;
+
     private boolean del = Boolean.FALSE;
 
     @OneToMany(mappedBy = "projects", orphanRemoval = true, cascade = CascadeType.ALL)
@@ -47,7 +49,7 @@ public class Projects extends BaseEntity {
 
     public static Projects of (
             String projectName, String description, LocalDate startDate,
-            LocalDate endDate, String status
+            LocalDate endDate, String status, Boolean confirm
     ) {
         return Projects.builder()
                 .projectName(projectName)
@@ -55,6 +57,7 @@ public class Projects extends BaseEntity {
                 .startDate(startDate)
                 .endDate(endDate)
                 .status(status)
+                .confirm(confirm)
                 .del(false)
                 .build();
     }
@@ -62,13 +65,14 @@ public class Projects extends BaseEntity {
     @Builder
     public Projects (
             String projectName, String description, LocalDate startDate,
-            LocalDate endDate, String status, Boolean del
+            LocalDate endDate, String status,Boolean confirm, Boolean del
     ) {
         this.projectName = projectName;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;
+        this.confirm = confirm;
         this.del = del;
     }
 
