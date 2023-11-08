@@ -27,6 +27,7 @@ import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {CSSTransition} from "react-transition-group";
+import {getRole} from "../../common/tokenUtils";
 
 type Tag = {
     projectId: number;
@@ -191,11 +192,15 @@ export default function AddModal({ open, onClose }: ModalProps) {
                 setErrorMessage('템플릿을 선택해주세요.');
                 setErrorModalOpen(true);
             } else {
+                // 경영진 계정인지 검증
+                // 경영진이면 자체승인, 경영진이 아니라면 승인 절차
+                const isAdmin: boolean = getRole() === 'ROLE_ADMIN';
                 const response = await axios.post('/api/project', {
                     projectName: data.projectName,
                     description: data.description,
                     startDate: data.startDate,
                     endDate: data.endDate,
+                    isAdmin,
                 });
 
                 if (response.data) {
@@ -283,6 +288,103 @@ export default function AddModal({ open, onClose }: ModalProps) {
                                 await axios.post(`/api/task/user/${responseTask.data}`, taskUsersList);
                             }
                         }
+                    }
+
+                    // email 요청
+                    if(getRole() !== 'ROLE_ADMIN') {
+                        const emailMessage = {
+                            to: 'chami0205@gmail.com',
+                            subject: `프로젝트 승인 요청 - ${data.projectName}`,
+                            html: `<!DOCTYPE html>
+                            <html lang="ko">
+                            <head>
+                              <meta charset="UTF-8">
+                              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                              <title>프로젝트 승인요청</title>
+                              <style>
+                                body {
+                                  font-family: Arial, sans-serif;
+                                  display: flex;
+                                  justify-content: center;
+                                  align-items: center;
+                                  height: 100vh;
+                                  background-color: #f4f4f4;
+                                }
+                            
+                                .container {
+                                  width: 600px;
+                                  padding: 20px;
+                                  border: 1px solid #e1e1e1;
+                                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                                  background-color: #ffffff;
+                                }
+                            
+                                .project-name {
+                                  font-size: 18px;
+                                  font-weight: bold;
+                                  margin-top: 20px;
+                                }
+                            
+                                .project-date {
+                                  color: #777;
+                                }
+                            
+                                .project-detail {
+                                  font-size: 14px;
+                                  margin-top: 20px;
+                                  white-space: pre-line;
+                                }
+                            
+                                .assignment-info, .task-info {
+                                  font-size: 14px;
+                                  margin-top: 20px;
+                                }
+                            
+                                .approve-button {
+                                  margin-top: 40px;
+                                  display: flex;
+                                  justify-content: center !important;
+                                  text-align: center !important;
+                                }
+                            
+                                a {
+                                  padding: 10px 20px;
+                                  font-size: 16px;
+                                  border: none;
+                                  border-radius: 4px;
+                                  background-color: #333;
+                                  color: #fff !important;
+                                  cursor: pointer;
+                                  text-decoration: none;
+                                }
+                            
+                                a:hover {
+                                  background-color: #555;
+                                }
+                              </style>
+                            </head>
+                            <body>
+                            <div class="container">
+                              <h1>프로젝트 승인 요청</h1>
+                              <div class="project-name">${data.projectName}</div>
+                              <span class="project-date">기간(${data.startDate} ~ ${data.endDate})</span>
+                            
+                              <div class="project-detail">
+                                ${data.description}
+                              </div>
+                            
+                              <div class="assignment-info">배정인원 : ${usersResponse.data.length}명</div>
+                              <div class="task-info">업무 : ${tasksResponse.data.length}개</div>
+                            
+                              <div class="approve-button">
+                                <a href="http://localhost:3000/project/plan">세부 내용</a>
+                              </div>
+                            </div>
+                            </body>
+                            </html>
+                            `
+                        };
+                        await axios.post('/api/mail/project', emailMessage);
                     }
 
                     setProjectIdNum(response.data);

@@ -40,10 +40,10 @@ public class TasksController {
     @Operation(summary = "프로젝트 단위 업무 상세 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{projectId}")
-    public ResponseEntity<List<TasksDto.GetGroupTask>> getProject (
+    public ResponseEntity<List<TasksDto.GetTaskRes>> getProject (
             @PathVariable Long projectId
     ) {
-        List<TasksDto.GetGroupTask> taskRes = tasksService.getTask(projectId);
+        List<TasksDto.GetTaskRes> taskRes = tasksService.getTask(projectId);
 
         return new ResponseEntity<>(taskRes, HttpStatus.OK);
     }

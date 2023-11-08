@@ -43,6 +43,17 @@ public class ProjectsService {
 
         return getProjectResList;
     }
+
+    @Transactional(readOnly = true)
+    public ProjectsDto.GetProjectRes getProject(Long projectId) {
+        // `orElseThrow`에 람다 표현식을 전달하여 `NoSuchElementException` 발생
+        ProjectsDto.GetProjectRes getProjectRes = projectsRepository.findById(projectId)
+                .map(ProjectsDto.GetProjectRes::new) // findById의 결과를 GetProjectRes 생성자로 매핑
+                .orElseThrow(() -> new NoSuchElementException("Project with id " + projectId + " not found"));
+
+        return getProjectRes;
+    }
+
     @Transactional
     public Projects saveProjects(Projects projects) {
 
@@ -152,6 +163,23 @@ public class ProjectsService {
     @Transactional
     public List<Long> getProjectTag(List<String> tags) {
             return projectTagRepository.findProjectIdsByTags(tags, (long) tags.size());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectsDto.ProjectTagDto> getTagProject(Long projectId) {
+
+        List<ProjectTag> projectTagList = projectTagRepository.findProjectTagByProject_IdNum(projectId);
+        List<ProjectsDto.ProjectTagDto> projectTagDtoList = new ArrayList<>();
+
+        for (ProjectTag projectTag : projectTagList) {
+            ProjectsDto.ProjectTagDto projectTagDto = new ProjectsDto.ProjectTagDto(
+                    projectTag.getIdNum(),
+                    projectTag.getTagName()
+            );
+            projectTagDtoList.add(projectTagDto);
+        }
+
+        return projectTagDtoList;
     }
 
     @Transactional

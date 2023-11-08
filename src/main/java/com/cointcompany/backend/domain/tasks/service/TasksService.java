@@ -57,14 +57,14 @@ public class TasksService {
         return getTaskResList;
     }
     @Transactional(readOnly = true)
-    public List<TasksDto.GetGroupTask> getTask(Long projectId) {
+    public List<TasksDto.GetTaskRes> getTask(Long projectId) {
 
-        List<TasksDto.GetGroupTask> getTaskResList = new ArrayList<>();
+        List<TasksDto.GetTaskRes> getTaskResList = new ArrayList<>();
 
         List<Tasks> tasksList = tasksRepository.findByProjectsIdNum(projectId);
 
         for (Tasks tasks : tasksList) {
-            TasksDto.GetGroupTask getTaskRes = new TasksDto.GetGroupTask(tasks);
+            TasksDto.GetTaskRes getTaskRes = new TasksDto.GetTaskRes(tasks);
             getTaskResList.add(getTaskRes);
         }
 

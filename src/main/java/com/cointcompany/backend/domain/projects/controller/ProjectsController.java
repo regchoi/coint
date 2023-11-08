@@ -39,6 +39,17 @@ public class ProjectsController {
         return new ResponseEntity<>(projectsList, HttpStatus.OK);
     }
 
+    @Operation(summary = "프로젝트 상세 조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/{projectId}")
+    public ResponseEntity<ProjectsDto.GetProjectRes> getProject (
+            @PathVariable Long projectId
+    ) {
+        ProjectsDto.GetProjectRes project = projectsService.getProject(projectId);
+
+        return new ResponseEntity<>(project, HttpStatus.OK);
+    }
+
     @Operation(summary = "프로젝트 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping
@@ -99,6 +110,17 @@ public class ProjectsController {
         return new ResponseEntity<>(projectIds, HttpStatus.OK);
     }
 
+    @Operation(summary = "프로젝트 태그 부분조회")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/tag/{projectId}")
+    public ResponseEntity<List<ProjectsDto.ProjectTagDto>> getProjectsTag (
+            @PathVariable Long projectId
+    ) {
+
+        List<ProjectsDto.ProjectTagDto> projectTagDtoList = projectsService.getTagProject(projectId);
+
+        return new ResponseEntity<>(projectTagDtoList, HttpStatus.OK);
+    }
 
     @Operation(summary = "프로젝트 사용자 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
