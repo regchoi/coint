@@ -50,6 +50,18 @@ public class ProjectsController {
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
+    @Operation(summary = "프로젝트 승인 요청")
+    @ApiResponse(responseCode = "200", description = "승인 요청 성공")
+    @PutMapping("/confirm/{projectId}")
+    public ResponseEntity<ProjectsDto.GetProjectRes> putProjectConfirm (
+            @PathVariable Long projectId,
+            @RequestBody Boolean confirm
+    ) {
+        ProjectsDto.GetProjectRes project = projectsService.putProjectConfirm(projectId, confirm);
+
+        return new ResponseEntity<>(project, HttpStatus.OK);
+    }
+
     @Operation(summary = "프로젝트 신규 등록")
     @ApiResponse(responseCode = "200", description = "등록 성공")
     @PostMapping

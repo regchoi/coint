@@ -56,7 +56,12 @@ export default function EnhancedTableHead(props: EnhancedTableProps) {
 
 
                 {/* 정의해둔 headCells로 테이블 헤더를 생성 */}
-                {headCells.map((headCell) => (
+                {headCells.map((headCell) => {
+
+                if(headCell.id === 'confirm') {
+                    return null;
+                }
+                    return (
                     <TableCell
                         key={headCell.id}
                         align={'center'}
@@ -85,7 +90,8 @@ export default function EnhancedTableHead(props: EnhancedTableProps) {
                             ) : null}
                         </TableSortLabel>
                     </TableCell>
-                ))}
+                )
+                })}
             </TableRow>
         </TableHead>
     );

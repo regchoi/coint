@@ -55,6 +55,15 @@ public class ProjectsService {
     }
 
     @Transactional
+    public ProjectsDto.GetProjectRes putProjectConfirm(Long projectId, Boolean confirm) {
+        Projects projects = projectsRepository.findById(projectId).orElseThrow();
+        projects.setConfirm(confirm);
+        projectsRepository.save(projects);
+
+        return new ProjectsDto.GetProjectRes(projects);
+    }
+
+    @Transactional
     public Projects saveProjects(Projects projects) {
 
         return projectsRepository.save(projects);
@@ -107,6 +116,7 @@ public class ProjectsService {
 
         return "SUCCESS";
     }
+
     @Transactional
     public String saveProjectUser(List<ProjectsDto.ProjectUserDto> projectUserDtoList) {
 

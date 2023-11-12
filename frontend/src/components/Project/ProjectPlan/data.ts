@@ -15,6 +15,7 @@ interface Data {
     status: string;
     regDate: string;
     regUserid: string;
+    confirm: boolean;
     detail: string;
 }
 
@@ -28,6 +29,7 @@ const createData = (
     status: string,
     regDate: string,
     regUserid: string,
+    confirm: boolean,
     detail: string,
 ): Data => {
     return {
@@ -39,6 +41,7 @@ const createData = (
         status,
         regDate,
         regUserid,
+        confirm,
         detail,
     };
 }
@@ -59,6 +62,7 @@ const headCells: readonly HeadCell[] = [
     {id: 'status', numeric: false, disablePadding: false, label: '상태'},
     {id: 'regDate', numeric: false, disablePadding: false, label: '등록일'},
     {id: 'regUserid', numeric: false, disablePadding: false, label: '등록자'},
+    {id: 'confirm', numeric: false, disablePadding: false, label: '승인여부'},
     {id: 'detail', numeric: false, disablePadding: false, label: '상세보기'},
 ];
 

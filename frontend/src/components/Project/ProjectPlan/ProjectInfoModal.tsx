@@ -18,10 +18,10 @@ import {
 } from '@mui/material';
 import axios from "../../../redux/axiosConfig";
 import { Data } from "./data";
+import {getRole}  from "../../common/tokenUtils";
 import CloseIcon from "@mui/icons-material/Close";
 import ErrorModal from "../../common/ErrorModal";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
-import GroupsIcon from "@mui/icons-material/Groups";
+import SuccessModal from "../../common/SuccessModal";
 
 type Project = {
     projectName: string,
@@ -90,6 +90,8 @@ const ProjectInfoModal: React.FC<ProjectDetailModalProps> = ({ open, onClose, pr
     const [taskInfo, setTaskInfo] = useState<Task[]>([]);
     const [progress, setProgress] = useState<number>(0);
     const [allUsers, setAllUsers] = useState<User[]>([]);
+    const [isSuccessModalOpen, setSuccessModalOpen] = useState<boolean>(false);
+    const [successMessage, setSuccessMessage] = useState<string>('');
     const [isErrorModalOpen, setErrorModalOpen] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -97,6 +99,29 @@ const ProjectInfoModal: React.FC<ProjectDetailModalProps> = ({ open, onClose, pr
         event.stopPropagation();
         setTabValue(newValue);
     };
+
+    const handleConfirm = (confirm: boolean) => {
+        axios.put(`/api/project/confirm/${projectIdNum}`, confirm )
+            .then((response) => {
+                if (response.status === 200) {
+                    if(confirm) {
+                        setSuccessMessage("프로젝트의 승인절차가 완료되었습니다.");
+                        setSuccessModalOpen(true);
+                    } else {
+                        setSuccessMessage("프로젝트의 승인요청이 거절되었습니다.");
+                        setSuccessModalOpen(true);
+                    }
+                    setProjectInfo(response.data);
+                } else {
+                    setErrorMessage("프로젝트의 승인절차가 실패했습니다.");
+                    setErrorModalOpen(true);
+                }
+            })
+            .catch((error) => {
+                setErrorMessage("프로젝트의 승인절차가 실패했습니다.");
+                setErrorModalOpen(true);
+            });
+    }
 
     useEffect(() => {
         axios.get(`/api/user`)
@@ -272,9 +297,78 @@ const ProjectInfoModal: React.FC<ProjectDetailModalProps> = ({ open, onClose, pr
                             <Typography sx={{p: 3}}>// TODO: 미구현</Typography>
                         </TabPanel>
 
+                        <Box sx={{mt: 3, display: 'flex', justifyContent: 'flex-end'}}>
+
+
+                            {
+                                projectInfo.confirm === null ?
+                                    getRole() === 'ROLE_ADMIN' ?
+                                        <Button
+                                            variant="contained"
+                                            sx={{
+                                                marginLeft: '10px',
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                height: '35px',
+                                                backgroundColor: 'rgb(40, 49, 66)',
+                                                boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                textTransform: 'none',
+                                                minWidth: '75px',
+                                                padding: '0 12px',
+                                                '&:hover': {
+                                                    textDecoration: 'none',
+                                                    backgroundColor: 'rgb(40, 49, 66, 0.8)',
+                                                },
+                                            }}
+                                            onClick={() => handleConfirm(true)}
+                                        >
+                                            승인
+                                        </Button>
+                                        : null
+                                    : null
+                            }
+
+
+                            {
+                                projectInfo.confirm === null ?
+                                    getRole() === 'ROLE_ADMIN' ?
+                                        <Button
+                                            variant="contained"
+                                            sx={{
+                                                marginLeft: '10px',
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                height: '35px',
+                                                backgroundColor: 'rgb(40, 49, 66)',
+                                                boxShadow: '0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important',
+                                                textTransform: 'none',
+                                                minWidth: '75px',
+                                                padding: '0 12px',
+                                                '&:hover': {
+                                                    textDecoration: 'none',
+                                                    backgroundColor: 'rgb(40, 49, 66, 0.8)',
+                                                },
+                                            }}
+                                            onClick={() => handleConfirm(false)}
+                                        >
+                                            거절
+                                        </Button>
+                                        : null
+                                    : null
+                            }
+                        </Box>
+
                     </DialogContent>
                 )
             }
+
+            {/*성공 Modal*/}
+            <SuccessModal
+                open={isSuccessModalOpen}
+                onClose={() => setSuccessModalOpen(false)}
+                title={""}
+                description={successMessage || ""}
+            />
 
             {/*에러 발생 Modal*/}
             <ErrorModal
