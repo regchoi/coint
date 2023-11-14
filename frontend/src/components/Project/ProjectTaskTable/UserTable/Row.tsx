@@ -1,7 +1,16 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {TableRow, TableCell, Checkbox, IconButton} from '@mui/material';
 import {Data} from "./data";
 import { useNavigate } from 'react-router-dom';
+import axios from "../../../../redux/axiosConfig";
+import ProjectContext from "../ProjectContext";
+
+type Role = {
+    projectId: number;
+    roleName: string;
+    roleLevel: number;
+    description: string;
+}
 
 type RowProps = {
     row: Data,
@@ -14,8 +23,32 @@ type RowProps = {
 // row의 각 key를 기준으로 TableCell을 구성함
 // 각 key는 Data의 key type인 keyof Data로 정의함
 const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) => {
+    const [rolesList, setRolesList] = React.useState<Role[]>([]);
 
     const navigate = useNavigate();
+
+    const context = React.useContext(ProjectContext);
+    if (!context) {
+        throw new Error("Cannot find ProjectProvider");
+    }
+    const { selectProject } = context;
+
+    useEffect(() => {
+        // 역할 목록 불러오기
+        axios.get(`/api/project/role/${selectProject.idNum}`)
+            .then((response) => {
+                const roleData = response.data.map((role: any) => ({
+                    projectId: role.projectIdNum,
+                    roleName: role.roleName,
+                    roleLevel: role.roleLevel,
+                    description: role.description
+                }));
+                setRolesList(roleData);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, []);
 
     return (
         <TableRow
@@ -54,6 +87,19 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                         padding: "0px 10px",
                         fontSize: "12px",
                     }} align="center" key={key}></TableCell>;
+                }
+                if (key === 'role') {
+                    return <TableCell sx={{
+                        border: "1px solid rgba(0, 0, 0, 0.12)",
+                        padding: "0px 10px",
+                        fontSize: "12px",
+                    }} align="center" key={key}>{
+                        rolesList.map((role) => {
+                            if (role.roleLevel === Number(row[key])) {
+                                return role.roleName;
+                            }
+                        })
+                    }</TableCell>;
                 }
                 return <TableCell sx={{
                     border: "1px solid rgba(0, 0, 0, 0.12)",

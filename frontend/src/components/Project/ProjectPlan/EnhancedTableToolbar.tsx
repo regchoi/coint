@@ -5,20 +5,19 @@ import Typography from '@mui/material/Typography';
 import {Button, Stack} from "@mui/material";
 import SaveIcon from '@mui/icons-material/Save';
 import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import EditIcon from '@mui/icons-material/Edit';
+import {EventNote} from "@mui/icons-material";
 
 interface EnhancedTableToolbarProps {
     numSelected: number;
     tableName: string;  // tableName을 DB에서 가져올 수 있음
+    onSimpleAdd: () => void;
     onAdd: () => void;
-    onSave: () => void;
     onUpdate: () => void;
     onDelete: () => void;
 }
 
 export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-    const {numSelected, tableName, onAdd, onSave, onUpdate, onDelete} = props;
+    const {numSelected, tableName, onSimpleAdd, onAdd, onUpdate, onDelete} = props;
 
     // 버튼 공통 스타일
     const commonButtonStyles = {
@@ -70,11 +69,11 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
             )}
             <Stack direction="row" spacing={1}>
                 <Button variant="contained"
-                        startIcon={<SaveIcon style={{ color: 'rgb(81, 128, 253)', marginRight: '2px', fontSize: '15px' }} />}
-                        sx={{ ...commonButtonStyles }}
-                        onClick={onSave}
+                        startIcon={<EventNote style={{ color: 'rgb(0, 123, 255)', marginRight: '2px', fontSize: '15px' }} />}
+                        sx={{ ...commonButtonStyles, width: '100px' }}
+                        onClick={onSimpleAdd}
                 >
-                    저장
+                    간편등록
                 </Button>
                 <Button variant="contained"
                         startIcon={<AddIcon style={{ color: 'rgb(23, 210, 23)', marginRight: '2px', fontSize: '15px' }} />}
@@ -82,19 +81,6 @@ export default function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                         onClick={onAdd}
                 >
                     신규등록
-                </Button>
-                <Button variant="contained"
-                        startIcon={<EditIcon style={{ color: 'gray', marginRight: '2px', fontSize: '15px' }} />}
-                        sx={{ ...commonButtonStyles }}
-                        onClick={onUpdate}
-                >
-                    수정
-                </Button>
-                <Button variant="contained"
-                        startIcon={<RemoveIcon style={{ color: 'red', marginRight: '2px', fontSize: '15px' }} />}
-                        sx={{ ...commonButtonStyles }}
-                        onClick={onDelete}>
-                    삭제
                 </Button>
             </Stack>
         </Toolbar>

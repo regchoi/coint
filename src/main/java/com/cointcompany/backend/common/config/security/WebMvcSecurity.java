@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@EnableWebMvc
+//@EnableWebMvc
 public class WebMvcSecurity implements WebMvcConfigurer {
 
     // CORS를 관리하기 위한 환경 설정입니다.
@@ -20,8 +20,10 @@ public class WebMvcSecurity implements WebMvcConfigurer {
                         HttpMethod.POST.name(),
                         HttpMethod.PUT.name(),
                         HttpMethod.DELETE.name(),
+                        HttpMethod.OPTIONS.name(),
                         HttpMethod.PATCH.name())
-                .exposedHeaders("Authorization")
+                .exposedHeaders("Authorization", "Content-Disposition")
+//                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(false)
                 .maxAge(3600);
     }

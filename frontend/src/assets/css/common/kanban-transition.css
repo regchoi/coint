@@ -1,0 +1,26 @@
+/* 시작 상태 */
+.project-list-enter {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+/* 시작 상태에서의 활성 상태로의 전환 */
+.project-list-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms, transform 500ms;
+}
+
+/* 끝 상태 */
+.project-list-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 끝 상태에서의 비활성 상태로의 전환 */
+.project-list-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 500ms, transform 500ms;
+}
+

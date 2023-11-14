@@ -1,7 +1,6 @@
 package com.cointcompany.backend.domain.projects.dto;
 
 import com.cointcompany.backend.domain.projects.entity.Projects;
-import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,17 +22,46 @@ public class ProjectsDto {
             this.role = role;
         }
     }
+
     @NoArgsConstructor
     @Data
     public static class ProjectUserDto {
         private Long projectId;
         private Long userId;
-        private String role;
+        private Integer projectRoleId;
 
-        public ProjectUserDto (Long projectId, Long userId, String role) {
+        public ProjectUserDto(Long projectId, Long userId, Integer projectRoleId) {
             this.projectId = projectId;
             this.userId = userId;
-            this.role = role;
+            this.projectRoleId = projectRoleId;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class ProjectRolesDto {
+        private Long projectId;
+        private String roleName;
+        private Integer roleLevel;
+        private String description;
+
+        public ProjectRolesDto (Long projectId, String roleName, Integer roleLevel, String description) {
+            this.projectId = projectId;
+            this.roleName = roleName;
+            this.roleLevel = roleLevel;
+            this.description = description;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class ProjectTagDto {
+        private Long projectId;
+        private String tagName;
+
+        public ProjectTagDto (Long projectId, String tagName) {
+            this.projectId = projectId;
+            this.tagName = tagName;
         }
     }
 
@@ -48,6 +76,7 @@ public class ProjectsDto {
         private String status;
         private String regDate;
         private String regUserid;
+        private Boolean confirm;
 
         public GetProjectRes (Projects projects) {
 
@@ -59,6 +88,7 @@ public class ProjectsDto {
             this.status = projects.getStatus();
             this.regDate = String.valueOf(projects.getRegDate());
             this.regUserid = String.valueOf(projects.getRegUserid());
+            this.confirm = projects.getConfirm();
 
         }
     }

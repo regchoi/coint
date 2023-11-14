@@ -14,6 +14,7 @@ interface Data {
     regDate: string;
     modUserid: string;
     modDate: string;
+    detail: string;
 }
 
 // 빈 데이터 생성을 위한 함수
@@ -25,6 +26,7 @@ const createData = (
     regDate: string,
     modUserid: string,
     modDate: string,
+    detail: string,
 ): Data => {
     return {
         idNum,
@@ -34,6 +36,7 @@ const createData = (
         regDate,
         modUserid,
         modDate,
+        detail,
     };
 }
 
@@ -52,6 +55,7 @@ const headCells: readonly HeadCell[] = [
     {id: 'regDate', numeric: false, disablePadding: false, label: '등록일'},
     {id: 'modUserid', numeric: false, disablePadding: false, label: '수정자'},
     {id: 'modDate', numeric: false, disablePadding: false, label: '수정일'},
+    {id: 'detail', numeric: false, disablePadding: false, label: '부서관리'},
 ];
 
 

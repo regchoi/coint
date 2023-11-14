@@ -63,7 +63,6 @@ const useTable = ({initialOrderBy, initialOrder, initialRowsPerPage, rowsData}: 
                 selected.slice(selectedIndex + 1),
             );
         }
-
         setSelected(newSelected);
     };
 

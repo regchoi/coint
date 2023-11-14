@@ -27,6 +27,7 @@ interface Data {
     phone: string;
     regDate: string;
     regUserid: string;
+    detail: string;
 }
 
 // 빈 데이터 생성을 위한 함수
@@ -49,6 +50,7 @@ const createData = (
     phone: string,
     regDate: string,
     regUserid: string,
+    detail: string,
 ): Data => {
     return {
         idNum,
@@ -61,6 +63,7 @@ const createData = (
         phone,
         regDate,
         regUserid,
+        detail,
     };
 }
 
@@ -72,7 +75,7 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
-    {id: 'idNum', numeric: true, disablePadding: false, label: 'Seq'},
+    {id: 'idNum', numeric: true, disablePadding: false, label: '번호'},
     {id: 'loginId', numeric: false, disablePadding: false, label: '아이디'},
     {id: 'name', numeric: false, disablePadding: false, label: '이름'},
     {id: 'position', numeric: false, disablePadding: false, label: '직급'},
@@ -82,6 +85,8 @@ const headCells: readonly HeadCell[] = [
     {id: 'phone', numeric: false, disablePadding: false, label: '전화번호'},
     {id: 'regDate', numeric: false, disablePadding: false, label: '등록일'},
     {id: 'regUserid', numeric: false, disablePadding: false, label: '등록자'},
+    {id: 'detail', numeric: false, disablePadding: false, label: '상세정보'}
+
 ];
 
 

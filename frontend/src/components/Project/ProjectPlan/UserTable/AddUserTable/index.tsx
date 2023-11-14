@@ -5,6 +5,8 @@ import CardHeader from '@mui/material/CardHeader';
 import Checkbox from '@mui/material/Checkbox';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import InputAdornment from '@mui/material/InputAdornment';
+import CloseIcon from '@mui/icons-material/Close';
 import TextField from '@mui/material/TextField';
 import {useEffect} from "react";
 import axios from "../../../../../redux/axiosConfig";
@@ -29,7 +31,7 @@ interface User {
     name: string;
     department: string;
     email: string;
-    role: string;
+    role: number;
 }
 
 type Department = {
@@ -64,7 +66,6 @@ function intersection(a: readonly number[], b: readonly number[]) {
 export default function AddUserTable(props: AddUserTableProps) {
     const [users, setUsers] = React.useState<User[]>([]);
     const [departments, setDepartments] = React.useState<Department[]>([]);
-    const [projectUsers, setProjectUsers] = React.useState<User[]>([]);
     const [checked, setChecked] = React.useState<readonly number[]>([]);
     const [filter, setFilter] = React.useState<string>('');
     const [selectedDepartment, setSelectedDepartment] = React.useState<string>('');
@@ -75,7 +76,7 @@ export default function AddUserTable(props: AddUserTableProps) {
     if (!context) {
         throw new Error("Cannot find ProjectProvider");
     }
-    const { usersList, setUsersList } = context;
+    const { rolesList, usersList, setUsersList } = context;
 
     // Table Cell 공통 스타일
     const tableCellStyle = {
@@ -113,9 +114,14 @@ export default function AddUserTable(props: AddUserTableProps) {
                 const userData = response.data.map((userData: UserResponse) => ({
                     idNum: userData.idNum,
                     name: userData.name || '',  // handle the potential null value
-                    department: userData.getUserDepartmentResList.length > 0 ? userData.getUserDepartmentResList[0].departmentName : 'N/A',
+                    department: userData.getUserDepartmentResList.length > 0 ? userData.getUserDepartmentResList[0].departmentName : '부서 미배정',
                     email: userData.email || '',  // handle the potential null value
                 }));
+                // usersList에 있는 사용자는 제외하고 setUsers 구성
+                usersList.forEach(user => {
+                    userData.splice(userData.findIndex(userData => userData.idNum === user.idNum), 1);
+                });
+
                 setUsers(userData);
             })
             .catch((error) => {
@@ -147,7 +153,7 @@ export default function AddUserTable(props: AddUserTableProps) {
     const handleMoveToProjectUsers = () => {
         const newUsersList = usersList.concat(users.filter(user => leftChecked.includes(user.idNum)).map(user => ({
             ...user,
-            role: ''
+            role: 1
         })));
         const newUsers = users.filter(user => !leftChecked.includes(user.idNum));
         setUsersList(newUsersList);
@@ -163,7 +169,7 @@ export default function AddUserTable(props: AddUserTableProps) {
         setChecked(not(checked, rightChecked));
     };
 
-    const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, idNum: number) => {
+    const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>, idNum: number) => {
         const newProjectUsers = usersList.map(user => {
             if (user.idNum === idNum) {
                 return {
@@ -247,25 +253,24 @@ export default function AddUserTable(props: AddUserTableProps) {
                                 <TableCell align="center" >{user.department}</TableCell>
                                 {title === 'Chosen' && (
                                     <TableCell align="center" >
-                                        <TextField
+                                        {/* rolesList에서 Select를 통해 Role을 선택하는 방식으로 변경 */}
+                                        <Select
                                             fullWidth
                                             variant="outlined"
                                             value={user.role}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: '#409aff',
-                                                },
-                                                '& .MuiInputBase-input': {
-                                                    padding: 0,
-                                                    fontSize: '14px',
-                                                    height: '30px',
-                                                    paddingLeft: '10px',
-                                                    width: '50px',
-                                                    backgroundColor: '#fff'
-                                                }
-                                            }}
                                             onChange={(event) => handleRoleChange(event, user.idNum)}
-                                        />
+                                            sx={{
+                                                width: '100%',
+                                                height: '30px',
+                                                fontSize: '14px',
+                                            }}
+                                        >
+                                            {rolesList.map((role) => (
+                                                <MenuItem key={role.roleLevel} value={role.roleLevel}>
+                                                    {role.roleName}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
                                     </TableCell>
                                 )}
                                 <TableCell align="center" >{user.email}</TableCell>
@@ -282,7 +287,7 @@ export default function AddUserTable(props: AddUserTableProps) {
         <Grid container spacing={2} justifyContent="flex-start" alignItems="center">
             <Grid container xs={8} sx={{mt: 3, pl: 2}} direction="row">
                 <Grid item xs={4}>
-                    <FormControl sx={{width: '100%'}}>
+                    <FormControl sx={{ position: 'relative', width: '100%' }}>
                         <InputLabel id="demo-simple-select-helper-label" sx={{fontSize: '14px'}}>부서검색</InputLabel>
                         <Select
                             labelId="demo-simple-select-helper-label"
@@ -290,7 +295,10 @@ export default function AddUserTable(props: AddUserTableProps) {
                             label="부서검색"
                             value={selectedDepartment}
                             onChange={(event) => setSelectedDepartment(event.target.value as string)}
-                            sx={{ width: '100%', fontSize: '14px' }}
+                            sx={{
+                                width: '100%',
+                                fontSize: '14px',
+                            }}
                         >
                             {departments.map((dept) => (
                                 <MenuItem key={dept.idNum} value={dept.departmentName} sx={{ width: '100%', fontSize: '14px' }}>
@@ -298,6 +306,20 @@ export default function AddUserTable(props: AddUserTableProps) {
                                 </MenuItem>
                             ))}
                         </Select>
+                        {selectedDepartment && (
+                            <IconButton
+                                size="small"
+                                sx={{
+                                    position: 'absolute',
+                                    right: '25px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)'
+                                }}
+                                onClick={() => setSelectedDepartment('')}
+                            >
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
+                        )}
                     </FormControl>
                 </Grid>
                 <Grid item xs={8}>

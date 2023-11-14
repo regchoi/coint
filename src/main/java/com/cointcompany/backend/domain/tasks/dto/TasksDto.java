@@ -2,6 +2,7 @@ package com.cointcompany.backend.domain.tasks.dto;
 
 import com.cointcompany.backend.domain.projects.dto.ProjectsDto;
 import com.cointcompany.backend.domain.projects.entity.Projects;
+import com.cointcompany.backend.domain.tasks.entity.TaskGroup;
 import com.cointcompany.backend.domain.tasks.entity.Tasks;
 import lombok.*;
 
@@ -32,12 +33,66 @@ public class TasksDto {
     public static class TaskUserDto {
         private Long taskId;
         private Long userId;
-        private String role;
+        private Integer taskRoleId;
 
-        public TaskUserDto (Long taskId, Long userId, String role) {
+        public TaskUserDto (Long taskId, Long userId, Integer taskRoleId) {
             this.taskId = taskId;
             this.userId = userId;
-            this.role = role;
+            this.taskRoleId = taskRoleId;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class TaskTagDto {
+        private Long taskId;
+        private String tagName;
+
+        public TaskTagDto (Long taskId, String tagName) {
+            this.taskId = taskId;
+            this.tagName = tagName;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class TaskGroupPostDto {
+        private String taskGroupName;
+        private String description;
+        private Long projectsIdNum;
+
+        public TaskGroupPostDto (String taskGroupName, String description, Long projectsIdNum) {
+            this.taskGroupName = taskGroupName;
+            this.description = description;
+            this.projectsIdNum = projectsIdNum;
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class TaskGroupDto {
+        private Long idNum;
+        private String taskGroupName;
+        private String description;
+        private Long projectsIdNum;
+
+        public TaskGroupDto (TaskGroup taskGroup) {
+            this.idNum = taskGroup.getIdNum();
+            this.taskGroupName = taskGroup.getTaskGroupName();
+            this.description = taskGroup.getDescription();
+            this.projectsIdNum = taskGroup.getProjects().getIdNum();
+        }
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class TaskGrouping {
+        private Long idNum;
+        private Long taskGroupIdNum;
+
+        public TaskGrouping (Long idNum, Long taskGroupIdNum) {
+            this.idNum = idNum;
+            this.taskGroupIdNum = taskGroupIdNum;
         }
     }
 
@@ -62,6 +117,8 @@ public class TasksDto {
 
         private String projectName;
 
+        private Long taskGroupIdNum;
+
         public GetTaskRes (Tasks tasks) {
 
             this.idNum = tasks.getIdNum();
@@ -73,8 +130,38 @@ public class TasksDto {
             this.regDate = String.valueOf(tasks.getRegDate());
             this.regUserid = String.valueOf(tasks.getRegUserid());
             this.projectName = tasks.getProjects().getProjectName();
+            if (tasks.getTaskGroup() != null) {
+                this.taskGroupIdNum = tasks.getTaskGroup().getIdNum();
+            } else {
+                this.taskGroupIdNum = null;
+            }
 
         }
+    }
+    @NoArgsConstructor
+    @Data
+    public static class GetGroupTask {
+        private Long idNum;
+
+        private String taskName;
+
+        private Long projectsIdNum;
+
+        private Long taskGroupIdNum;
+
+        public GetGroupTask (Tasks tasks) {
+
+            this.idNum = tasks.getIdNum();
+            this.taskName = tasks.getTaskName();
+            this.projectsIdNum = tasks.getProjects().getIdNum();
+            if (tasks.getTaskGroup() != null) {
+                this.taskGroupIdNum = tasks.getTaskGroup().getIdNum();
+            } else {
+                this.taskGroupIdNum = null;
+            }
+
+        }
+
     }
     @NoArgsConstructor
     @Data
@@ -97,6 +184,17 @@ public class TasksDto {
             this.startDate = String.valueOf(tasks.getStartDate());
             this.endDate = String.valueOf(tasks.getEndDate());
             this.status = tasks.getStatus();
+        }
+    }
+    @NoArgsConstructor
+    @Data
+    public static class TaskStatus {
+        private Long idNum;
+        private String status;
+
+        public TaskStatus (Long idNum, String status) {
+            this.idNum = idNum;
+            this.status = status;
         }
     }
 

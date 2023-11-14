@@ -12,7 +12,14 @@ import DepartmentTable from "./components/User/DepartmentTable";
 // Project
 import ProjectPlan from "./components/Project/ProjectPlan";
 import ProjectTaskTable from "./components/Project/ProjectTaskTable";
-
+import TaskGanttChart from "./components/Project/TaskGanttChart";
+import KanBanBoard from "./components/Project/KanBanBoard";
+import Calendar from "./components/Project/Calendar";
+// Document
+import FileDrive from "./components/Document/FileDrive";
+// Template
+import TemplateCopy from "./components/Template/TemplateCopy";
+import TemplateList from "./components/Template/TemplateList";
 
 // Example
 // import SampleTable from "./components/SampleTable";
@@ -27,6 +34,7 @@ import ProjectTaskTable from "./components/Project/ProjectTaskTable";
 // import TaskList from "./components/common/TaskList";
 
 import "./assets/css/common/chart.css";
+import {getRole} from "./components/common/tokenUtils";
 
 const ROUTES = {
     LOGIN: '/login',
@@ -38,6 +46,14 @@ const ROUTES = {
     // Project
     PROJECTPLAN: '/project/plan',
     PROJECTTASKTABLE: '/project/task',
+    TASKGANTTCHART: '/project/task/ganttchart',
+    KANBANBOARD: '/project/task/kanbanboard',
+    CALENDAR: '/project/task/calendar',
+    // Document
+    FILEDRIVE: '/document/drive',
+    // Template
+    TEMPLATECOPY: '/template/copy',
+    TEMPLATELIST: '/template/list',
 
     // Example
     // SAMPLE_TABLE: '/sampletable',
@@ -50,10 +66,17 @@ const ROUTES = {
     // DOCUMENTEDITOR: '/documenteditor',
     // CALENDAR: '/calendar',
     // TASKLIST: '/tasklist',
-    NOT_FOUND: '*'
 }
 
 const App: React.FC = () => {
+
+    const adminRoutes = getRole() === "ROLE_ADMIN" ? (
+        <>
+            <Route path={ROUTES.USERTABLE} element={<UserTable/>}/>
+            <Route path={ROUTES.USERGROUPTABLE} element={<UserGroupTable/>}/>
+            <Route path={ROUTES.DEPARTMENTTABLE} element={<DepartmentTable/>}/>
+        </>
+    ) : '';
 
     return (
         <BrowserRouter>
@@ -67,12 +90,17 @@ const App: React.FC = () => {
                     <Route element={<Layout/>}>
 
                         <Route path="/" element={<div></div>}/>
-                        <Route path={ROUTES.USERTABLE} element={<UserTable/>}/>
-                        <Route path={ROUTES.USERGROUPTABLE} element={<UserGroupTable/>}/>
-                        <Route path={ROUTES.DEPARTMENTTABLE} element={<DepartmentTable/>}/>
-
+                        {adminRoutes}
                         <Route path={ROUTES.PROJECTPLAN} element={<ProjectPlan/>}/>
                         <Route path={ROUTES.PROJECTTASKTABLE} element={<ProjectTaskTable/>}/>
+                        <Route path={ROUTES.TASKGANTTCHART} element={<TaskGanttChart/>}/>
+                        <Route path={ROUTES.KANBANBOARD} element={<KanBanBoard/>}/>
+                        <Route path={ROUTES.CALENDAR} element={<Calendar />} />
+
+                        <Route path={ROUTES.FILEDRIVE} element={<FileDrive/>}/>
+
+                        <Route path={ROUTES.TEMPLATECOPY} element={<TemplateCopy/>}/>
+                        <Route path={ROUTES.TEMPLATELIST} element={<TemplateList/>}/>
 
                         {/* Example*/}
                         {/*<Route path={ROUTES.SAMPLE_TABLE} element={<SampleTable/>}/>*/}

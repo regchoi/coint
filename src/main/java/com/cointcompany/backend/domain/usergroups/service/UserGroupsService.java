@@ -3,6 +3,7 @@ package com.cointcompany.backend.domain.usergroups.service;
 import com.cointcompany.backend.domain.usergroups.dto.UserGroupsDto;
 import com.cointcompany.backend.domain.usergroups.entity.Usergroups;
 import com.cointcompany.backend.domain.usergroups.repository.UserGroupsRepository;
+import com.cointcompany.backend.domain.users.repository.UserUsergroupRepository;
 import com.cointcompany.backend.domain.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,12 +55,11 @@ public class UserGroupsService {
         usergroups.setDel(Boolean.TRUE);
     }
 
-    // TODO 유저 권한 수정
     @Transactional
     public void modifyUserGroups(Usergroups usergroups) {
         Usergroups userGroup = userGroupsRepository.getReferenceById(usergroups.getIdNum());
 
         userGroup.setDescription(usergroups.getDescription());
-
     }
+
 }

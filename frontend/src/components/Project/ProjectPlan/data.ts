@@ -1,8 +1,8 @@
 // data.ts
 
 // tableName 정의
-const tableName: string = '프로젝트 계획';
-const API_LINK: string = '/api/user';
+const tableName: string = '프로젝트조회';
+const API_LINK: string = '/api/project';
 
 // 테이블의 구조를 정의
 // 테이블 데이터형을 명시적으로 정의함으로써 가독성과 안정성을 높임
@@ -15,6 +15,7 @@ interface Data {
     status: string;
     regDate: string;
     regUserid: string;
+    confirm: boolean;
     detail: string;
 }
 
@@ -28,6 +29,7 @@ const createData = (
     status: string,
     regDate: string,
     regUserid: string,
+    confirm: boolean,
     detail: string,
 ): Data => {
     return {
@@ -39,6 +41,7 @@ const createData = (
         status,
         regDate,
         regUserid,
+        confirm,
         detail,
     };
 }
@@ -59,7 +62,8 @@ const headCells: readonly HeadCell[] = [
     {id: 'status', numeric: false, disablePadding: false, label: '상태'},
     {id: 'regDate', numeric: false, disablePadding: false, label: '등록일'},
     {id: 'regUserid', numeric: false, disablePadding: false, label: '등록자'},
-    {id: 'detail', numeric: false, disablePadding: false, label: '작업관리'},
+    {id: 'confirm', numeric: false, disablePadding: false, label: '승인여부'},
+    {id: 'detail', numeric: false, disablePadding: false, label: '상세보기'},
 ];
 
 

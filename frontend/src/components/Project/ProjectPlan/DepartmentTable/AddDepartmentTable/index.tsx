@@ -267,22 +267,6 @@ export default function AddDepartmentTable(props: AddDepartmentTableProps) {
                         </Select>
                     </FormControl>
                 </Grid>
-                <Grid item xs={8}>
-                    <TextField
-                        fullWidth
-                        variant="outlined"
-                        label="사용자검색"
-                        value={filter}
-                        onChange={handleFilterChange}
-                        placeholder="이름을 입력해주세요"
-                        InputProps={{
-                            style: { fontSize: '14px', backgroundColor: 'transparent' }
-                        }}
-                        InputLabelProps={{
-                            style: { fontSize: '14px' },
-                        }}
-                    />
-                </Grid>
             </Grid>
             <Grid item xs={12}>
                 {customList('Choices', filteredDepts)}

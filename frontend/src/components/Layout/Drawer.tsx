@@ -15,9 +15,12 @@ import {
     Factory, GridView,
     PieChart,
     SignalCellularAlt,
-    Streetview
+    Streetview,
+    CloudDownload,
+    EventNote
 } from "@mui/icons-material";
 import SidebarItem from "./SidebarItem";
+import {getRole} from '../common/tokenUtils';
 
 interface DrawerProps {
     open: boolean;
@@ -50,9 +53,11 @@ export default function SideDrawer({ open, drawerWidth }: DrawerProps) {
     // Auth 정보에 따라 다른 SidebarItem을 보여주게 변경 가능
     const initialSidebarItems: SidebarItemState[] = [
 
-        {title: "프로젝트관리", icon: <ListAlt sx={{ color: '#c8c8c8' }} />, items: ["프로젝트 계획", "업무관리"], itemLink: ["/project/plan", "/project/task"], open: false},
-        {title: "시스템관리", icon: <Settings sx={{ color: '#c8c8c8' }} />, items: ["사용자 관리", "사용자 그룹 관리", "부서 관리"], itemLink: ["/system/user", "/system/usergroup", "/system/department"], open: false},
-
+        {title: "문서관리", icon: <CloudDownload sx={{ color: '#c8c8c8' }} />, items: ["드라이브"], itemLink: ["/document/drive"], open: false},
+        {title: "프로젝트관리", icon: <ListAlt sx={{ color: '#c8c8c8' }} />, items: ["프로젝트조회", "업무조회", "업무일정", "업무리스트", "업무달력"], itemLink: ["/project/plan", "/project/task", "/project/task/ganttchart", "/project/task/kanbanboard", "project/task/calendar"], open: false},
+        {title: "템플릿관리", icon: <EventNote sx={{ color: '#c8c8c8' }} />, items: ["템플릿조회", "프로젝트 복사"], itemLink: ["/template/list", "/template/copy"], open: false},
+        // ROLE_ADMIN만 보여주는 메뉴
+        ...(getRole() === "ROLE_ADMIN" ? [{title: "시스템관리", icon: <Settings sx={{ color: '#c8c8c8' }} />, items: ["사용자 관리", "사용자 그룹 관리", "부서 관리"], itemLink: ["/system/user", "/system/usergroup", "/system/department"], open: false}] : []),
         // Example
         // {title: "차트샘플", icon: <BarChart sx={{ color: '#c8c8c8' }} />, items: ["StackedBar Chart", "Pie Chart", "Scatter Chart", "Tree Chart"], itemLink: ["stackedbarchart", "piechart", "threedimscatterchart", "treemapchart"], open: false},
         // {title: "컴포넌트관리", icon: <GridView sx={{ color: '#c8c8c8' }} />, items: ["Kanban", "Gantt", "Document Editor", "Calendar", "Task List"], itemLink: ["kanban", "ganttchart", "documenteditor", "calendar", "tasklist"], open: false},

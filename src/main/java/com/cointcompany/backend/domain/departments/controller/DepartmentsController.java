@@ -58,6 +58,9 @@ public class DepartmentsController {
         return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
     }
 
+    /**
+     * 일괄 삭제를 사용하기 위하여 DeleteMapping 대신 PostMapping 사용
+     */
     @Operation(summary = "부서 삭제")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
     @PostMapping("/delete")

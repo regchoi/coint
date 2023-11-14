@@ -16,9 +16,23 @@ import {useEffect, useState} from "react";
 import {addTableData, deleteTableData, fetchTableData, updateTableData} from "../../../redux/tableSlice";
 import {AppDispatch, useAppDispatch, useAppSelector} from "../../../redux/store";
 import EditableRow from "./EditableRow";
-import {Button, LinearProgress, Modal, Snackbar, SnackbarCloseReason, Typography} from "@mui/material";
+import {
+    Button, Chip, IconButton,
+    InputAdornment,
+    LinearProgress,
+    Modal,
+    Snackbar,
+    SnackbarCloseReason,
+    TextField,
+    Typography
+} from "@mui/material";
 import ErrorModal from "../../common/ErrorModal";
 import AddModal from "./AddModal";
+import { CSSTransition } from 'react-transition-group';
+import "../../../assets/css/common/modal-transition.css";
+import axios from "../../../redux/axiosConfig";
+import SearchIcon from "@mui/icons-material/Search";
+import GroupTable from "./GroupTable";
 
 export default function ProjectTaskTable() {
     const dispatch = useAppDispatch();
@@ -31,6 +45,11 @@ export default function ProjectTaskTable() {
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     // 에러 확인 Modal 상태 관리
     const [isErrorModalOpen, setErrorModalOpen] = useState(false);
+    // 업무 그룹 Modal 상태 관리
+    const [isGroupModalOpen, setGroupModalOpen] = useState(false);
+    // Tag 관리
+    const [tags, setTags] = useState<string[]>([]);
+    const [tagSearchId, setTagSearchId] = useState<number[]>([]);
 
     const { data, loading, error } = useAppSelector(state => state.table);
 
@@ -46,6 +65,19 @@ export default function ProjectTaskTable() {
             setErrorModalOpen(true);
         }
     }, [error]);
+
+    // useState의 Tags를 감지하여 변경마다 axios로 데이터를 요청합니다.
+    useEffect(() => {
+        // 태그를 포함하는 ProjectIdNums를 가져옵니다.
+        axios.get(`/api/task/tag?tags=${tags.join(',')}`)
+            .then(res => {
+                console.log(res.data);
+                setTagSearchId(res.data);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }, [tags]);
 
     // Error Modal 닫기
     const handleCloseErrorModal = () => {
@@ -77,6 +109,14 @@ export default function ProjectTaskTable() {
         setAddId(addId + 1);  // addId 값을 증가시킵니다.
     };
 
+    // 태그 추가 함수
+    const handleTagAddition = (e: any) => {
+        const input = e.currentTarget.closest('.MuiFormControl-root')?.querySelector('input') as HTMLInputElement;
+        if (input && input.value) {
+            addTag(input.value);
+            input.value = '';
+        }
+    };
 
     // 삭제 확인 Modal 열기
     const handleOpenDeleteModal = () => {
@@ -129,31 +169,14 @@ export default function ProjectTaskTable() {
         });
     }
 
-    // save 버튼을 누르면 일괄적으로 정보를 저장하는 함수
-    const handleSave = async () => {
-        try {
-            // 서버에 추가할 데이터 전송
-            // added배열이 비어있다면, 아무것도 전송하지 않습니다.
-            if(added.length > 0) {
-                await dispatch(addTableData({apiUrl: API_LINK, data: added}));
-            }
-            // 서버 응답을 받은 후에 added 상태 초기화
-            setAdded([]);
-
-            // 서버에 업데이트할 데이터 전송
-            // updated배열이 비어있다면, 아무것도 전송하지 않습니다.
-            if(updated.length > 0) {
-                await dispatch(updateTableData({apiUrl: API_LINK, data: updated}));
-            }
-            // 서버 응답을 받은 후에 updated 상태 초기화
-            setUpdated([]);
-
-            // table 데이터 가져오기
-            dispatch(fetchTableData(API_LINK));
-        } catch (error) {
-            // 에러 처리
-            console.error('Error while saving data:', error);
+    const addTag = (tag: string) => {
+        if (!tags.includes(tag)) {
+            setTags([...tags, tag]);
         }
+    };
+
+    const removeTag = (tag: string) => {
+        setTags(tags.filter(t => t !== tag));
     }
 
     // table 관련 hook들을 관리하는 커스텀 hook
@@ -175,8 +198,10 @@ export default function ProjectTaskTable() {
     } = useTable({
         initialOrderBy: 'idNum',
         initialOrder: 'asc',
-        initialRowsPerPage: 5,
+        initialRowsPerPage: 10,
         rowsData: data,
+        tags,
+        tagSearchId,
     });
 
     return (
@@ -186,11 +211,71 @@ export default function ProjectTaskTable() {
                 <EnhancedTableToolbar
                     numSelected={selected.length}
                     tableName={tableName}
+                    onGroup={() => setGroupModalOpen(true)}
                     onAdd={handleAdd}
                     onUpdate={handleUpdate}
-                    onSave={handleSave}
                     onDelete={handleOpenDeleteModal}    // 삭제 버튼 클릭 시, 삭제 확인 Modal 열기
                 />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <TextField
+                        placeholder="태그 입력"
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                            '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#409aff',
+                            },
+                            '& .MuiInputBase-input': {
+                                padding: 1,
+                                fontSize: '12px',
+                                height: '30px',
+                                paddingLeft: '10px',
+                                backgroundColor: '#fff',
+                            },
+                            width: '20%', // 필요하다면 여기서 폭 조절 가능
+                        }}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        edge="end"
+                                        color="primary"
+                                        onClick={handleTagAddition}
+                                    >
+                                        <SearchIcon sx={{ color: 'rgb(40, 49, 66)' }} />
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                        // Enter 키 입력 시, 태그 추가
+                        onKeyUp={(e) => { // 여기를 onKeyUp으로 변경
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleTagAddition(e);
+                            }
+                        }}
+                    />
+
+                    {tags.map(tag => (
+                        <Chip
+                            key={tag}
+                            label={tag}
+                            onDelete={() => removeTag(tag)}
+                            sx={{
+                                '& .MuiChip-root': {
+                                    color: '#000',
+                                    height: '100%',
+                                },
+                                '& .MuiChip-root:hover .MuiChip-deleteIcon': {
+                                    color: '#fff',
+                                },
+                                '& .MuiChip-root .MuiChip-label': {
+                                    fontSize: '12px',
+                                },
+                            }}
+                        />
+                    ))}
+                </Box>
                 <TableContainer sx={{borderRadius: '3px'}}>
                     <Table
                         sx={{minWidth: 750}}
@@ -206,7 +291,17 @@ export default function ProjectTaskTable() {
                             rowCount={data.length}
                         />
                         <TableBody>
-                            {visibleRows.map((row, index) => {
+                            {
+                                visibleRows
+                                    .filter(row => {
+                                        if (tagSearchId.length === 0) {
+                                            if(tags.length === 0) return true;
+                                            else return false;
+                                        } else {
+                                            return tagSearchId.includes(row.idNum);
+                                        }
+                                    })
+                                .map((row, index) => {
                                 const isItemSelected = isSelected(row.idNum);
                                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -277,12 +372,20 @@ export default function ProjectTaskTable() {
             {/*    label="Dense padding"*/}
             {/*/>*/}
 
-            {/*프로젝트 생성 모달*/}
-            <AddModal
-                open={isCreateModalOpen}
-                onClose={() => setCreateModalOpen(false)}
-                onSave={(data: Data) => {}}
-            />
+            {/*프로젝트 생성 모달 (필요한 경우에 Transition) */}
+            <CSSTransition
+                in={true}
+                appear={true}
+                timeout={300}
+                classNames="fade">
+                <AddModal
+                    open={isCreateModalOpen}
+                    onClose={() => setCreateModalOpen(false)}
+                />
+            </CSSTransition>
+
+            {/* 업무 그룹 모달 */}
+                <GroupTable open={isGroupModalOpen} onClose={() => setGroupModalOpen(false)} />
 
             {/* 삭제 확인 Modal */}
             <Modal

@@ -18,10 +18,6 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
 
     const navigate = useNavigate();
 
-    const handleRedirect = (idNum: number) => {
-        navigate(`/project/task/${idNum}`);
-    };
-
     return (
         <TableRow
             hover
@@ -60,6 +56,39 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                         fontSize: "12px",
                     }} align="center" key={key}></TableCell>;
                 }
+
+                if (key === 'description') {
+                    if(row[key] === null) return (
+                        <TableCell sx={{
+                            border: "1px solid rgba(0, 0, 0, 0.12)",
+                            padding: "0px 10px",
+                            fontSize: "12px",
+                            width: "250px"
+                        }}
+                                      align="center" key={key}>
+                        </TableCell>
+                    );
+
+                    let description = row[key].substring(0, 25);
+                    const breakIndex = description.indexOf('\n'); // 첫 번째 줄바꿈 위치 찾기
+
+                    // 줄바꿈이 있을 경우에만 텍스트 잘라내기
+                    if (breakIndex !== -1) {
+                        description.substring(0, breakIndex);
+                    }
+                    return (
+                        <TableCell sx={{
+                            border: "1px solid rgba(0, 0, 0, 0.12)",
+                            padding: "0px 10px",
+                            fontSize: "12px",
+                            width: "250px",
+                            overflow: "hidden",
+                        }} align="center" key={key}>
+                            {description+'...'}
+                        </TableCell>
+                    );
+                }
+
                 if (key === 'startDate' || key === 'endDate' || key === 'regDate') {
                     return <TableCell sx={{
                         border: "1px solid rgba(0, 0, 0, 0.12)",
@@ -69,8 +98,8 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                 }
 
                 const handleRedirect = (idNum: number) => {
-                    navigate(`/project/task/${idNum}`);
-                }
+                    alert('TODO: Modal창으로 프로젝트 상세 정보 보여주기');
+                };
 
                 if (key === 'detail') {
                     return (
@@ -80,7 +109,7 @@ const Row: React.FC<RowProps> = ({row, labelId, isItemSelected, handleClick}) =>
                             fontSize: "12px",
                             width: "120px"
                         }} align="center" key={key}>
-                            <IconButton onClick={() => handleRedirect(row.idNum)}>  {/* 아이콘 버튼에 클릭 이벤트 연결 */}
+                            <IconButton onClick={() => handleRedirect}>  {/* 아이콘 버튼에 클릭 이벤트 연결 */}
                                 <SearchIcon/>
                             </IconButton>
                         </TableCell>

@@ -59,7 +59,7 @@ export default function UserTable() {
 
     // added data를 추가하는 함수
     const handleAdd = () => {
-        const newData: Data = createData(addId, '', '', '', [], '', [], '', '', '');
+        const newData: Data = createData(addId, '', '', '', [], '', [], '', '', '', '');
         setAdded([...added, newData]);
         setAddId(addId + 1);
     }
@@ -110,6 +110,7 @@ export default function UserTable() {
 
     // selected 항목들을 updated 상태로 이동시키는 함수
     const handleUpdate = () => {
+        console.log('selected:', selected)
         const selectedRows = data.filter(row => selected.includes(row.idNum));
         setUpdated([...updated, ...selectedRows]);
         // 이동한 항목들은 selected에서 제거
