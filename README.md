@@ -10,7 +10,7 @@ React와 Spring, Redis를 모두 실행시켜야 정상 작동합니다.
    user 계정 - ID: user, PW:0000
 2. 초기 생성된 유저의 PW는 0000으로 세팅되어 있습니다.
 
-### 로그 사용
+### ELK 실행 방법
 1. docker-compose up
 2. localhost:5601로 접속
   ID: elastic 
